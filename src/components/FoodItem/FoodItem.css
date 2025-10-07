@@ -1,0 +1,8 @@
+.food-item-img {
+    width: 120px;    /* hoặc 100px, 80px tuỳ ý */
+    height: 120px;   /* giữ tỉ lệ vuông, hoặc điều chỉnh cho phù hợp */
+    object-fit: cover;
+    border-radius: 20px; /* bo góc nhẹ, hoặc 50% nếu muốn hình tròn */
+    display: block;
+    margin: 0 auto;
+}

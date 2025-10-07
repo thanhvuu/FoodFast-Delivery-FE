@@ -12,7 +12,15 @@ import menu_6 from './menu6.jpeg';
 import food_1 from './food_1.jpg';
 import food_2 from './food_2.jpg';
 import food_3 from './food_3.webp';
-
+import food_4 from './food_4.jpg';
+import food_5 from './food_5.jpg';
+import food_6 from './food_6.jpg';
+import food_7 from './food_7.jpg';
+import food_8 from './food_8.jpg';
+import food_9 from './food_9.jpg';
+import food_10 from './food_10.jpg';
+import food_11 from './food_11.png';
+import food_12 from './food_12.png';
 
 export const assets = {
     logo,
@@ -72,5 +80,77 @@ export const food_list = [
         price: 50000,
         description: "Pizza hải sản, phô mai mozzarella",
         category: "fast-food",
+    },
+    {
+        _id: "4",
+        name: "Tacos",
+        image: food_4,
+        price: 50000,
+        description: "Tacos thịt bò, rau củ tươi ngon",
+        category: "fast-food",
+    },
+    {
+        _id: "5",
+        name: "Phở bò",
+        image: food_5,
+        price: 50000,
+        description: "Phở bò tái, nước dùng đậm đà",
+        category: "Món nước",
+    },
+    {
+        _id: "6",
+        name: "Mỳ Ý",
+        image: food_6,
+        price: 60000,
+        description: "Mỳ Ý sốt bò bằm, phô mai Parmesan",
+        category: "Món nước",
+    },
+    {
+        _id: "7",
+        name: "Khoai tây chiên",
+        image: food_7,
+        price: 30000,
+        description: "Khoai tây chiên giòn rụm, muối tiêu",
+        category: "Đồ ăn vặt",
+    },
+    {
+        _id: "8",
+        name: "Kem ốc quế",
+        image: food_8,
+        price: 15000,
+        description: "Kem ốc quế vani, socola",
+        category: "Đồ ngọt",
+    },
+    {
+        _id: "9",
+        name: "Gà viên",
+        image: food_9,
+        price: 40000,
+        description: "Gà viên chiên giòn, sốt mayonnaise",
+        category: "Đồ ăn vặt",
+    },
+    {
+        _id: "10",
+        name: "Bún bò Huế",
+        image: food_10,
+        price: 50000,
+        description: "Bún bò Huế cay nồng, đậm đà hương vị",
+        category: "Đồ nước",
+    },
+    {
+        _id: "11",
+        name: "Cơm chiên Dương Châu",
+        image: food_11,
+        price: 40000,
+        description: "Cơm chiên Dương Châu thập cẩm, trứng, rau củ",
+        category: "Đồ khô",
+    },
+    {
+        _id: "12",
+        name: "Panna Cotta",
+        image: food_12,
+        price: 15000,
+        description: "Panna Cotta kem tươi, sốt dâu tây",
+        category: "Đồ ngọt",
     },
 ]
