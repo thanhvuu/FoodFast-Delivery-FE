@@ -2,6 +2,10 @@ import logo from './logo.jpg';
 import search_icon from './search_icon.png';
 import basket_icon from './basket.jpeg';
 import header_img from './header_img.webp';
+import rating_starts from './rating_stars.png'; 
+import add_icon_white from './add_icon_white.png';
+import remove_icon_red from './remove_icon_red.png';
+import add_icon_green from './add_icon_green.png';
 import menu_1 from './menu1.jpg';
 import menu_2 from './menu2.jpg';
 import menu_3 from './menu3.jpg';
@@ -27,6 +31,11 @@ export const assets = {
     search_icon,
     basket_icon,
     header_img,
+    rating_starts,
+    add_icon_white,
+    remove_icon_red,
+    add_icon_green,
+   
 }
 
 export const menu_list = [

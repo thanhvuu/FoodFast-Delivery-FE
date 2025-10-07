@@ -1,8 +1,136 @@
+.food-item{
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  overflow: hidden;                /* bo góc cho cả ảnh + nội dung */
+  transition: transform .15s ease, box-shadow .15s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.food-item:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.12);
+}
+
+/* Ảnh đầu thẻ luôn đầy, không méo */
+.food-item-img{
+  width: 100%;
+  height: 220px;                   /* chỉnh 200–240px tùy ý */
+  object-fit: cover;
+  display: block;
+}
+
+/* Phần nội dung dưới ảnh */
+.food-item-info{
+  padding: 16px 18px;
+}
+
+
+.food-item-img-container {
+  position: relative;
+}
+
+/* Nút + trôi góc */
+.add-btn {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.add-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Cụm đếm số lượng */
+.item-count-counter {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Nút – và + trong cụm đếm */
+.item-count-counter .icon-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+.item-count-counter .icon-btn img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Số lượng */
+.item-count-counter .qty {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.add-btn:hover,
+.item-count-counter .icon-btn:hover {
+  transform: scale(1.05);
+}
+
+/* đảm bảo ảnh item luôn đầy đủ và không méo */
 .food-item-img {
-    width: 120px;    /* hoặc 100px, 80px tuỳ ý */
-    height: 120px;   /* giữ tỉ lệ vuông, hoặc điều chỉnh cho phù hợp */
-    object-fit: cover;
-    border-radius: 20px; /* bo góc nhẹ, hoặc 50% nếu muốn hình tròn */
-    display: block;
-    margin: 0 auto;
+  width: 100%;
+  height: 220px;        /* tùy bạn chỉnh 200–240px */
+  object-fit: cover;
+  display: block;
+  border-radius: 15px 15px 0 0;
+}
+/* Tên món + sao ở cùng một hàng */
+.food-item-name-rating{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 6px;
+}
+
+.food-item-name-rating p{
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Sao nhỏ lại và đặt sát bên phải tên */
+.food-item-name-rating img{
+  height: 100px;      /* chỉnh 14–18px tùy ý */
+  width: auto;
+  display: block;
+  opacity: .9;
+}
+
+/* Giá tiền to hơn và màu đỏ */
+.food-item-price{
+  margin-top: 12px;
+  color: #ff4d4f;    /* đỏ */
+  font-weight: 800;
+  font-size: clamp(20px, 2.2vw, 26px); /* responsive */
 }

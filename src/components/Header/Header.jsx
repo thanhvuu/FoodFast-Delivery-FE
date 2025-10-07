@@ -5,9 +5,9 @@ const Header = () => {
     return (
         <div className='header'>
             <div className="header-contents">
-                <h2>Order your favorite food here</h2>
-                <p>Healthy switcher chefs do all the prep work, like chopping and marinating, so you can cook a fresh, delicious meal in just 15 minutes.</p>
-                <button>View Menu</button>
+                <h2>Đặt món ăn yêu thích của bạn tại đây</h2>
+                <p>Đầu bếp sẽ đảm nhiệm mọi công đoạn chuẩn bị, như thái nhỏ và ướp, để bạn có thể nấu một bữa ăn tươi ngon chỉ trong 15 phút.</p>
+                <button>Xem thực đơn</button>
             </div>
         </div>
     )
