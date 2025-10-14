@@ -1,8 +1,12 @@
 import React from 'react'
 import './ExploreMenu.css'
 import { menu_list } from '../../assets/assets'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const ExploreMenu = ({ category, setCategory }) => {
+  const { dictionary } = useLanguage()
+  const menuText = dictionary.exploreMenu
+
   const handleSelect = (menuName) => {
     if (!setCategory) return
     setCategory((prev) => {
@@ -16,11 +20,12 @@ const ExploreMenu = ({ category, setCategory }) => {
 
   return (
     <div className='explore-menu' id='explore-menu'>
-      <h1>Khám phá thực đơn của chúng tôi</h1>
-      <p className='explore-menu-text'>Chạm để lọc nhanh các món ăn theo sở thích và khám phá những lựa chọn hấp dẫn mỗi ngày.</p>
+      <h1>{menuText.title}</h1>
+      <p className='explore-menu-text'>{menuText.description}</p>
       <div className="explore-menu-list">
         {menu_list.map((item) => {
           const isActive = normalizedCategory === item.menu_name.toLowerCase()
+          const displayLabel = menuText.categories[item.menu_name] || item.menu_name
           return (
             <button
               key={item.menu_name}
@@ -29,7 +34,7 @@ const ExploreMenu = ({ category, setCategory }) => {
               className={`explore-menu-list-item ${isActive ? 'active' : ''}`}
             >
               <img src={item.menu_image} alt={item.menu_name} />
-              <p>{item.menu_name}</p>
+              <p>{displayLabel}</p>
             </button>
           )
         })}

@@ -1,9 +1,15 @@
 import React, { useMemo, useState } from 'react'
 import './Footer.css'
 import { assets } from '../../assets/assets'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const Footer = () => {
+    const { language, setLanguage, dictionary, languageOptions } = useLanguage()
     const year = new Date().getFullYear()
+codex/add-language-switcher-in-footer-b51gps
+    const t = dictionary.footer
+    const navText = dictionary.navbar
+
     const [language, setLanguage] = useState('vi')
 
     const translations = useMemo(() => ({
@@ -52,13 +58,14 @@ const Footer = () => {
     }), [year])
 
     const t = translations[language]
+ main
 
     return (
         <footer className='footer'>
             <div className="footer-content">
                 <div className="footer-column footer-about">
                     <div className="footer-logo">
-                        <img src={assets.logo} alt="FoodFast Delivery logo" />
+                        <img src={assets.logo} alt={navText.logoAlt} />
                         <span>FoodFast Delivery</span>
                     </div>
                     <p>{t.description}</p>
@@ -90,14 +97,22 @@ const Footer = () => {
                         value={language}
                         onChange={(event) => setLanguage(event.target.value)}
                     >
+ codex/add-language-switcher-in-footer-b51gps
+                        {Object.entries(languageOptions).map(([value, label]) => (
+
                         {Object.entries(t.languageOptions).map(([value, label]) => (
+ main
                             <option key={value} value={value}>
                                 {label}
                             </option>
                         ))}
                     </select>
                 </div>
+ codex/add-language-switcher-in-footer-b51gps
+                <span>{t.notice.replace('{{year}}', year)}</span>
+
                 <span>{t.footerNotice}</span>
+ main
             </div>
         </footer>
     )

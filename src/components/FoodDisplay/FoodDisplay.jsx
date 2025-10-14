@@ -2,9 +2,11 @@ import React, { useContext, useMemo } from 'react'
 import './FoodDisplay.css'
 import { StoreContext } from '../../Context/StoreContext'
 import FoodItem from '../FoodItem/FoodItem'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const FoodDisplay = ({ category = 'all' }) => {
   const { food_list = [] } = useContext(StoreContext)
+  const { dictionary } = useLanguage()
 
   const itemsToShow = useMemo(() => {
     const normalizedCategory = (category || '').toString().trim().toLowerCase()
@@ -20,7 +22,7 @@ const FoodDisplay = ({ category = 'all' }) => {
 
   return (
     <div className='food-display' id='food-display'>
-      <h2>Những món ăn gần bạn</h2>
+      <h2>{dictionary.foodDisplay.title}</h2>
       <div className="food-display-list">
         {itemsToShow.map((item) => (
           <FoodItem
