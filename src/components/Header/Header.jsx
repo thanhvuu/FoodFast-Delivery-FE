@@ -1,13 +1,17 @@
 import React from 'react'
 import './Header.css'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const Header = () => {
+    const { dictionary } = useLanguage()
+    const headerText = dictionary.header
+
     return (
         <div className='header'>
             <div className="header-contents">
-                <h2>Đặt món ăn yêu thích của bạn tại đây</h2>
-                <p>Đầu bếp sẽ đảm nhiệm mọi công đoạn chuẩn bị, như thái nhỏ và ướp, để bạn có thể nấu một bữa ăn tươi ngon chỉ trong 15 phút.</p>
-                <button>Xem thực đơn</button>
+                <h2>{headerText.title}</h2>
+                <p>{headerText.description}</p>
+                <button>{headerText.cta}</button>
             </div>
         </div>
     )

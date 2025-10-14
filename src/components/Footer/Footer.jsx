@@ -1,42 +1,59 @@
 import React from 'react'
 import './Footer.css'
 import { assets } from '../../assets/assets'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const Footer = () => {
+    const { language, setLanguage, dictionary, languageOptions } = useLanguage()
     const year = new Date().getFullYear()
+    const t = dictionary.footer
+    const navText = dictionary.navbar
 
     return (
         <footer className='footer'>
             <div className="footer-content">
                 <div className="footer-column footer-about">
                     <div className="footer-logo">
-                        <img src={assets.logo} alt="FoodFast Delivery logo" />
+                        <img src={assets.logo} alt={navText.logoAlt} />
                         <span>FoodFast Delivery</span>
                     </div>
-                    <p>
-                        FoodFast Delivery mang đến cho bạn trải nghiệm giao đồ ăn nhanh chóng, tiện lợi và an toàn.
-                        Chúng tôi hợp tác với những đầu bếp địa phương để phục vụ các món ăn yêu thích mọi lúc bạn cần.
-                    </p>
+                    <p>{t.description}</p>
                 </div>
                 <div className="footer-column">
-                    <h4>Liên kết nhanh</h4>
+                    <h4>{t.quickLinksTitle}</h4>
                     <ul>
-                        <li><a href="#explore-menu">Khám phá menu</a></li>
-                        <li><a href="#food-display">Món ăn nổi bật</a></li>
-                        <li><a href="/cart">Giỏ hàng của bạn</a></li>
+                        {t.quickLinks.map((link) => (
+                            <li key={link.href}>
+                                <a href={link.href}>{link.label}</a>
+                            </li>
+                        ))}
                     </ul>
                 </div>
                 <div className="footer-column">
-                    <h4>Liên hệ</h4>
+                    <h4>{t.contactTitle}</h4>
                     <ul>
-                        <li>Hotline: 1111111111</li>
-                        <li>Email: support@foodfast.vn</li>
-                        <li>Địa chỉ: 273 An Dương Vương, Phường Chợ Quán, Hồ Chí Minh</li>
+                        {t.contactItems.map((item, index) => (
+                            <li key={index}>{item}</li>
+                        ))}
                     </ul>
                 </div>
             </div>
             <div className="footer-bottom">
-                <span>© {year} FoodFast Delivery. Tất cả các quyền được bảo lưu.</span>
+                <div className="footer-language-switch">
+                    <label htmlFor="footer-language-select">{t.languageLabel}</label>
+                    <select
+                        id="footer-language-select"
+                        value={language}
+                        onChange={(event) => setLanguage(event.target.value)}
+                    >
+                        {Object.entries(languageOptions).map(([value, label]) => (
+                            <option key={value} value={value}>
+                                {label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <span>{t.notice.replace('{{year}}', year)}</span>
             </div>
         </footer>
     )

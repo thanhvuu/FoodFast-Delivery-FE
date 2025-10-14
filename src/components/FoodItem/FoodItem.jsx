@@ -1,22 +1,41 @@
-import React, { useContext,useState } from 'react';
-import './FoodItem.css';
-import { StoreContext } from '../../Context/StoreContext';
-import { assets } from '../../assets/assets';
+import React, { useContext, useMemo } from 'react'
+import './FoodItem.css'
+import { StoreContext } from '../../Context/StoreContext'
+import { assets } from '../../assets/assets'
+import { useLanguage } from '../../Context/LanguageContext'
 
 const FoodItem = ({ id, name, price, description, image }) => {
-  const{cartItems,addToCart, removeFromCart} = useContext(StoreContext);
+  const { cartItems, addToCart, removeFromCart } = useContext(StoreContext)
+  const { dictionary } = useLanguage()
+
+  const itemTranslations = dictionary.foodItems[id] || {}
+  const displayName = itemTranslations.name || name
+  const displayDescription = itemTranslations.description || description
+  const { common } = dictionary
+
+  const priceFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(common.currencyLocale, {
+        style: 'currency',
+        currency: 'VND',
+        maximumFractionDigits: 0,
+      }),
+    [common.currencyLocale],
+  )
+
+  const replaceItemPlaceholder = (template) => (template || '').replace('{{item}}', displayName)
 
   return (
     <div className="food-item">
       <div className="food-item-img-container">
-        <img className="food-item-img" src={image} alt={name} />
+        <img className="food-item-img" src={image} alt={displayName} />
 
 
         {!cartItems[id] ? (
           <button
             className="add-btn"
             onClick={() => addToCart(id)}
-            aria-label="Thêm vào giỏ"
+            aria-label={replaceItemPlaceholder(common.addItemToCart)}
           >
             <img src={assets.add_icon_white} alt="" />
           </button>
@@ -25,7 +44,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
             <button
               className="icon-btn"
               onClick={() => removeFromCart(id)}
-              aria-label="Giảm số lượng"
+              aria-label={replaceItemPlaceholder(common.decreaseItem)}
             >
               <img src={assets.remove_icon_red} alt="" />
             </button>
@@ -33,7 +52,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
             <button
               className="icon-btn"
               onClick={() => addToCart(id)}
-              aria-label="Tăng số lượng"
+              aria-label={replaceItemPlaceholder(common.increaseItem)}
             >
               <img src={assets.add_icon_green} alt="" />
             </button>
@@ -43,14 +62,14 @@ const FoodItem = ({ id, name, price, description, image }) => {
 
       <div className="food-item-info">
         <div className="food-item-name-rating">
-          <p>{name}</p>
+          <p>{displayName}</p>
           <img src={assets.rating_starts} alt="" />
         </div>
-        <p className="food-item-desc">{description}</p>
-        <p className="food-item-price">{price}đ</p>
+        <p className="food-item-desc">{displayDescription}</p>
+        <p className="food-item-price">{priceFormatter.format(price)}</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FoodItem;
+export default FoodItem
