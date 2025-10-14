@@ -1,73 +1,110 @@
 .navbar {
-    padding: 20px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
 }
 
-.navbar .logo {
-    width: 150px;
+.logo {
+  width: 150px;
 }
 
 .navbar-menu {
-    display: flex;
-    list-style: none;
-    gap: 20px;
-    color: #49557e;
-    font-size: 18px;
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  color: #49557e;
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li a,
+.navbar-menu li a:visited {
+  color: inherit;
+  text-decoration: none;
+  padding-bottom: 2px;
+}
+
+.navbar-menu li a:hover,
+.navbar-menu li a:focus-visible {
+  color: tomato;
+}
+
+.navbar-menu li a.active {
+  border-bottom: 2px solid tomato;
 }
 
 .navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
-/* SỬA LỖI Ở ĐÂY */
-.navbar button {
-    background: transparent;
-    font-size: 16px;
-    color: #49557e;
-    border: 1px solid tomato;
-    padding: 10px 30px;
-    /* Sửa padding */
-    border-radius: 50px;
-    cursor: pointer;
-    transition: 0.3s;
-    /* Sửa cú pháp transition */
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
-/* SỬA LỖI Ở ĐÂY */
-.navbar button:hover {
-    background-color: #fff4f2;
-}
-
-.navbar-menu .active {
-    padding-bottom: 2px;
-    border-bottom: 2px solid tomato;
-    /* Sửa màu gạch chân */
-}
-
-/* SỬA LỖI Ở ĐÂY */
-.navbar-menu li {
-    cursor: pointer;
-    /* Sửa selector */
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  background-color: #fff4f2;
 }
 
 .navbar-search-icon {
-    position: relative;
+  position: relative;
+  display: inline-flex;
 }
 
 .navbar-search-icon .dot {
-    position: absolute;
-    min-width: 10px;
-    min-height: 10px;
-    background-color: tomato;
-    border-radius: 5px;
-    top: -8px;
-    right: -8px;
+  position: absolute;
+  min-width: 10px;
+  min-height: 10px;
+  background-color: tomato;
+  border-radius: 50%;
+  top: -6px;
+  right: -6px;
 }
 
 .navbar-right img {
-    width: 30px;
+  width: 28px;
+}
+
+.cta-btn {
+  background: transparent;
+  font-size: 16px;
+  color: #49557e;
+  border: 1px solid tomato;
+  padding: 10px 28px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-decoration: none;
+}
+
+.cta-btn:hover,
+.cta-btn:focus-visible {
+  background-color: #fff4f2;
+  color: tomato;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-right {
+    align-self: stretch;
+    justify-content: space-between;
+    width: 100%;
+  }
 }

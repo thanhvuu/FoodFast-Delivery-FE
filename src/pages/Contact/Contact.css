@@ -1,0 +1,144 @@
+.contact-page {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.contact-hero {
+  background: linear-gradient(135deg, rgba(139, 198, 236, 0.18), rgba(255, 231, 190, 0.18));
+  border-radius: 24px;
+  padding: 60px 48px;
+}
+
+.contact-hero-content {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-eyebrow {
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #1f2b6c;
+  font-weight: 600;
+}
+
+.contact-hero h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin: 0;
+  color: #1f2b6c;
+}
+
+.contact-hero p {
+  margin: 0;
+  color: #4f5b84;
+  line-height: 1.6;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.contact-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 12px 24px rgba(31, 43, 108, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-card h2 {
+  margin: 0;
+  color: #1f2b6c;
+}
+
+.contact-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #4f5b84;
+}
+
+.contact-card li a {
+  color: tomato;
+  text-decoration: none;
+}
+
+.contact-card li a:hover,
+.contact-card li a:focus-visible {
+  text-decoration: underline;
+}
+
+.contact-card .label {
+  font-weight: 600;
+  color: #1f2b6c;
+  display: block;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #4f5b84;
+  font-weight: 500;
+}
+
+.contact-form input,
+.contact-form textarea {
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.contact-form button {
+  align-self: flex-start;
+  background-color: tomato;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.contact-form button:hover,
+.contact-form button:focus-visible {
+  background-color: #e5533d;
+}
+
+.contact-map iframe {
+  width: 100%;
+  min-height: 360px;
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 12px 24px rgba(31, 43, 108, 0.08);
+}
+
+@media (max-width: 768px) {
+  .contact-hero {
+    padding: 40px 24px;
+  }
+
+  .contact-form button {
+    width: 100%;
+    text-align: center;
+  }
+}
