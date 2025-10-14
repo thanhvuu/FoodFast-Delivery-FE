@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react'
+// ...existing code...
+import React, { useMemo } from 'react'
 import './Footer.css'
 import { assets } from '../../assets/assets'
 import { useLanguage } from '../../Context/LanguageContext'
@@ -6,11 +7,7 @@ import { useLanguage } from '../../Context/LanguageContext'
 const Footer = () => {
     const { language, setLanguage, dictionary, languageOptions } = useLanguage()
     const year = new Date().getFullYear()
-codex/add-language-switcher-in-footer-b51gps
-    const t = dictionary.footer
-    const navText = dictionary.navbar
-
-    const [language, setLanguage] = useState('vi')
+    const navText = dictionary?.navbar || { logoAlt: 'FoodFast' }
 
     const translations = useMemo(() => ({
         vi: {
@@ -57,8 +54,8 @@ codex/add-language-switcher-in-footer-b51gps
         }
     }), [year])
 
-    const t = translations[language]
- main
+    const t = translations[language] || translations.en
+    const langOptions = languageOptions || t.languageOptions
 
     return (
         <footer className='footer'>
@@ -97,25 +94,19 @@ codex/add-language-switcher-in-footer-b51gps
                         value={language}
                         onChange={(event) => setLanguage(event.target.value)}
                     >
- codex/add-language-switcher-in-footer-b51gps
-                        {Object.entries(languageOptions).map(([value, label]) => (
-
-                        {Object.entries(t.languageOptions).map(([value, label]) => (
- main
+                        {Object.entries(langOptions).map(([value, label]) => (
                             <option key={value} value={value}>
                                 {label}
                             </option>
                         ))}
                     </select>
                 </div>
- codex/add-language-switcher-in-footer-b51gps
-                <span>{t.notice.replace('{{year}}', year)}</span>
 
                 <span>{t.footerNotice}</span>
- main
             </div>
         </footer>
     )
 }
 
 export default Footer
+// ...existing code...
