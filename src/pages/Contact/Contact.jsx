@@ -22,15 +22,15 @@ const Contact = () => {
           <ul>
             <li>
               <span className='label'>Hotline:</span>
-              <a href='tel:19001234'>1900 1234</a>
+              <a href=''>111111111</a>
             </li>
             <li>
               <span className='label'>Email:</span>
-              <a href='mailto:hello@foodfast.vn'>hello@foodfast.vn</a>
+              <a href=''>dangthanhvu19124@gmail.com</a>
             </li>
             <li>
               <span className='label'>Địa chỉ:</span>
-              123 Đường Ẩm Thực, Quận 1, TP. Hồ Chí Minh
+              273 An Dương Vương, Phường Chợ Quán, Hồ Chí Minh
             </li>
             <li>
               <span className='label'>Giờ làm việc:</span>

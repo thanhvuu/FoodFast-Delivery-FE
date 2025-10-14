@@ -40,7 +40,7 @@ const Navbar = () => {
           <img src={assets.basket_icon} alt='Giỏ hàng' />
           {cartItemCount > 0 && <span className='dot' aria-hidden='true'></span>}
         </Link>
-        <Link to='/order' className='cta-btn'>Đặt ngay</Link>
+        <Link to='/order' className='cta-btn'>Đăng Nhập</Link>
       </div>
     </header>
   )

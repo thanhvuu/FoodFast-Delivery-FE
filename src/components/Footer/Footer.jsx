@@ -29,9 +29,9 @@ const Footer = () => {
                 <div className="footer-column">
                     <h4>Liên hệ</h4>
                     <ul>
-                        <li>Hotline: 1900 0099</li>
+                        <li>Hotline: 1111111111</li>
                         <li>Email: support@foodfast.vn</li>
-                        <li>Địa chỉ: 123 Phố Ẩm Thực, Q.1, TP.HCM</li>
+                        <li>Địa chỉ: 273 An Dương Vương, Phường Chợ Quán, Hồ Chí Minh</li>
                     </ul>
                 </div>
             </div>
