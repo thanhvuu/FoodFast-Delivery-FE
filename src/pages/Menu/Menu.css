@@ -1,0 +1,44 @@
+.menu-page {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.menu-hero {
+  background: linear-gradient(135deg, rgba(255, 126, 95, 0.12), rgba(254, 180, 123, 0.12));
+  border-radius: 24px;
+  padding: 60px 48px;
+}
+
+.menu-hero-content {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-eyebrow {
+  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: tomato;
+  font-weight: 600;
+}
+
+.menu-hero h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin: 0;
+  color: #1f2b6c;
+}
+
+.menu-hero p {
+  margin: 0;
+  color: #4f5b84;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .menu-hero {
+    padding: 40px 24px;
+  }
+}

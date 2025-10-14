@@ -1,8 +1,10 @@
 import React from 'react'
-import Navbar from './components/Navbar/Navbar'
 import { Route, Routes } from 'react-router-dom'
-import Home from './pages/Home/Home'
+import Navbar from './components/Navbar/Navbar'
 import Cart from './pages/Cart/Cart'
+import Contact from './pages/Contact/Contact'
+import Home from './pages/Home/Home'
+import Menu from './pages/Menu/Menu'
 import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
 
 const App = () => {
@@ -11,6 +13,8 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path='/' element={<Home />} />
+        <Route path='/menu' element={<Menu />} />
+        <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/order' element={<PlaceOrder />} />
       </Routes>

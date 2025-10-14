@@ -6,17 +6,16 @@ import FoodDisplay from '../../components/FoodDisplay/FoodDisplay'
 import Footer from '../../components/Footer/Footer'
 
 const Home = () => {
+  const [category, setCategory] = useState('all')
 
-    const [category, setCategory] = useState("All");
-
-    return (
-        <div>
-            <Header />
-            <ExploreMenu category={category} setCategory={setCategory} />
-            <FoodDisplay category={category} />
-            <Footer />
-        </div>
-    )
+  return (
+    <div>
+      <Header />
+      <ExploreMenu category={category} setCategory={setCategory} />
+      <FoodDisplay category={category} />
+      <Footer />
+    </div>
+  )
 }
 
 export default Home
