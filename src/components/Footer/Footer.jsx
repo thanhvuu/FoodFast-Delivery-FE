@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import './Footer.css'
 import { assets } from '../../assets/assets'
 import { useLanguage } from '../../Context/LanguageContext'
@@ -6,8 +6,59 @@ import { useLanguage } from '../../Context/LanguageContext'
 const Footer = () => {
     const { language, setLanguage, dictionary, languageOptions } = useLanguage()
     const year = new Date().getFullYear()
+codex/add-language-switcher-in-footer-b51gps
     const t = dictionary.footer
     const navText = dictionary.navbar
+
+    const [language, setLanguage] = useState('vi')
+
+    const translations = useMemo(() => ({
+        vi: {
+            description: 'FoodFast Delivery mang đến cho bạn trải nghiệm giao đồ ăn nhanh chóng, tiện lợi và an toàn. Chúng tôi hợp tác với những đầu bếp địa phương để phục vụ các món ăn yêu thích mọi lúc bạn cần.',
+            quickLinksTitle: 'Liên kết nhanh',
+            quickLinks: [
+                { href: '#explore-menu', label: 'Khám phá menu' },
+                { href: '#food-display', label: 'Món ăn nổi bật' },
+                { href: '/cart', label: 'Giỏ hàng của bạn' }
+            ],
+            contactTitle: 'Liên hệ',
+            contactItems: [
+                'Hotline: 1111111111',
+                'Email: support@foodfast.vn',
+                'Địa chỉ: 273 An Dương Vương, Phường Chợ Quán, Hồ Chí Minh'
+            ],
+            languageLabel: 'Ngôn ngữ',
+            languageOptions: {
+                vi: 'Tiếng Việt',
+                en: 'English'
+            },
+            footerNotice: `© ${year} FoodFast Delivery. Tất cả các quyền được bảo lưu.`
+        },
+        en: {
+            description: 'FoodFast Delivery brings you a fast, convenient and safe food delivery experience. We partner with local chefs to serve your favourite dishes whenever you need them.',
+            quickLinksTitle: 'Quick links',
+            quickLinks: [
+                { href: '#explore-menu', label: 'Explore menu' },
+                { href: '#food-display', label: 'Featured dishes' },
+                { href: '/cart', label: 'Your cart' }
+            ],
+            contactTitle: 'Contact',
+            contactItems: [
+                'Hotline: 1111111111',
+                'Email: support@foodfast.vn',
+                'Address: 273 An Dương Vương, Ward Chợ Quán, Ho Chi Minh City'
+            ],
+            languageLabel: 'Language',
+            languageOptions: {
+                vi: 'Vietnamese',
+                en: 'English'
+            },
+            footerNotice: `© ${year} FoodFast Delivery. All rights reserved.`
+        }
+    }), [year])
+
+    const t = translations[language]
+ main
 
     return (
         <footer className='footer'>
@@ -46,14 +97,22 @@ const Footer = () => {
                         value={language}
                         onChange={(event) => setLanguage(event.target.value)}
                     >
+ codex/add-language-switcher-in-footer-b51gps
                         {Object.entries(languageOptions).map(([value, label]) => (
+
+                        {Object.entries(t.languageOptions).map(([value, label]) => (
+ main
                             <option key={value} value={value}>
                                 {label}
                             </option>
                         ))}
                     </select>
                 </div>
+ codex/add-language-switcher-in-footer-b51gps
                 <span>{t.notice.replace('{{year}}', year)}</span>
+
+                <span>{t.footerNotice}</span>
+ main
             </div>
         </footer>
     )
