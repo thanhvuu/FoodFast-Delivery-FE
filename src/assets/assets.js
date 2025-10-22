@@ -72,6 +72,12 @@ export const food_list = [
     price: 30000,
     description: 'Gà rán giòn rụm, thơm ngon',
     category: 'Fast Food',
+    ingredients: ['Đùi gà', 'Bột chiên', 'Dầu ăn', 'Tiêu', 'Muối'],
+    address: '273 An Dương Vương, Quận 5, TP.HCM',
+    restaurant: {
+      name: 'KFC Nguyễn Trãi',
+      address: '273 An Dương Vương, Quận 5, TP.HCM',
+    },
   },
   {
     _id: '2',
@@ -80,6 +86,12 @@ export const food_list = [
     price: 35000,
     description: 'Hamburger bò Mỹ, phô mai cheddar',
     category: 'Fast Food',
+    ingredients: ['Bánh mì Burger', 'Thịt bò', 'Phô mai Cheddar', 'Xà lách', 'Cà chua', 'Sốt đặc biệt'],
+    address: '45 Trần Hưng Đạo, Quận 1, TP.HCM',
+    restaurant: {
+      name: 'Burger King Trần Hưng Đạo',
+      address: '45 Trần Hưng Đạo, Quận 1, TP.HCM',
+    },
   },
   {
     _id: '3',
@@ -88,6 +100,12 @@ export const food_list = [
     price: 50000,
     description: 'Pizza hải sản, phô mai mozzarella',
     category: 'Fast Food',
+    ingredients: ['Bột mì', 'Tôm', 'Mực', 'Phô mai Mozzarella', 'Sốt cà chua'],
+    address: '198 Pasteur, Quận 3, TP.HCM',
+    restaurant: {
+      name: 'Pizza 4P Pasteur',
+      address: '198 Pasteur, Quận 3, TP.HCM',
+    },
   },
   {
     _id: '4',
@@ -96,6 +114,12 @@ export const food_list = [
     price: 50000,
     description: 'Tacos thịt bò, rau củ tươi ngon',
     category: 'Fast Food',
+    ingredients: ['Vỏ bánh tacos', 'Thịt bò', 'Hành tây', 'Cà chua', 'Xà lách', 'Sốt salsa'],
+    address: '81 Lê Lợi, Quận 1, TP.HCM',
+    restaurant: {
+      name: 'Mexican Saigon',
+      address: '81 Lê Lợi, Quận 1, TP.HCM',
+    },
   },
   {
     _id: '5',
@@ -104,6 +128,12 @@ export const food_list = [
     price: 50000,
     description: 'Phở bò tái, nước dùng đậm đà',
     category: 'Món nước',
+    ingredients: ['Bánh phở', 'Thịt bò tái', 'Nước dùng bò', 'Hành lá', 'Giá', 'Ngò gai'],
+    address: '260 Cách Mạng Tháng 8, Quận 10, TP.HCM',
+    restaurant: {
+      name: 'Phở Hòa Pasteur',
+      address: '260 Cách Mạng Tháng 8, Quận 10, TP.HCM',
+    },
   },
   {
     _id: '6',
@@ -112,6 +142,12 @@ export const food_list = [
     price: 60000,
     description: 'Mỳ Ý sốt bò bằm, phô mai Parmesan',
     category: 'Món nước',
+    ingredients: ['Mỳ Ý Spaghetti', 'Thịt bò bằm', 'Sốt cà chua', 'Phô mai Parmesan', 'Hành tây'],
+    address: '92 Lê Thánh Tôn, Quận 1, TP.HCM',
+    restaurant: {
+      name: 'Italian Food Corner',
+      address: '92 Lê Thánh Tôn, Quận 1, TP.HCM',
+    },
   },
   {
     _id: '7',
@@ -120,6 +156,12 @@ export const food_list = [
     price: 30000,
     description: 'Khoai tây chiên giòn rụm, muối tiêu',
     category: 'Đồ ăn vặt',
+    ingredients: ['Khoai tây', 'Dầu ăn', 'Muối', 'Tiêu'],
+    address: '120 Nguyễn Tri Phương, Quận 10, TP.HCM',
+    restaurant: {
+      name: 'Snack House',
+      address: '120 Nguyễn Tri Phương, Quận 10, TP.HCM',
+    },
   },
   {
     _id: '8',
@@ -128,6 +170,12 @@ export const food_list = [
     price: 15000,
     description: 'Kem ốc quế vani, socola',
     category: 'Đồ ngọt',
+    ingredients: ['Kem vani', 'Kem socola', 'Ốc quế', 'Sữa đặc'],
+    address: '35 Nguyễn Văn Cừ, Quận 5, TP.HCM',
+    restaurant: {
+      name: 'Ice Cream House',
+      address: '35 Nguyễn Văn Cừ, Quận 5, TP.HCM',
+    },
   },
   {
     _id: '9',
@@ -136,6 +184,12 @@ export const food_list = [
     price: 40000,
     description: 'Gà viên chiên giòn, sốt mayonnaise',
     category: 'Đồ ăn vặt',
+    ingredients: ['Thịt gà', 'Bột chiên', 'Dầu ăn', 'Sốt mayonnaise', 'Tiêu'],
+    address: '14 Nguyễn Thành Ý, Quận 1, TP.HCM',
+    restaurant: {
+      name: 'Chicken Balls Corner',
+      address: '14 Nguyễn Thành Ý, Quận 1, TP.HCM',
+    },
   },
   {
     _id: '10',
@@ -144,6 +198,12 @@ export const food_list = [
     price: 50000,
     description: 'Bún bò Huế cay nồng, đậm đà hương vị',
     category: 'Món nước',
+    ingredients: ['Bún Huế', 'Thịt bò', 'Chả Huế', 'Rau thơm', 'Ớt', 'Sả'],
+    address: '19 Nguyễn Đình Chiểu, Quận 3, TP.HCM',
+    restaurant: {
+      name: 'Bún bò Huế O Lý',
+      address: '19 Nguyễn Đình Chiểu, Quận 3, TP.HCM',
+    },
   },
   {
     _id: '11',
@@ -152,6 +212,12 @@ export const food_list = [
     price: 40000,
     description: 'Cơm chiên Dương Châu thập cẩm, trứng, rau củ',
     category: 'Món khô',
+    ingredients: ['Cơm', 'Trứng', 'Thịt xá xíu', 'Đậu Hà Lan', 'Cà rốt', 'Lạp xưởng'],
+    address: '212 Lý Chính Thắng, Quận 3, TP.HCM',
+    restaurant: {
+      name: 'Quán Hoa Dương Châu',
+      address: '212 Lý Chính Thắng, Quận 3, TP.HCM',
+    },
   },
   {
     _id: '12',
@@ -160,5 +226,12 @@ export const food_list = [
     price: 15000,
     description: 'Panna Cotta kem tươi, sốt dâu tây',
     category: 'Đồ ngọt',
+    ingredients: ['Kem tươi', 'Sữa', 'Gelatin', 'Đường', 'Sốt dâu tây'],
+    address: '101 Nguyễn Công Trứ, Quận 1, TP.HCM',
+    restaurant: {
+      name: 'Sweet Italy',
+      address: '101 Nguyễn Công Trứ, Quận 1, TP.HCM',
+    },
   },
 ]
+

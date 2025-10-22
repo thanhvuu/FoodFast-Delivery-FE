@@ -21,6 +21,12 @@ a {
   margin: auto;
 }
 
+main {
+  padding-top: 80px;
+  /* hoặc đúng height của .navbar */
+}
+
+
 @keyframes fadeIn {
   0% {
     opacity: 0;

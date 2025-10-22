@@ -1,0 +1,18 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "email": "admin@gmail.com",
+            "password": "admin123",
+            "fullName": "Admin User"
+        },
+        {
+            "id": 2,
+            "username": "trankhanh",
+            "email": "test@gmail.com",
+            "password": "test123",
+            "fullName": "Trần Tuấn Khanh"
+        }
+    ]
+}

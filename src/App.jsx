@@ -6,6 +6,8 @@ import Contact from './pages/Contact/Contact'
 import Home from './pages/Home/Home'
 import Menu from './pages/Menu/Menu'
 import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
+import Footer from './components/Footer/Footer'
+import FoodDetail from './components/FoodDetail/FoodDetail'
 
 const App = () => {
   return (
@@ -17,7 +19,9 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/order' element={<PlaceOrder />} />
+        <Route path="/food/:id" element={<FoodDetail />} />
       </Routes>
+      <Footer />
     </div>
   )
 }
