@@ -42,6 +42,7 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
         try {
             if (isLogin) {
                 // Đăng nhập: đọc danh sách người dùng từ db.json thông qua API
+ codex/rework-registration-and-login-process
                 const res = await fetch(USERS_API_URL)
                 const usersPayload = await res.json().catch(() => null)
                 if (!res.ok || !Array.isArray(usersPayload)) {
@@ -49,6 +50,13 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
                     throw new Error(message)
                 }
                 const users = usersPayload
+
+                const res = await fetch(API_URL)
+                if (!res.ok) {
+                    throw new Error('NETWORK_ERROR')
+                }
+                const users = await res.json()
+ main
                 const matchedUser = users.find(
                     (user) =>
                         user.email?.toLowerCase() === email.trim().toLowerCase() &&
@@ -78,6 +86,7 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
                     return
                 }
 
+ codex/rework-registration-and-login-process
                 const response = await fetch(USERS_API_URL)
                 const existingUsersPayload = await response.json().catch(() => null)
                 if (!response.ok || !Array.isArray(existingUsersPayload)) {
@@ -85,6 +94,13 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
                     throw new Error(message)
                 }
                 const existingUsers = existingUsersPayload
+
+                const response = await fetch(API_URL)
+                if (!response.ok) {
+                    throw new Error('NETWORK_ERROR')
+                }
+                const existingUsers = await response.json()
+ main
                 const isEmailTaken = existingUsers.some(
                     (user) => user.email?.toLowerCase() === email.trim().toLowerCase()
                 )
@@ -107,16 +123,25 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
                     fullName: userName,
                 }
 
+ codex/rework-registration-and-login-process
                 const createRes = await fetch(USERS_API_URL, {
+
+                const createRes = await fetch(API_URL, {
+ main
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newUser),
                 })
 
+ codex/rework-registration-and-login-process
                 const createdPayload = await createRes.json().catch(() => null)
                 if (!createRes.ok) {
                     const message = createdPayload?.message || 'Không thể đăng ký tài khoản mới.'
                     throw new Error(message)
+
+                if (!createRes.ok) {
+                    throw new Error('NETWORK_ERROR')
+ main
                 }
 
                 setIsLogin(true)
@@ -125,8 +150,12 @@ const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
             }
         } catch (err) {
             console.error(err)
+ codex/rework-registration-and-login-process
             const fallbackMessage = err?.message || 'Lỗi kết nối server!'
             setError(fallbackMessage)
+
+            setError('Lỗi kết nối server!')
+ main
         } finally {
             setLoading(false)
         }
