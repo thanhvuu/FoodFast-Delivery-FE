@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FoodFast Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="../public/logo.svg" alt="FoodFast" class="brand__logo" />
+          <span class="brand__name">FoodFast Admin</span>
+        </div>
+        <nav class="sidebar__nav">
+          <button class="nav__item active" data-target="orders">Quản lý đơn hàng</button>
+          <button class="nav__item" data-target="menu">Quản lý món ăn</button>
+          <button class="nav__item" data-target="accounts">Quản lý tài khoản</button>
+        </nav>
+        <div class="sidebar__footer">
+          <button class="logout-btn">Đăng xuất</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="content__header">
+          <div class="header__title">
+            <h1>Trang quản trị FoodFast</h1>
+            <p>Theo dõi hoạt động đơn hàng, món ăn và tài khoản.</p>
+          </div>
+          <div class="header__actions">
+            <input
+              id="globalSearch"
+              type="search"
+              placeholder="Tìm kiếm nhanh..."
+              aria-label="Tìm kiếm"
+            />
+            <button id="darkModeToggle" class="icon-button" aria-label="Đổi giao diện">
+              🌗
+            </button>
+          </div>
+        </header>
+
+        <section id="orders" class="panel active">
+          <div class="panel__header">
+            <div>
+              <h2>Đơn hàng</h2>
+              <p>Theo dõi trạng thái và hình thức thanh toán của đơn hàng.</p>
+            </div>
+            <div class="panel__filters">
+              <select id="filterStatus">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="delivering">Đang giao</option>
+                <option value="delivered">Đã giao</option>
+              </select>
+              <select id="filterPayment">
+                <option value="all">Tất cả thanh toán</option>
+                <option value="cash">Tiền mặt</option>
+                <option value="card">Thẻ</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel__body">
+            <table class="table" aria-label="Danh sách đơn hàng">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
+                  <th>Trạng thái</th>
+                  <th>Thanh toán</th>
+                  <th>Giá trị</th>
+                  <th>Ngày tạo</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="menu" class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Quản lý món ăn</h2>
+              <p>Thêm, chỉnh sửa hoặc xoá món trong thực đơn.</p>
+            </div>
+            <button id="addDishBtn" class="primary-btn">+ Thêm món</button>
+          </div>
+
+          <div class="panel__body">
+            <div class="grid">
+              <div class="card">
+                <h3>Thông tin món ăn</h3>
+                <form id="dishForm" novalidate>
+                  <div class="form-group">
+                    <label for="dishName">Tên món</label>
+                    <input id="dishName" name="name" required placeholder="Ví dụ: Bún chả" />
+                  </div>
+                  <div class="form-group">
+                    <label for="dishCategory">Danh mục</label>
+                    <input id="dishCategory" name="category" required placeholder="Món chính" />
+                  </div>
+                  <div class="form-group">
+                    <label for="dishPrice">Giá (VNĐ)</label>
+                    <input
+                      id="dishPrice"
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="1000"
+                      required
+                      placeholder="75000"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="dishStatus">Trạng thái</label>
+                    <select id="dishStatus" name="status">
+                      <option value="available">Đang bán</option>
+                      <option value="out_of_stock">Hết hàng</option>
+                    </select>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="primary-btn">Lưu món</button>
+                    <button type="reset" class="ghost-btn" id="resetFormBtn">Hủy</button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="card">
+                <div class="card__header">
+                  <h3>Danh sách món ăn</h3>
+                  <div class="chip" id="menuCount">0 món</div>
+                </div>
+                <table class="table" aria-label="Danh sách món ăn">
+                  <thead>
+                    <tr>
+                      <th>Tên</th>
+                      <th>Danh mục</th>
+                      <th>Giá</th>
+                      <th>Trạng thái</th>
+                      <th class="col-actions">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="menuTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="accounts" class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Tài khoản</h2>
+              <p>Quản lý quyền truy cập và trạng thái tài khoản quản trị.</p>
+            </div>
+            <button id="addAccountBtn" class="primary-btn">+ Tạo tài khoản</button>
+          </div>
+
+          <div class="panel__body">
+            <div class="card">
+              <table class="table" aria-label="Danh sách tài khoản">
+                <thead>
+                  <tr>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th class="col-actions">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="accountsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="accountDialog" class="modal">
+      <form method="dialog" id="accountForm">
+        <h3>Tạo tài khoản quản trị</h3>
+        <div class="form-group">
+          <label for="accountUsername">Tên đăng nhập</label>
+          <input id="accountUsername" name="username" required />
+        </div>
+        <div class="form-group">
+          <label for="accountFullName">Họ tên</label>
+          <input id="accountFullName" name="fullName" required />
+        </div>
+        <div class="form-group">
+          <label for="accountRole">Vai trò</label>
+          <select id="accountRole" name="role">
+            <option value="admin">Admin</option>
+            <option value="staff">Nhân viên</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="accountStatus">Trạng thái</label>
+          <select id="accountStatus" name="status">
+            <option value="active">Hoạt động</option>
+            <option value="locked">Đã khóa</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button value="cancel" class="ghost-btn">Hủy</button>
+          <button value="confirm" class="primary-btn">Lưu</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog" class="modal">
+      <form method="dialog">
+        <h3>Xác nhận thao tác</h3>
+        <p id="confirmMessage"></p>
+        <div class="form-actions">
+          <button value="cancel" class="ghost-btn">Hủy</button>
+          <button value="confirm" class="danger-btn">Xác nhận</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
