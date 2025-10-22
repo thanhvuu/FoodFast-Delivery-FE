@@ -1,127 +1,274 @@
 .food-detail-page {
+    position: relative;
     width: 100%;
-    max-width: 1200px;
     min-height: 100vh;
-    margin: 0 auto;
-    background: #fff;
+    padding: 96px 24px 112px;
+    background: linear-gradient(140deg, #fff8f3 0%, #f5f9ff 50%, #ffffff 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 50px 0 50px 0;
-    gap: 32px;
+    gap: 48px;
     box-sizing: border-box;
-    overflow-x: hidden;
-    /* Chặn scroll ngang nếu có */
 }
 
-.food-detail-row,
-.food-detail-recommend,
-.food-detail-map {
+.food-detail-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(600px circle at 10% 15%, rgba(255, 112, 67, 0.14), transparent 60%),
+        radial-gradient(700px circle at 85% 10%, rgba(22, 97, 201, 0.12), transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.food-detail-page > * {
+    position: relative;
+    z-index: 1;
+}
+
+.food-detail-back {
     width: 100%;
-    max-width: 960px;
-    margin: 0 auto;
+    max-width: 1080px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #1f3c88;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    background: rgba(255, 255, 255, 0.65);
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(31, 60, 136, 0.1);
+    transition: transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.food-detail-back span {
+    font-size: 1.1rem;
+}
+
+.food-detail-back:hover {
+    transform: translateY(-2px);
+    color: #ff7043;
+    box-shadow: 0 12px 26px rgba(255, 112, 67, 0.22);
+}
+
+.food-detail-row {
+    width: 100%;
+    max-width: 1080px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 40px;
+    padding: 42px;
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 36px;
+    box-shadow: 0 35px 80px rgba(24, 39, 75, 0.12);
+    backdrop-filter: blur(18px);
+}
+
+.food-detail-img-wrapper {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(255, 148, 104, 0.25), rgba(22, 97, 201, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 340px;
+}
+
+.food-detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+}
+
+.food-detail-img-wrapper:hover .food-detail-img {
+    transform: scale(1.06);
+}
+
+.food-detail-category-badge {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    padding: 9px 22px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #ff7043;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    box-shadow: 0 15px 30px rgba(255, 112, 67, 0.3);
 }
 
 .food-detail-info-box {
-    flex: 1;
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 6px 28px rgba(41, 46, 51, .09);
-    padding: 36px 30px 36px 34px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    gap: 22px;
 }
 
-.food-detail-info-box h1 {
-    font-size: 2.1rem;
+.food-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.food-detail-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.food-detail-title-block h1 {
+    font-size: 2.25rem;
+    line-height: 1.15;
+    color: #1f2937;
+    margin: 0 0 8px;
     font-weight: 800;
-    color: #ff7043;
-    margin-bottom: 5px;
-    line-height: 1.18;
+}
+
+.food-detail-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.food-detail-price-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px 22px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #ff9966, #ff7043);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.28rem;
+    box-shadow: 0 20px 40px rgba(255, 112, 67, 0.3);
+    min-width: 150px;
+}
+
+.food-detail-price-unit {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.85;
 }
 
 .food-detail-desc {
-    color: #565656;
-    font-size: 1.12rem;
-    margin-bottom: 7px;
-    line-height: 1.4;
+    margin: 0;
+    color: #374151;
+    font-size: 1.08rem;
+    line-height: 1.6;
 }
 
-.food-detail-price {
-    font-weight: bold;
-    font-size: 1.22rem;
-    color: #164ed2;
-    margin-bottom: 13px;
+.food-detail-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
 }
 
-/* Nguyên liệu */
+.meta-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    border-radius: 20px;
+    background: #f5f8ff;
+    box-shadow: inset 0 0 0 1px rgba(22, 97, 201, 0.08);
+}
+
+.meta-card:nth-of-type(1) {
+    background: #fff5f0;
+    box-shadow: inset 0 0 0 1px rgba(255, 112, 67, 0.12);
+}
+
+.meta-card-wide {
+    grid-column: 1 / -1;
+    background: #ffffff;
+    box-shadow: 0 18px 36px rgba(31, 41, 55, 0.08);
+}
+
+.meta-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.meta-title {
+    margin: 0;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.meta-value {
+    margin: 4px 0 0;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1f2937;
+    line-height: 1.35;
+}
+
 .ingredients-section {
-    margin: 15px 0 12px 0;
-    padding: 12px 16px;
-    background: #f9f7f5;
-    border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(210, 180, 140, 0.07);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 22px;
+    padding: 22px 24px 20px;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
 }
 
 .ingredients-title {
     font-weight: 700;
     font-size: 1.08rem;
     color: #ff7043;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
 }
 
 .ingredients-list {
-    padding-left: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0;
     margin: 0;
-    color: #2a2927;
-    font-size: 1.04rem;
-    line-height: 1.6;
+    list-style: none;
 }
 
-/* Địa chỉ */
-.address-block {
-    margin-top: 9px;
-    margin-bottom: 2px;
-    font-size: 1.11rem;
-    color: #1661c9;
-    border-left: 3px solid #ff7043;
-    padding-left: 8px;
-    background: #f7fcff;
-    border-radius: 7px;
-}
-
-.meta {
-    margin-bottom: 3px;
-    font-size: 1.06rem;
-    color: #252525;
-    line-height: 1.35;
-}
-
-.label {
-    font-weight: 700;
-    color: #222;
-    margin-right: 5px;
+.ingredients-list li {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #f2f6ff;
+    color: #1f3c88;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    box-shadow: inset 0 0 0 1px rgba(31, 60, 136, 0.06);
 }
 
 .food-detail-add-btn {
-    margin-top: 18px;
-    min-width: 180px;
-    padding: 15px 0;
-    background: #ff7043;
+    margin-top: 8px;
+    align-self: flex-start;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, #ff8455, #ff6138);
     color: #fff;
     border: none;
-    font-size: 1.13rem;
+    font-size: 1.08rem;
     font-weight: 700;
     border-radius: 999px;
     cursor: pointer;
-    align-self: center;
-    box-shadow: 0 4px 13px rgba(255, 112, 67, 0.13);
-    transition: background .19s;
+    box-shadow: 0 20px 36px rgba(255, 112, 67, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .food-detail-add-btn:hover {
-    background: #ff5722;
+    transform: translateY(-2px);
+    box-shadow: 0 26px 44px rgba(255, 112, 67, 0.35);
 }
 
 .add-to-cart-toast {
@@ -131,10 +278,10 @@
     background: #ff7043;
     color: #fff;
     font-weight: 600;
-    font-size: 1.08rem;
+    font-size: 1.05rem;
     padding: 13px 36px;
     border-radius: 20px;
-    box-shadow: 0 3px 14px rgba(255, 112, 67, 0.15);
+    box-shadow: 0 18px 30px rgba(255, 112, 67, 0.25);
     z-index: 9999;
     animation: fadeInOutRight 1.6s;
 }
@@ -161,94 +308,154 @@
     }
 }
 
+.food-detail-section-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.food-detail-section-title::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9966, #ff7043);
+    box-shadow: 0 0 0 6px rgba(255, 112, 67, 0.15);
+}
+
 .food-detail-recommend {
-    width: 90vw;
-    max-width: 1180px;
-    margin-top: 38px;
-    margin-bottom: 10px;
+    width: 100%;
+    max-width: 1080px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 34px 36px 38px;
+    border-radius: 32px;
+    box-shadow: 0 28px 60px rgba(24, 39, 75, 0.12);
+    backdrop-filter: blur(12px);
 }
 
 .food-detail-recommend-list-horizontal {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-    margin-top: 16px;
-    padding-bottom: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
 }
 
-.food-detail-recommend-list-horizontal>* {
+.food-detail-recommend-list-horizontal > * {
     min-width: 0;
-    max-width: 310px;
-}
-
-/* Ảnh sản phẩm và khối info */
-.food-detail-img {
-    width: 400px;
-    min-width: 220px;
-    height: 280px;
 }
 
 .food-detail-map {
     width: 100%;
-    max-width: 980px;
-    margin-top: 30px;
-    margin-bottom: 22px;
-    border-radius: 18px;
-    background: #f5f8fa;
-    padding: 18px 18px 16px 18px;
-    box-shadow: 0 2px 16px rgba(41, 46, 51, 0.09);
+    max-width: 1080px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 28px 32px 32px;
+    border-radius: 32px;
+    box-shadow: 0 28px 60px rgba(24, 39, 75, 0.12);
+    backdrop-filter: blur(12px);
 }
 
-.food-detail-map h3 {
-    margin-bottom: 8px;
-    font-weight: 700;
-    font-size: 1.14rem;
-    color: #ff7043;
+.food-detail-map iframe {
+    box-shadow: 0 18px 30px rgba(31, 41, 55, 0.18);
 }
 
-@media (max-width: 900px) {
-    .food-detail-info-box {
-        width: 98vw;
-        max-width: 100vw;
-        min-width: 0;
-        border-radius: 15px;
-        padding: 20px 6vw;
+@media (max-width: 1100px) {
+    .food-detail-row {
+        grid-template-columns: 1fr;
+        padding: 32px;
     }
 
-    .food-detail-info-box h1 {
-        font-size: 1.43rem;
+    .food-detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .food-detail-price-chip {
+        align-items: flex-start;
+    }
+
+    .food-detail-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .meta-card-wide {
+        grid-column: auto;
     }
 }
 
-@media (max-width: 900px) {
-
-    .food-detail-row,
-    .food-detail-recommend,
-    .food-detail-map {
-        width: 99vw;
-        max-width: 100vw;
+@media (max-width: 720px) {
+    .food-detail-page {
+        padding: 80px 18px 90px;
+        gap: 40px;
     }
 
     .food-detail-row {
-        flex-direction: column;
-        align-items: center;
-        gap: 22px;
+        padding: 26px;
+        border-radius: 26px;
     }
 
-    .food-detail-img {
-        width: 99vw;
-        height: 170px;
-        border-radius: 10px;
+    .food-detail-img-wrapper {
+        min-height: 260px;
     }
 
-    .food-detail-info-box {
-        width: 98vw;
-        border-radius: 9px;
-        padding: 22px 10vw 22px 6vw;
+    .food-detail-title-block h1 {
+        font-size: 1.85rem;
     }
 
-    .food-detail-recommend-list-horizontal {
-        flex-direction: column;
-        gap: 15px;
+    .food-detail-desc {
+        font-size: 1rem;
+    }
+
+    .ingredients-section {
+        padding: 20px 18px 18px;
+    }
+
+    .food-detail-recommend,
+    .food-detail-map {
+        padding: 26px 24px 28px;
+        border-radius: 26px;
+    }
+
+    .food-detail-back {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .food-detail-page {
+        padding: 72px 16px 80px;
+    }
+
+    .food-detail-row {
+        padding: 22px 18px;
+        gap: 28px;
+    }
+
+    .food-detail-price-chip {
+        font-size: 1.08rem;
+        padding: 12px 18px;
+        min-width: auto;
+        border-radius: 18px;
+    }
+
+    .food-detail-category-badge {
+        left: 16px;
+        bottom: 18px;
+        padding: 7px 18px;
+    }
+
+    .food-detail-section-title {
+        font-size: 1.35rem;
+    }
+
+    .ingredients-list li {
+        font-size: 0.88rem;
+    }
+
+    .food-detail-add-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
