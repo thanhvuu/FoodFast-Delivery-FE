@@ -43,35 +43,69 @@ const FoodDetail = () => {
 
     return (
         <div className="food-detail-page">
+            <Link to="/" className="food-detail-back">
+                <span aria-hidden="true">←</span>
+                Quay lại thực đơn
+            </Link>
+
             <div className="food-detail-row">
-                <img className="food-detail-img" src={food.image} alt={displayName} />
+                <div className="food-detail-img-wrapper">
+                    <img className="food-detail-img" src={food.image} alt={displayName} />
+                    <span className="food-detail-category-badge">{food.category}</span>
+                </div>
+
                 <div className="food-detail-info-box">
-                    <h1>{displayName}</h1>
+                    <div className="food-detail-header">
+                        <div className="food-detail-title-block">
+                            <h1>{displayName}</h1>
+                            <p className="food-detail-subtitle">{restaurant.name}</p>
+                        </div>
+                        <div className="food-detail-price-chip">
+                            {priceFormatter.format(food.price)}
+                            <span className="food-detail-price-unit">/ phần</span>
+                        </div>
+                    </div>
+
                     <p className="food-detail-desc">{displayDescription}</p>
-                    <p className="food-detail-price">{priceFormatter.format(food.price)}</p>
-                    {/* Nguyên liệu */}
+
+                    <div className="food-detail-meta-grid">
+                        <div className="meta-card">
+                            <span className="meta-icon" aria-hidden="true">⏱️</span>
+                            <div>
+                                <p className="meta-title">Thời gian giao</p>
+                                <p className="meta-value">{estimatedTime}</p>
+                            </div>
+                        </div>
+                        <div className="meta-card">
+                            <span className="meta-icon" aria-hidden="true">🏠</span>
+                            <div>
+                                <p className="meta-title">Quán</p>
+                                <p className="meta-value">{restaurant.name}</p>
+                            </div>
+                        </div>
+                        <div className="meta-card meta-card-wide">
+                            <span className="meta-icon" aria-hidden="true">📍</span>
+                            <div>
+                                <p className="meta-title">Địa chỉ</p>
+                                <p className="meta-value">{restaurant.address}</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="ingredients-section">
-                        <div className="ingredients-title">Nguyên liệu chính:</div>
+                        <div className="ingredients-title">Nguyên liệu nổi bật</div>
                         <ul className="ingredients-list">
                             {food.ingredients?.map((it, i) => <li key={i}>{it}</li>)}
                         </ul>
                     </div>
-                    {/* Địa chỉ quán ăn */}
-                    <div className="meta address-block">
-                        <span className="label">Quán:</span>{restaurant.name}
-                    </div>
-                    <div className="meta address-block">
-                        <span className="label">Địa chỉ:</span>{restaurant.address}
-                    </div>
-                    <div className="meta">
-                        <span className="label">Thời gian giao hàng dự kiến:</span>{estimatedTime}
-                    </div>
+
                     <button
                         className="food-detail-add-btn"
                         onClick={() => handleAddToCart(food._id)}
                     >
                         Thêm vào giỏ hàng
                     </button>
+
                     {showAddedMsg && (
                         <div className="add-to-cart-toast">
                             Đã thêm vào giỏ hàng!
@@ -81,7 +115,7 @@ const FoodDetail = () => {
             </div>
 
             <div className="food-detail-recommend">
-                <h2>Đề xuất món tương tự</h2>
+                <h2 className="food-detail-section-title">Đề xuất món tương tự</h2>
                 <div className="food-detail-recommend-list-horizontal">
                     {similarItems.map((item) => (
                         <Link to={`/food/${item._id}`} key={item._id} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -98,7 +132,7 @@ const FoodDetail = () => {
             </div>
 
             <div className="food-detail-map">
-                <h3>Bản đồ quán ăn</h3>
+                <h3 className="food-detail-section-title">Bản đồ quán ăn</h3>
                 {/* Google Maps iframe sử dụng địa chỉ động */}
                 <iframe
                     title="restaurant-map"
