@@ -6,6 +6,7 @@ import Contact from './pages/Contact/Contact'
 import Home from './pages/Home/Home'
 import Menu from './pages/Menu/Menu'
 import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
+import AdminApp from './admin/AdminApp'
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/order' element={<PlaceOrder />} />
+        <Route path='/admin' element={<AdminApp />} />
       </Routes>
     </div>
   )

@@ -29,6 +29,9 @@ const Navbar = () => {
             <NavLink to='/menu' className={({ isActive }) => (isActive ? 'active' : '')}>{navText.menu}</NavLink>
           </li>
           <li>
+            <NavLink to='/admin' className={({ isActive }) => (isActive ? 'active' : '')}>{navText.admin}</NavLink>
+          </li>
+          <li>
             <a href='https://foodfast-app.example.com' target='_blank' rel='noreferrer'>{navText.mobileApp}</a>
           </li>
           <li>
