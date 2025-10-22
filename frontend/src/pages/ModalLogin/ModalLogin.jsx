@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './ModalLogin.css'
 
-const API_URL = "http://localhost:4000/users"
+const API_BASE_URL = (import.meta.env?.VITE_AUTH_API_BASE_URL || '/api').replace(/\/$/, '')
+const USERS_API_URL = `${API_BASE_URL}/users`
 
-const ModalLogin = ({ open, onClose }) => {
+const ModalLogin = ({ open, onClose, onLoginSuccess }) => {
     const [isLogin, setIsLogin] = useState(true)
     const [userName, setUserName] = useState('')
     const [email, setEmail] = useState('')
@@ -12,6 +14,7 @@ const ModalLogin = ({ open, onClose }) => {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [success, setSuccess] = useState('')
+    const navigate = useNavigate()
 
     if (!open) return null
 
@@ -36,72 +39,96 @@ const ModalLogin = ({ open, onClose }) => {
             return
         }
 
-        if (isLogin) {
-            // Đăng nhập
-            try {
-                const res = await fetch(
-                    `${API_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+        try {
+            if (isLogin) {
+                // Đăng nhập: đọc danh sách người dùng từ db.json thông qua API
+                const res = await fetch(USERS_API_URL)
+                const usersPayload = await res.json().catch(() => null)
+                if (!res.ok || !Array.isArray(usersPayload)) {
+                    const message = usersPayload?.message || 'Không thể tải danh sách người dùng.'
+                    throw new Error(message)
+                }
+                const users = usersPayload
+                const matchedUser = users.find(
+                    (user) =>
+                        user.email?.toLowerCase() === email.trim().toLowerCase() &&
+                        user.password === password
                 )
-                const users = await res.json()
-                if (users.length > 0) {
+
+                if (matchedUser) {
                     setSuccess('Đăng nhập thành công!')
-                    resetForm()
+                    localStorage.setItem('user', JSON.stringify(matchedUser))
                     setTimeout(() => {
-                        onClose()
+                        resetForm()
                         setSuccess('')
-                    }, 1000)
-                    // Lưu user nếu cần
-                    localStorage.setItem('user', JSON.stringify(users[0]))
+                        if (typeof onLoginSuccess === 'function') {
+                            onLoginSuccess()
+                        } else if (typeof onClose === 'function') {
+                            onClose()
+                        }
+                        navigate('/')
+                    }, 1200)
                 } else {
-                    setError('Sai email hoặc mật khẩu!')
+                    setError('Thông tin đăng nhập không chính xác. Vui lòng thử lại.')
                 }
-            } catch {
-                setError('Lỗi kết nối server!')
-            }
-            setLoading(false)
-        } else {
-            // Đăng ký
-            if (!userName || !email || !password) {
-                setError('Vui lòng nhập đủ thông tin')
-                setLoading(false)
-                return
-            }
-            try {
-                // Kiểm tra tồn tại email và username
-                const respEmail = await fetch(`${API_URL}?email=${encodeURIComponent(email)}`)
-                const existsEmail = await respEmail.json()
-                if (existsEmail.length > 0) {
+            } else {
+                // Đăng ký: lưu thông tin người dùng mới vào db.json
+                if (!userName || !email || !password) {
+                    setError('Vui lòng nhập đủ thông tin')
+                    return
+                }
+
+                const response = await fetch(USERS_API_URL)
+                const existingUsersPayload = await response.json().catch(() => null)
+                if (!response.ok || !Array.isArray(existingUsersPayload)) {
+                    const message = existingUsersPayload?.message || 'Không thể tải danh sách người dùng.'
+                    throw new Error(message)
+                }
+                const existingUsers = existingUsersPayload
+                const isEmailTaken = existingUsers.some(
+                    (user) => user.email?.toLowerCase() === email.trim().toLowerCase()
+                )
+                if (isEmailTaken) {
                     setError('Email đã được đăng ký!')
-                    setLoading(false)
                     return
                 }
-                const respUser = await fetch(`${API_URL}?username=${encodeURIComponent(userName)}`)
-                const existsUser = await respUser.json()
-                if (existsUser.length > 0) {
+                const isUsernameTaken = existingUsers.some(
+                    (user) => user.username?.toLowerCase() === userName.trim().toLowerCase()
+                )
+                if (isUsernameTaken) {
                     setError('Tên người dùng đã được đăng ký!')
-                    setLoading(false)
                     return
                 }
-                // Tạo user mới
+
                 const newUser = {
                     username: userName,
-                    email,
+                    email: email.trim(),
                     password,
                     fullName: userName,
                 }
-                await fetch(API_URL, {
+
+                const createRes = await fetch(USERS_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser)
+                    body: JSON.stringify(newUser),
                 })
-                setSuccess('Đăng ký thành công! Bạn có thể đăng nhập.')
-                setLoading(false)
+
+                const createdPayload = await createRes.json().catch(() => null)
+                if (!createRes.ok) {
+                    const message = createdPayload?.message || 'Không thể đăng ký tài khoản mới.'
+                    throw new Error(message)
+                }
+
                 setIsLogin(true)
                 resetForm()
-            } catch {
-                setError('Lỗi kết nối server!')
-                setLoading(false)
+                setSuccess('Đăng ký thành công! Bạn có thể đăng nhập.')
             }
+        } catch (err) {
+            console.error(err)
+            const fallbackMessage = err?.message || 'Lỗi kết nối server!'
+            setError(fallbackMessage)
+        } finally {
+            setLoading(false)
         }
     }
 
