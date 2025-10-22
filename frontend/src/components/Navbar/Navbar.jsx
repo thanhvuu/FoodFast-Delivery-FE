@@ -35,10 +35,11 @@ const Navbar = () => {
 
   // Callback sau khi modal login đăng nhập thành công
   const handleLoginSuccess = () => {
+    const loggedUser = localStorage.getItem('user')
+    if (loggedUser) {
+      setUser(JSON.parse(loggedUser))
+    }
     setOpenLogin(false)
-    setTimeout(() => {
-      window.location.reload()
-    }, 400)
   }
 
   return (
