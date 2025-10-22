@@ -1,0 +1,195 @@
+.modal-overlay {
+    position: fixed;
+    z-index: 8888;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(30, 30, 30, 0.20);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-login-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 4px 46px rgba(30, 30, 30, 0.21);
+    padding: 38px 56px 28px 56px;
+    max-width: 520px;
+    /* khung to ra */
+    min-width: 420px;
+    /* to cho mọi màn hình desktop */
+    /* width: px; */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-close {
+    position: absolute;
+    right: 22px;
+    top: 14px;
+    font-size: 2.25rem;
+    border: none;
+    background: none;
+    color: #444;
+    cursor: pointer;
+    outline: none;
+    z-index: 2;
+}
+
+.modal-login-card h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 19px;
+    color: #191919;
+}
+
+.modal-switcher {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.modal-switcher button {
+    padding: 7px 22px;
+    background: #eee;
+    border: none;
+    border-radius: 22px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #222;
+}
+
+.modal-switcher .active {
+    background: #191919;
+    color: #fff;
+}
+
+.social-login-section {
+    margin: 16px 0 18px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    width: 100%;
+    align-items: center;
+}
+
+.social-btn {
+    width: 100%;
+    font-size: 1.13rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    padding: 17px 0;
+    cursor: pointer;
+    box-shadow: 0 1px 7px rgba(0, 0, 0, 0.06);
+    transition: filter 0.14s;
+}
+
+.social-btn.google {
+    background: #e5eaf6;
+    color: #222;
+}
+
+.social-btn.facebook {
+    background: #3b5998;
+    color: #fff;
+}
+
+.social-btn.apple {
+    background: #222;
+    color: #fff;
+}
+
+.social-btn:hover {
+    filter: brightness(0.95);
+}
+
+.social-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    margin-right: 2px;
+}
+
+.modal-divider {
+    width: 100%;
+    text-align: center;
+    margin: 10px 0 12px 0;
+    color: #666;
+    font-size: 0.98rem;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #eee;
+    position: relative;
+}
+
+.modal-divider span {
+    background: #fff;
+    position: relative;
+    z-index: 1;
+    top: 12px;
+    padding: 0 12px;
+}
+
+.modal-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.modal-form label {
+    font-size: 1.09rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #222;
+}
+
+.modal-form input {
+    padding: 12px 13px;
+    border-radius: 8px;
+    border: 2px solid #ececec;
+    margin-bottom: 8px;
+    font-size: 1.04rem;
+    outline: none;
+    background: #faf9fc;
+}
+
+.modal-form input:focus {
+    border-color: #ff7043;
+}
+
+.modal-btn-main {
+    background: #ee1818;
+    color: #fff;
+    font-weight: bold;
+    padding: 14px 0;
+    border: none;
+    font-size: 1.13rem;
+    border-radius: 999px;
+    margin: 8px 0 8px 0;
+    cursor: pointer;
+    box-shadow: 0 1px 8px rgba(220, 0, 0, 0.10);
+    transition: background 0.2s;
+}
+
+.modal-btn-main:hover {
+    background: #c41111;
+}
+
+.modal-term {
+    margin-top: 16px;
+    font-size: 0.93rem;
+    color: #444;
+    text-align: center;
+    opacity: 0.78;
+}
