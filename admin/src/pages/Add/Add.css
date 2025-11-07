@@ -1,0 +1,71 @@
+.add-category,
+.add-price {
+    display: flex;
+    flex-direction: column;
+    min-width: 210px;
+    /* từ 160px lên 210px hoặc lớn hơn */
+    gap: 10px;
+}
+
+.add-category select,
+.add-price input {
+    padding: 16px 20px;
+    /* tăng chiều cao & rộng padding */
+    font-size: 18px;
+    /* font lớn hơn */
+    background: #f4f4f4;
+    border: 1.5px solid #bdbdbd;
+    border-radius: 8px;
+    /* bo góc nhiều hơn */
+    outline: none;
+    margin-top: 4px;
+    width: 100%;
+    /* khung luôn chiếm hết chiều ngang vùng parent */
+}
+
+
+.add-category select:focus,
+.add-price input:focus {
+    border: 1.5px solid #222;
+    background: #fff;
+}
+
+/* Label cho đẹp hơn */
+.add-category p,
+.add-price p {
+    font-size: 17px;
+    /* tăng font label */
+    font-weight: 600;
+    color: #484848;
+}
+
+.add-btn {
+    max-width: 160px;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 0;
+    background-color: #222;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-btn:hover {
+    background-color: #ff4343;
+}
+
+.add-category-price {
+    display: flex;
+    gap: 40px;
+    /* tăng khoảng cách giữa 2 cột */
+    margin-top: 18px;
+}
+
+/* (Option) Cả form rộng hơn, item spacing lớn hơn */
+.add form {
+    gap: 32px;
+    /* space giữa các vùng trong form */
+}
