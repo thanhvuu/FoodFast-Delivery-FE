@@ -8,6 +8,7 @@ import Menu from './pages/Menu/Menu'
 import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
 import Footer from './components/Footer/Footer'
 import FoodDetail from './components/FoodDetail/FoodDetail'
+import OrderTracking from './pages/OrderTracking/OrderTracking'
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/order' element={<PlaceOrder />} />
+        <Route path='/tracking' element={<OrderTracking />} />
         <Route path="/food/:id" element={<FoodDetail />} />
       </Routes>
       <Footer />

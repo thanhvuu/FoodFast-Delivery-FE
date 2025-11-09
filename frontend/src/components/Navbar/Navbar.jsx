@@ -62,6 +62,9 @@ const Navbar = () => {
             <li>
               <NavLink to='/contact' className={({ isActive }) => (isActive ? 'active' : '')}>{navText.contact}</NavLink>
             </li>
+            <li>
+              <NavLink to='/tracking' className={({ isActive }) => (isActive ? 'active' : '')}>{navText.orderTracking}</NavLink>
+            </li>
           </ul>
         </nav>
         <div className='navbar-right'>
