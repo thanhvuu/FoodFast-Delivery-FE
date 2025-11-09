@@ -1,24 +1,77 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
+import GoogleDroneMap from './GoogleDroneMap'
 
 const OrderTracking = () => {
   const { dictionary } = useLanguage()
   const { trackingPage } = dictionary
 
-  const [selectedOrderId, setSelectedOrderId] = useState(
-    trackingPage.orders[0]?.id ?? ''
-  )
+  const [user, setUser] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const stored = window.localStorage.getItem('user')
+    if (!stored) return null
+    try {
+      return JSON.parse(stored)
+    } catch (error) {
+      console.error(error)
+      return null
+    }
+  })
 
   useEffect(() => {
-    if (!trackingPage.orders.some(order => order.id === selectedOrderId)) {
-      setSelectedOrderId(trackingPage.orders[0]?.id ?? '')
+    if (typeof window === 'undefined') return undefined
+
+    const syncUser = () => {
+      try {
+        const stored = window.localStorage.getItem('user')
+        if (!stored) {
+          setUser(null)
+          return
+        }
+        setUser(JSON.parse(stored))
+      } catch (error) {
+        console.error(error)
+        setUser(null)
+      }
     }
-  }, [trackingPage.orders, selectedOrderId])
+
+    window.addEventListener('storage', syncUser)
+    window.addEventListener('foodfast-auth-change', syncUser)
+
+    return () => {
+      window.removeEventListener('storage', syncUser)
+      window.removeEventListener('foodfast-auth-change', syncUser)
+    }
+  }, [])
+
+  const availableOrders = useMemo(() => {
+    if (!user?.email) return []
+    return trackingPage.orders.filter(order =>
+      order.customerEmail?.toLowerCase() === user.email.toLowerCase()
+    )
+  }, [trackingPage.orders, user?.email])
+
+  const [selectedOrderId, setSelectedOrderId] = useState('')
+
+  useEffect(() => {
+    if (!user) {
+      setSelectedOrderId('')
+      return
+    }
+    if (!availableOrders.length) {
+      setSelectedOrderId('')
+      return
+    }
+    if (!availableOrders.some(order => order.id === selectedOrderId)) {
+      setSelectedOrderId(availableOrders[0].id)
+    }
+  }, [availableOrders, selectedOrderId, user])
 
   const selectedOrder = useMemo(
-    () => trackingPage.orders.find(order => order.id === selectedOrderId),
-    [trackingPage.orders, selectedOrderId]
+    () => availableOrders.find(order => order.id === selectedOrderId),
+    [availableOrders, selectedOrderId]
   )
 
   const route = selectedOrder?.route ?? []
@@ -31,16 +84,15 @@ const OrderTracking = () => {
   }, [selectedOrderId])
 
   useEffect(() => {
-    const routeLength = route.length
-    if (routeLength < 2) return undefined
+    if (route.length < 2) return undefined
 
     const timer = setInterval(() => {
       setProgress(prev => {
         const next = prev + 0.015
-        if (next >= routeLength - 1) {
+        if (next >= route.length - 1) {
           clearInterval(timer)
           setLastUpdated(new Date())
-          return routeLength - 1
+          return route.length - 1
         }
         setLastUpdated(new Date())
         return next
@@ -57,41 +109,38 @@ const OrderTracking = () => {
   const currentPoint = route[currentIndex] ?? route[0]
   const nextPoint = route[nextIndex] ?? route[route.length - 1]
 
-  const dronePosition = () => {
-    if (!currentPoint) {
-      return { left: '10%', top: '70%' }
+  const droneCoordinate = useMemo(() => {
+    if (!currentPoint?.coords) return null
+    if (!nextPoint?.coords) {
+      return { ...currentPoint.coords }
     }
-    if (!nextPoint) {
-      return {
-        left: `${currentPoint.position.x}%`,
-        top: `${currentPoint.position.y}%`,
-      }
-    }
-    const left =
-      currentPoint.position.x +
-      (nextPoint.position.x - currentPoint.position.x) * segmentProgress
-    const top =
-      currentPoint.position.y +
-      (nextPoint.position.y - currentPoint.position.y) * segmentProgress
-
     return {
-      left: `${left}%`,
-      top: `${top}%`,
+      lat:
+        currentPoint.coords.lat +
+        (nextPoint.coords.lat - currentPoint.coords.lat) * segmentProgress,
+      lng:
+        currentPoint.coords.lng +
+        (nextPoint.coords.lng - currentPoint.coords.lng) * segmentProgress,
     }
-  }
+  }, [currentPoint, nextPoint, segmentProgress])
 
   const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
 
   const summaryLabels = trackingPage.summaryLabels
 
-  const statusLabel =
-    selectedOrder?.status === 'delivered'
-      ? summaryLabels.delivered
-      : summaryLabels.inTransit
+  const statusLabel = selectedOrder?.status === 'delivered'
+    ? summaryLabels.delivered
+    : summaryLabels.inTransit
 
-  const paymentLabel = selectedOrder?.paid
-    ? summaryLabels.paid
-    : summaryLabels.unpaid
+  const paymentLabel = selectedOrder?.paid ? summaryLabels.paid : summaryLabels.unpaid
+
+  const selectorDisabled = !user || availableOrders.length === 0
+  const selectValue = selectorDisabled ? '' : selectedOrderId
+
+  const legendText = trackingPage.legend.updated.replace(
+    '{{time}}',
+    lastUpdated.toLocaleTimeString()
+  )
 
   return (
     <main className='order-tracking-page'>
@@ -105,19 +154,42 @@ const OrderTracking = () => {
           <label htmlFor='tracking-order-select'>{trackingPage.selectorLabel}</label>
           <select
             id='tracking-order-select'
-            value={selectedOrderId}
+            value={selectValue}
             onChange={event => setSelectedOrderId(event.target.value)}
+            disabled={selectorDisabled}
           >
-            {trackingPage.orders.map(order => (
-              <option key={order.id} value={order.id}>
-                {order.code} — {order.customer}
+            {selectorDisabled ? (
+              <option value=''>
+                {!user ? trackingPage.loginRequiredTitle : trackingPage.noOrdersTitle}
               </option>
-            ))}
+            ) : (
+              availableOrders.map(order => (
+                <option key={order.id} value={order.id}>
+                  {order.code} — {order.customer}
+                </option>
+              ))
+            )}
           </select>
         </div>
       </section>
 
-      {selectedOrder ? (
+      {!user ? (
+        <section className='order-tracking-empty'>
+          <h2>{trackingPage.loginRequiredTitle}</h2>
+          <p>{trackingPage.loginRequiredDescription}</p>
+          <Link to='/' className='order-tracking-link'>
+            {dictionary.navbar.signInCta}
+          </Link>
+        </section>
+      ) : !availableOrders.length ? (
+        <section className='order-tracking-empty'>
+          <h2>{trackingPage.noOrdersTitle}</h2>
+          <p>{trackingPage.noOrdersDescription}</p>
+          <Link to='/menu' className='order-tracking-link'>
+            {dictionary.cart.emptyCta}
+          </Link>
+        </section>
+      ) : selectedOrder ? (
         <section className='order-tracking-content'>
           <div className='tracking-summary'>
             <article className='summary-card'>
@@ -163,49 +235,20 @@ const OrderTracking = () => {
 
           <div className='tracking-grid'>
             <div className='tracking-map'>
-              <div className='map-overlay'>
-                {[...Array(4)].map((_, index) => (
-                  <span
-                    key={`h-${index}`}
-                    className='map-line horizontal'
-                    style={{ top: `${(index + 1) * 20}%` }}
-                  />
-                ))}
-                {[...Array(4)].map((_, index) => (
-                  <span
-                    key={`v-${index}`}
-                    className='map-line vertical'
-                    style={{ left: `${(index + 1) * 20}%` }}
-                  />
-                ))}
-              </div>
-              {route.map(point => (
-                <div
-                  key={point.id}
-                  className='map-point'
-                  style={{ left: `${point.position.x}%`, top: `${point.position.y}%` }}
-                >
-                  <span className='map-point-dot' />
-                  <span className='map-point-label'>{point.title}</span>
-                </div>
-              ))}
-              <div className='map-drone' style={dronePosition()}>
-                <span role='img' aria-label='Drone icon'>🚁</span>
-              </div>
+              <GoogleDroneMap
+                route={route}
+                droneCoordinate={droneCoordinate}
+                orderCode={selectedOrder.code}
+                unavailableMessage={trackingPage.mapUnavailable}
+              />
               <div className='map-legend'>
                 <strong>
                   {trackingPage.legend.prefix}
                   {selectedOrder.code}
                 </strong>
-                <span>
-                  {trackingPage.legend.updated.replace(
-                    '{{time}}',
-                    lastUpdated.toLocaleTimeString(),
-                  )}
-                </span>
+                <span>{legendText}</span>
               </div>
             </div>
-
             <aside className='tracking-timeline'>
               <h2>{trackingPage.timelineTitle}</h2>
               <ul>

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import './FoodEdit.css'
+import { useAdminLanguage } from '../../context/LanguageContext'
 
 const FoodEdit = ({ food, onSave, onClose }) => {
     // Bản sao state để edit live
     const [editData, setEditData] = useState(food || {})
+    const { dictionary } = useAdminLanguage()
+    const t = dictionary.foodEdit
 
     useEffect(() => {
         setEditData(food)
@@ -36,9 +39,9 @@ const FoodEdit = ({ food, onSave, onClose }) => {
     return (
         <div className="popup-overlay">
             <form className="food-edit-popup" onSubmit={handleSubmit}>
-                <h3>Chỉnh sửa món: {food.name}</h3>
+                <h3>{t.title.replace('{{name}}', food.name)}</h3>
                 <label>
-                    Tên món
+                    {t.fields.name}
                     <input
                         name="name"
                         value={editData.name || ''}
@@ -47,7 +50,7 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <label>
-                    Giá
+                    {t.fields.price}
                     <input
                         name="price"
                         value={editData.price || ''}
@@ -57,7 +60,7 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <label>
-                    Danh mục
+                    {t.fields.category}
                     <input
                         name="category"
                         value={editData.category || ''}
@@ -66,7 +69,7 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <label>
-                    Mô tả
+                    {t.fields.description}
                     <textarea
                         name="description"
                         value={editData.description || ''}
@@ -74,7 +77,7 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <label>
-                    Thành phần (cách nhau bởi dấu phẩy)
+                    {t.fields.ingredients}
                     <input
                         name="ingredients"
                         value={
@@ -86,7 +89,7 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <label>
-                    Địa chỉ
+                    {t.fields.address}
                     <input
                         name="address"
                         value={editData.address || ''}
@@ -94,8 +97,8 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                     />
                 </label>
                 <div className="popup-btn-group">
-                    <button type="submit" className="save-btn">Lưu thay đổi</button>
-                    <button type="button" onClick={onClose} className="close-btn">Đóng</button>
+                    <button type="submit" className="save-btn">{t.actions.save}</button>
+                    <button type="button" onClick={onClose} className="close-btn">{t.actions.close}</button>
                 </div>
             </form>
         </div>

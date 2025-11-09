@@ -8,3 +8,19 @@
 .navbar .logo {
     width: max(10%, 80px);
 }
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.navbar-actions select {
+    border: 1px solid #cbd5f5;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 14px;
+    background: #fff;
+}

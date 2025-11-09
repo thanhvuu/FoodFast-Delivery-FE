@@ -30,6 +30,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('user')
     setUser(null)
+    window.dispatchEvent(new CustomEvent('foodfast-auth-change'))
     window.location.reload()
   }
 
@@ -38,6 +39,7 @@ const Navbar = () => {
     const loggedUser = localStorage.getItem('user')
     if (loggedUser) {
       setUser(JSON.parse(loggedUser))
+      window.dispatchEvent(new CustomEvent('foodfast-auth-change'))
     }
     setOpenLogin(false)
   }
@@ -82,7 +84,7 @@ const Navbar = () => {
               type='button'
               onClick={() => setOpenLogin(true)}
             >
-              Sign In
+              {navText.signInCta}
             </button>
           ) : (
             <button
@@ -91,7 +93,7 @@ const Navbar = () => {
               type='button'
               onClick={handleLogout}
             >
-              Sign Out
+              {navText.signOutCta}
             </button>
           )}
         </div>

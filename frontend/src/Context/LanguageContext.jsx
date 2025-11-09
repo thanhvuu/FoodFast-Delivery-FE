@@ -22,7 +22,9 @@ const translationData = {
       searchAria: 'Tìm kiếm',
       cartAria: 'Xem giỏ hàng',
       cartAlt: 'Giỏ hàng',
-      loginCta: 'Đăng Nhập',
+      loginCta: 'Đăng nhập',
+      signInCta: 'Đăng nhập',
+      signOutCta: 'Đăng xuất',
       navAria: 'Điều hướng chính',
     },
     header: {
@@ -120,6 +122,14 @@ const translationData = {
         prefix: 'Drone #',
         updated: 'Tọa độ cập nhật lúc {{time}}',
       },
+      loginRequiredTitle: 'Cần đăng nhập',
+      loginRequiredDescription:
+        'Vui lòng đăng nhập để theo dõi đơn hàng của bạn. Hệ thống chỉ hiển thị các chuyến bay thuộc tài khoản hiện tại.',
+      noOrdersTitle: 'Chưa có đơn để theo dõi',
+      noOrdersDescription:
+        'Chúng tôi chưa tìm thấy đơn hàng nào thuộc tài khoản của bạn. Hãy đặt món và quay lại trang này sau nhé!',
+      mapUnavailable:
+        'Không thể tải bản đồ Google Maps. Vui lòng kiểm tra khóa API VITE_GOOGLE_MAPS_API_KEY.',
       summaryLabels: {
         customer: 'Khách hàng',
         address: 'Địa chỉ giao',
@@ -139,6 +149,7 @@ const translationData = {
           code: 'FF-1024',
           customer: 'Nguyễn Văn A',
           address: '212 Lý Chính Thắng, Quận 3',
+          customerEmail: 'vu191@gmail.com',
           status: 'inTransit',
           paid: true,
           route: [
@@ -148,6 +159,7 @@ const translationData = {
               title: 'Nhận món tại nhà hàng',
               description: 'Drone đã nhận đơn tại KFC Nguyễn Trãi và đang kiểm tra cảm biến.',
               position: { x: 10, y: 70 },
+              coords: { lat: 10.762622, lng: 106.660172 },
             },
             {
               id: 'takeoff',
@@ -155,6 +167,7 @@ const translationData = {
               title: 'Drone cất cánh',
               description: 'Thiết bị bay rời bãi đáp và tăng độ cao lên 60m.',
               position: { x: 25, y: 55 },
+              coords: { lat: 10.764752, lng: 106.670419 },
             },
             {
               id: 'enroute',
@@ -162,6 +175,7 @@ const translationData = {
               title: 'Đang trên đường giao',
               description: 'Drone đang di chuyển qua Quận 1 với vận tốc ổn định 40 km/h.',
               position: { x: 50, y: 45 },
+              coords: { lat: 10.770421, lng: 106.68394 },
             },
             {
               id: 'arriving',
@@ -169,6 +183,7 @@ const translationData = {
               title: 'Chuẩn bị hạ cánh',
               description: 'Drone giảm độ cao và gửi thông báo cho khách chuẩn bị nhận đơn.',
               position: { x: 75, y: 40 },
+              coords: { lat: 10.776866, lng: 106.688123 },
             },
             {
               id: 'delivered',
@@ -176,6 +191,7 @@ const translationData = {
               title: 'Hoàn tất giao hàng',
               description: 'Đơn hàng dự kiến giao cho khách trong vòng 2 phút nữa.',
               position: { x: 88, y: 65 },
+              coords: { lat: 10.780497, lng: 106.700195 },
             },
           ],
         },
@@ -184,6 +200,7 @@ const translationData = {
           code: 'FF-1072',
           customer: 'Trần Thị B',
           address: '45 Trần Hưng Đạo, Quận 1',
+          customerEmail: 'tranthi.b@example.com',
           status: 'delivered',
           paid: false,
           route: [
@@ -193,6 +210,7 @@ const translationData = {
               title: 'Nhận món tại nhà hàng',
               description: 'Drone tiếp nhận pizza tại Pizza 4P và niêm phong khoang hàng.',
               position: { x: 8, y: 75 },
+              coords: { lat: 10.771853, lng: 106.698055 },
             },
             {
               id: 'takeoff',
@@ -200,6 +218,7 @@ const translationData = {
               title: 'Drone cất cánh',
               description: 'Drone rời điểm xuất phát với mức pin 92%.',
               position: { x: 22, y: 60 },
+              coords: { lat: 10.772922, lng: 106.706451 },
             },
             {
               id: 'enroute',
@@ -207,6 +226,7 @@ const translationData = {
               title: 'Đang trên đường giao',
               description: 'Thiết bị bay băng qua đại lộ Nguyễn Huệ, tránh vùng gió mạnh.',
               position: { x: 48, y: 47 },
+              coords: { lat: 10.775458, lng: 106.712894 },
             },
             {
               id: 'arriving',
@@ -214,6 +234,7 @@ const translationData = {
               title: 'Chuẩn bị hạ cánh',
               description: 'Drone yêu cầu khách hàng xác nhận vị trí hạ cánh an toàn.',
               position: { x: 70, y: 45 },
+              coords: { lat: 10.779611, lng: 106.708012 },
             },
             {
               id: 'delivered',
@@ -221,6 +242,7 @@ const translationData = {
               title: 'Hoàn tất giao hàng',
               description: 'Đơn hàng được bàn giao thành công và đang quay về bãi sạc.',
               position: { x: 90, y: 60 },
+              coords: { lat: 10.782537, lng: 106.700721 },
             },
           ],
         },
@@ -263,6 +285,8 @@ const translationData = {
       cartAria: 'View cart',
       cartAlt: 'Cart',
       loginCta: 'Sign in',
+      signInCta: 'Sign in',
+      signOutCta: 'Sign out',
       navAria: 'Main navigation',
     },
     header: {
@@ -360,6 +384,14 @@ const translationData = {
         prefix: 'Drone #',
         updated: 'Location updated at {{time}}',
       },
+      loginRequiredTitle: 'Sign-in required',
+      loginRequiredDescription:
+        'Log in to follow along with your delivery. Only orders belonging to the active account are displayed.',
+      noOrdersTitle: 'No deliveries to track yet',
+      noOrdersDescription:
+        'We could not find any orders linked to your account. Place an order and come back to watch the drone fly!',
+      mapUnavailable:
+        'Unable to load Google Maps. Make sure the VITE_GOOGLE_MAPS_API_KEY environment variable is configured.',
       summaryLabels: {
         customer: 'Customer',
         address: 'Delivery address',
@@ -379,6 +411,7 @@ const translationData = {
           code: 'FF-1024',
           customer: 'Nguyễn Văn A',
           address: '212 Lý Chính Thắng, District 3',
+          customerEmail: 'vu191@gmail.com',
           status: 'inTransit',
           paid: true,
           route: [
@@ -388,6 +421,7 @@ const translationData = {
               title: 'Picked up at restaurant',
               description: 'Drone collected the meal at KFC Nguyễn Trãi and is running safety checks.',
               position: { x: 10, y: 70 },
+              coords: { lat: 10.762622, lng: 106.660172 },
             },
             {
               id: 'takeoff',
@@ -395,6 +429,7 @@ const translationData = {
               title: 'Drone take-off',
               description: 'The aircraft leaves the launch pad and climbs to 60m altitude.',
               position: { x: 25, y: 55 },
+              coords: { lat: 10.764752, lng: 106.670419 },
             },
             {
               id: 'enroute',
@@ -402,6 +437,7 @@ const translationData = {
               title: 'En route to customer',
               description: 'Flying across District 1 at a steady 40 km/h with clear skies.',
               position: { x: 50, y: 45 },
+              coords: { lat: 10.770421, lng: 106.68394 },
             },
             {
               id: 'arriving',
@@ -409,6 +445,7 @@ const translationData = {
               title: 'Preparing to land',
               description: 'Drone descends and notifies the customer to get ready for delivery.',
               position: { x: 75, y: 40 },
+              coords: { lat: 10.776866, lng: 106.688123 },
             },
             {
               id: 'delivered',
@@ -416,6 +453,7 @@ const translationData = {
               title: 'Delivery almost complete',
               description: 'Package will be handed over to the customer within 2 minutes.',
               position: { x: 88, y: 65 },
+              coords: { lat: 10.780497, lng: 106.700195 },
             },
           ],
         },
@@ -424,6 +462,7 @@ const translationData = {
           code: 'FF-1072',
           customer: 'Trần Thị B',
           address: '45 Trần Hưng Đạo, District 1',
+          customerEmail: 'tranthi.b@example.com',
           status: 'delivered',
           paid: false,
           route: [
@@ -433,6 +472,7 @@ const translationData = {
               title: 'Picked up at restaurant',
               description: 'Drone secured the pizza at Pizza 4P and sealed the cargo bay.',
               position: { x: 8, y: 75 },
+              coords: { lat: 10.771853, lng: 106.698055 },
             },
             {
               id: 'takeoff',
@@ -440,6 +480,7 @@ const translationData = {
               title: 'Drone take-off',
               description: 'Departure confirmed with a healthy 92% battery level.',
               position: { x: 22, y: 60 },
+              coords: { lat: 10.772922, lng: 106.706451 },
             },
             {
               id: 'enroute',
@@ -447,6 +488,7 @@ const translationData = {
               title: 'En route to customer',
               description: 'Crossing Nguyễn Huệ boulevard while navigating strong winds.',
               position: { x: 48, y: 47 },
+              coords: { lat: 10.775458, lng: 106.712894 },
             },
             {
               id: 'arriving',
@@ -454,6 +496,7 @@ const translationData = {
               title: 'Preparing to land',
               description: 'Drone requested the customer to confirm a safe landing spot.',
               position: { x: 70, y: 45 },
+              coords: { lat: 10.779611, lng: 106.708012 },
             },
             {
               id: 'delivered',
@@ -461,6 +504,7 @@ const translationData = {
               title: 'Delivery completed',
               description: 'Order delivered successfully and now heading back to the charging hub.',
               position: { x: 90, y: 60 },
+              coords: { lat: 10.782537, lng: 106.700721 },
             },
           ],
         },

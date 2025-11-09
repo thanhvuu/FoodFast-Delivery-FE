@@ -1,11 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import './Tracking.css'
 import { order_list } from '../../assets/assest'
+import { useAdminLanguage } from '../../context/LanguageContext'
 
 const getInitialOrderId = () => order_list[0]?.id ?? ''
 
 const Tracking = () => {
     const [selectedOrderId, setSelectedOrderId] = useState(getInitialOrderId)
+    const { dictionary } = useAdminLanguage()
+    const t = dictionary.trackingPage
+
     const selectedOrder = useMemo(
         () => order_list.find(order => order.id === selectedOrderId),
         [selectedOrderId]
@@ -62,18 +66,27 @@ const Tracking = () => {
 
     const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
 
+    const statusLabel = selectedOrder?.status === 'delivered'
+        ? t.summaryLabels.delivered
+        : t.summaryLabels.inTransit
+
+    const paymentLabel = selectedOrder?.paid
+        ? t.summaryLabels.paid
+        : t.summaryLabels.unpaid
+
+    const legendText = t.legendUpdated.replace('{{time}}', lastUpdated.toLocaleTimeString())
+
     return (
         <div className='tracking-page'>
             <header className='tracking-header'>
                 <div>
-                    <h2>Theo dõi drone giao hàng</h2>
+                    <h2>{t.headerTitle}</h2>
                     <p>
-                        Giám sát trạng thái thực tế của các đơn hàng được giao bằng drone.
-                        Dữ liệu được cập nhật tự động vài giây một lần.
+                        {t.headerDescription}
                     </p>
                 </div>
                 <div className='tracking-selector'>
-                    <label htmlFor='order-select'>Chọn đơn hàng</label>
+                    <label htmlFor='order-select'>{t.selectorLabel}</label>
                     <select
                         id='order-select'
                         value={selectedOrderId}
@@ -92,34 +105,34 @@ const Tracking = () => {
                 <div className='tracking-content'>
                     <section className='tracking-summary'>
                         <div className='summary-card'>
-                            <span className='summary-label'>Khách hàng</span>
+                            <span className='summary-label'>{t.summaryLabels.customer}</span>
                             <strong>{selectedOrder.customer}</strong>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>Địa chỉ giao</span>
+                            <span className='summary-label'>{t.summaryLabels.address}</span>
                             <strong>{selectedOrder.address}</strong>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>Trạng thái</span>
+                            <span className='summary-label'>{t.summaryLabels.status}</span>
                             <strong className={selectedOrder.status === 'delivered' ? 'badge-success' : 'badge-pending'}>
-                                {selectedOrder.status === 'delivered' ? 'Đã giao' : 'Đang giao'}
+                                {statusLabel}
                             </strong>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>Thanh toán</span>
+                            <span className='summary-label'>{t.summaryLabels.payment}</span>
                             <strong className={selectedOrder.paid ? 'badge-success' : 'badge-pending'}>
-                                {selectedOrder.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                {paymentLabel}
                             </strong>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>Tiến độ chuyến bay</span>
+                            <span className='summary-label'>{t.summaryLabels.flightProgress}</span>
                             <div className='progress'>
                                 <div className='progress-bar' style={{ width: `${completion}%` }} />
                             </div>
-                            <small>{Math.round(completion)}% hoàn thành</small>
+                            <small>{Math.round(completion)} {t.summaryLabels.progressSuffix}</small>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>Cập nhật cuối</span>
+                            <span className='summary-label'>{t.summaryLabels.lastUpdate}</span>
                             <strong>{lastUpdated.toLocaleTimeString()}</strong>
                         </div>
                     </section>
@@ -157,11 +170,11 @@ const Tracking = () => {
                             </div>
                             <div className='map-legend'>
                                 <strong>Drone #{selectedOrder.id.toUpperCase()}</strong>
-                                <span>Tọa độ hiện tại cập nhật lúc {lastUpdated.toLocaleTimeString()}</span>
+                                <span>{legendText}</span>
                             </div>
                         </div>
                         <aside className='tracking-timeline'>
-                            <h3>Lộ trình chuyến bay</h3>
+                            <h3>{t.timelineTitle}</h3>
                             <ul>
                                 {route.map((point, index) => {
                                     const isCompleted = index < currentIndex || progress >= route.length - 1
@@ -184,7 +197,7 @@ const Tracking = () => {
                     </section>
                 </div>
             ) : (
-                <p>Không tìm thấy thông tin đơn hàng.</p>
+                <p>{t.empty}</p>
             )}
         </div>
     )
