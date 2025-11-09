@@ -4,9 +4,46 @@ import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
 import GoogleDroneMap from './GoogleDroneMap'
 
+const ORDERS_STORAGE_KEY = 'foodfast-orders'
+
+const readStoredOrders = () => {
+  if (typeof window === 'undefined') return []
+  try {
+    const data = window.localStorage.getItem(ORDERS_STORAGE_KEY)
+    if (!data) return []
+    const parsed = JSON.parse(data)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+}
+
+const toUniqueOrders = orders => {
+  const map = new Map()
+  orders.forEach(order => {
+    if (order?.id) {
+      map.set(order.id, order)
+    }
+  })
+  return Array.from(map.values())
+}
+
+const byRecency = (a, b) => {
+  const parseTimestamp = value => {
+    if (!value) return Number.NEGATIVE_INFINITY
+    const timestamp = Date.parse(value)
+    return Number.isFinite(timestamp) ? timestamp : Number.NEGATIVE_INFINITY
+  }
+
+  return parseTimestamp(b?.createdAt) - parseTimestamp(a?.createdAt)
+}
+
 const OrderTracking = () => {
   const { dictionary } = useLanguage()
   const { trackingPage } = dictionary
+
+  const [storedOrders, setStoredOrders] = useState(() => readStoredOrders())
 
   const [user, setUser] = useState(() => {
     if (typeof window === 'undefined') return null
@@ -46,12 +83,34 @@ const OrderTracking = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+
+    const syncOrders = () => {
+      setStoredOrders(readStoredOrders())
+    }
+
+    syncOrders()
+    window.addEventListener('storage', syncOrders)
+    window.addEventListener('foodfast-orders-update', syncOrders)
+
+    return () => {
+      window.removeEventListener('storage', syncOrders)
+      window.removeEventListener('foodfast-orders-update', syncOrders)
+    }
+  }, [])
+
+  const allOrders = useMemo(() => {
+    const merged = toUniqueOrders([...trackingPage.orders, ...storedOrders])
+    return merged.sort(byRecency)
+  }, [storedOrders, trackingPage.orders])
+
   const availableOrders = useMemo(() => {
     if (!user?.email) return []
-    return trackingPage.orders.filter(order =>
+    return allOrders.filter(order =>
       order.customerEmail?.toLowerCase() === user.email.toLowerCase()
     )
-  }, [trackingPage.orders, user?.email])
+  }, [allOrders, user?.email])
 
   const [selectedOrderId, setSelectedOrderId] = useState('')
 
@@ -128,7 +187,8 @@ const OrderTracking = () => {
 
   const summaryLabels = trackingPage.summaryLabels
 
-  const statusLabel = selectedOrder?.status === 'delivered'
+  const orderStatus = selectedOrder?.trackingStatus ?? selectedOrder?.status
+  const statusLabel = orderStatus === 'delivered'
     ? summaryLabels.delivered
     : summaryLabels.inTransit
 

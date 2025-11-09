@@ -341,10 +341,33 @@ const GoogleDroneMap = ({
     mapRef.current = null
   }, [])
 
+  const showFallback = Boolean(error)
+
   return (
     <div className='google-map-wrapper'>
-      <div ref={containerRef} className='google-map-canvas' role='presentation' />
-      {error && <div className='map-error'>{error}</div>}
+      <div
+        ref={containerRef}
+        className={`google-map-canvas${showFallback ? ' is-hidden' : ''}`}
+        role='presentation'
+        aria-hidden={showFallback}
+      />
+      {showFallback && (
+        <div className='map-fallback' role='status'>
+          <div className='map-fallback-icon' aria-hidden='true'>🚁</div>
+          <p>{error}</p>
+          {route?.length ? (
+            <ol className='map-fallback-steps'>
+              {route.map(point => (
+                <li key={point.id}>
+                  <strong>{point.title}</strong>
+                  {point.eta && <span>{point.eta}</span>}
+                  <p>{point.description}</p>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }

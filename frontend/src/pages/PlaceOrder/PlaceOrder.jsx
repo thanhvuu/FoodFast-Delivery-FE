@@ -1,11 +1,75 @@
-import React, { useContext, useState, useEffect } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import './PlaceOrder.css'
 import { StoreContext } from '../../Context/StoreContext'
 import { useNavigate } from 'react-router-dom'
 
+const ORDERS_STORAGE_KEY = 'foodfast-orders'
+
+const generateOrderCode = (timestamp) => {
+    const randomSegment = Math.floor(100 + (timestamp % 900))
+    const suffix = String(timestamp).slice(-3)
+    return `FF-${randomSegment}${suffix}`
+}
+
+const generateRoute = (createdAt, address) => {
+    const baseLat = 10.772673
+    const baseLng = 106.660987
+    const seed = createdAt.getTime() / 1000
+    const pseudoRandom = (factor) => {
+        const x = Math.sin(seed * factor) * 10000
+        return x - Math.floor(x)
+    }
+
+    const latDelta = 0.015 + pseudoRandom(1.3) * 0.008
+    const lngDelta = 0.02 + pseudoRandom(0.7) * 0.01
+
+    const checkpoints = [
+        { offset: 0, id: 'pickup', title: 'Nhận món tại bếp trung tâm', description: 'Đơn hàng đã được xác nhận và đang đóng gói.' },
+        { offset: 2, id: 'takeoff', title: 'Drone cất cánh', description: 'Drone rời bãi đáp và tăng độ cao an toàn.' },
+        { offset: 6, id: 'enroute', title: 'Đang giao hàng', description: 'Drone di chuyển đến khu vực giao với tốc độ ổn định.' },
+        { offset: 9, id: 'arriving', title: 'Chuẩn bị hạ cánh', description: 'Drone giảm độ cao và thông báo cho khách chuẩn bị nhận hàng.' },
+        { offset: 12, id: 'delivered', title: 'Hoàn tất giao hàng', description: `Đơn hàng sẽ được giao tại ${address}.` },
+    ]
+
+    const etaFormatter = new Intl.DateTimeFormat('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+
+    return checkpoints.map((checkpoint, index) => {
+        const progression = index / (checkpoints.length - 1 || 1)
+        const coords = {
+            lat: baseLat + latDelta * progression,
+            lng: baseLng + lngDelta * progression,
+        }
+
+        const eta = new Date(createdAt.getTime() + checkpoint.offset * 60 * 1000)
+
+        return {
+            id: checkpoint.id,
+            eta: etaFormatter.format(eta),
+            title: checkpoint.title,
+            description: checkpoint.description,
+            coords,
+        }
+    })
+}
+
+const readStoredOrders = () => {
+    if (typeof window === 'undefined') return []
+    try {
+        const data = window.localStorage.getItem(ORDERS_STORAGE_KEY)
+        if (!data) return []
+        const parsed = JSON.parse(data)
+        return Array.isArray(parsed) ? parsed : []
+    } catch (error) {
+        console.error(error)
+        return []
+    }
+}
 
 const PlaceOrder = () => {
-    const { cartTotal } = useContext(StoreContext)
+    const { cartItems, cartTotal, food_list, setCartItems } = useContext(StoreContext)
     const deliveryFee = cartTotal > 0 && cartTotal < 100000 ? 15000 : 0
     const grandTotal = cartTotal + deliveryFee
 
@@ -13,7 +77,6 @@ const PlaceOrder = () => {
     const [orderPlaced, setOrderPlaced] = useState(false)
 
     const navigate = useNavigate()
-
 
     const [form, setForm] = useState({
         fullName: '',
@@ -23,6 +86,21 @@ const PlaceOrder = () => {
         state: '',
         voucher: ''
     })
+
+    const selectedItems = useMemo(() => {
+        return Object.entries(cartItems).reduce((items, [itemId, quantity]) => {
+            if (!quantity) return items
+            const product = food_list.find(food => food._id === itemId)
+            if (!product) return items
+            items.push({
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                quantity,
+            })
+            return items
+        }, [])
+    }, [cartItems, food_list])
 
     // Khi component mount, lấy dữ liệu localStorage nếu có
     useEffect(() => {
@@ -39,23 +117,70 @@ const PlaceOrder = () => {
         ...prev, [e.target.name]: e.target.value
     }))
 
+    const formatCurrency = value => value.toLocaleString('vi-VN', {
+        style: 'currency', currency: 'VND', maximumFractionDigits: 0
+    })
+
     const handleSubmit = e => {
         e.preventDefault()
         if (!form.fullName.trim() || !form.phone.trim() || !form.street.trim() || !form.city.trim() || !form.state.trim()) {
             alert('Bạn cần điền đầy đủ thông tin bắt buộc!')
             return
         }
+
+        if (!selectedItems.length) {
+            alert('Giỏ hàng của bạn đang trống')
+            return
+        }
+
+        const loggedUser = window.localStorage.getItem('user')
+        if (!loggedUser) {
+            alert('Vui lòng đăng nhập trước khi đặt hàng để theo dõi chuyến bay của bạn.')
+            return
+        }
+
+        const user = JSON.parse(loggedUser)
+        const createdAt = new Date()
+        const code = generateOrderCode(createdAt.getTime())
+        const fullAddress = `${form.street}, ${form.state}, ${form.city}`
+
+        const newOrder = {
+            id: `local-${createdAt.getTime()}`,
+            code,
+            customer: form.fullName.trim(),
+            customerPhone: form.phone.trim(),
+            customerEmail: user?.email ?? '',
+            address: fullAddress,
+            items: selectedItems.map(item => ({
+                ...item,
+                price: Number(item.price),
+                quantity: Number(item.quantity),
+            })),
+            subtotal: cartTotal,
+            deliveryFee,
+            total: grandTotal,
+            status: 'pending',
+            trackingStatus: 'inTransit',
+            paid: paymentMethod !== 'cod',
+            paymentMethod,
+            route: generateRoute(createdAt, fullAddress),
+            createdAt: createdAt.toISOString(),
+        }
+
+        const existingOrders = readStoredOrders()
+        const updatedOrders = [...existingOrders, newOrder]
+        window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updatedOrders))
+        window.dispatchEvent(new CustomEvent('foodfast-orders-update'))
+
         setOrderPlaced(true)
+        window.localStorage.removeItem('checkoutInfo')
+        setCartItems({})
+
         setTimeout(() => {
             setOrderPlaced(false)
-            navigate('/')
-        }, 1000)
+            navigate('/tracking')
+        }, 1200)
     }
-
-
-    const formatCurrency = value => value.toLocaleString('vi-VN', {
-        style: 'currency', currency: 'VND', maximumFractionDigits: 0
-    })
 
     return (
         <form className='place-order' onSubmit={handleSubmit}>
