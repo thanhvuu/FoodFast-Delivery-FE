@@ -51,10 +51,63 @@ const createDroneIcon = google => {
   }
 }
 
-const GoogleDroneMap = ({ route, droneCoordinate, orderCode, unavailableMessage }) => {
+const createEndpointIcon = (google, type) => {
+  const isStart = type === 'start'
+  const gradientStart = isStart ? '#38bdf8' : '#fb923c'
+  const gradientEnd = isStart ? '#3b82f6' : '#ef4444'
+  const glyph = isStart ? 'A' : 'B'
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg width="48" height="64" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="grad-${type}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${gradientStart}" />
+        <stop offset="100%" stop-color="${gradientEnd}" />
+      </linearGradient>
+      <filter id="shadow-${type}" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(15,23,42,0.35)" />
+      </filter>
+    </defs>
+    <path d="M24 0C11.297 0 1 10.297 1 23c0 15.422 18.078 35.086 22.766 40.082.66.698 1.808.698 2.468 0C28.922 58.086 47 38.422 47 23 47 10.297 36.703 0 24 0z" fill="url(#grad-${type})" filter="url(#shadow-${type})" />
+    <circle cx="24" cy="23" r="12" fill="white" />
+    <text x="24" y="27" text-anchor="middle" font-size="14" font-family="'Inter', 'Arial', sans-serif" font-weight="700" fill="#0f172a">${glyph}</text>
+  </svg>`
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new google.maps.Size(48, 64),
+    anchor: new google.maps.Point(24, 64),
+    labelOrigin: new google.maps.Point(24, 26),
+  }
+}
+
+const createWaypointIcon = google => {
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="9" cy="9" r="8" fill="rgba(59,130,246,0.18)" />
+    <circle cx="9" cy="9" r="4" fill="#2563eb" />
+  </svg>`
+
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new google.maps.Size(18, 18),
+    anchor: new google.maps.Point(9, 9),
+  }
+}
+
+const GoogleDroneMap = ({
+  route,
+  droneCoordinate,
+  currentIndex,
+  segmentProgress,
+  orderCode,
+  unavailableMessage,
+}) => {
   const containerRef = useRef(null)
   const mapRef = useRef(null)
   const polylineRef = useRef(null)
+  const progressPolylineRef = useRef(null)
+  const shadowPolylineRef = useRef(null)
   const droneMarkerRef = useRef(null)
   const checkpointsRef = useRef([])
   const [error, setError] = useState('')
@@ -98,6 +151,14 @@ const GoogleDroneMap = ({ route, droneCoordinate, orderCode, unavailableMessage 
           polylineRef.current.setMap(null)
           polylineRef.current = null
         }
+        if (progressPolylineRef.current) {
+          progressPolylineRef.current.setMap(null)
+          progressPolylineRef.current = null
+        }
+        if (shadowPolylineRef.current) {
+          shadowPolylineRef.current.setMap(null)
+          shadowPolylineRef.current = null
+        }
         checkpointsRef.current.forEach(marker => marker.setMap(null))
         checkpointsRef.current = []
         if (droneMarkerRef.current) {
@@ -116,12 +177,43 @@ const GoogleDroneMap = ({ route, droneCoordinate, orderCode, unavailableMessage 
           ],
         })
 
+        shadowPolylineRef.current = new google.maps.Polyline({
+          map: mapRef.current,
+          path: coordinates,
+          strokeColor: '#e2e8f0',
+          strokeOpacity: 0.9,
+          strokeWeight: 8,
+          geodesic: true,
+        })
+
         polylineRef.current = new google.maps.Polyline({
           map: mapRef.current,
           path: coordinates,
-          strokeColor: '#2563eb',
-          strokeOpacity: 0.9,
+          strokeColor: '#3b82f6',
+          strokeOpacity: 0.75,
           strokeWeight: 4,
+          geodesic: true,
+          icons: [
+            {
+              icon: {
+                path: 'M 0,-1 0,1',
+                strokeOpacity: 1,
+                scale: 3,
+              },
+              offset: '0',
+              repeat: '22px',
+            },
+          ],
+        })
+
+        progressPolylineRef.current = new google.maps.Polyline({
+          map: mapRef.current,
+          path: [coordinates[0]],
+          strokeColor: '#22c55e',
+          strokeOpacity: 1,
+          strokeWeight: 5,
+          geodesic: true,
+          zIndex: 9,
         })
 
         const bounds = new google.maps.LatLngBounds()
@@ -131,14 +223,33 @@ const GoogleDroneMap = ({ route, droneCoordinate, orderCode, unavailableMessage 
         const startMarker = new google.maps.Marker({
           map: mapRef.current,
           position: coordinates[0],
-          label: { text: 'A', color: '#0f172a', fontWeight: 'bold' },
+          title: route[0]?.title ?? 'Start',
+          icon: createEndpointIcon(google, 'start'),
+          zIndex: 8,
         })
         const endMarker = new google.maps.Marker({
           map: mapRef.current,
           position: coordinates[coordinates.length - 1],
-          label: { text: 'B', color: '#0f172a', fontWeight: 'bold' },
+          title: route[route.length - 1]?.title ?? 'Destination',
+          icon: createEndpointIcon(google, 'end'),
+          zIndex: 8,
         })
-        checkpointsRef.current = [startMarker, endMarker]
+
+        const waypointIcon = createWaypointIcon(google)
+        const waypointMarkers = route
+          .slice(1, -1)
+          .filter(point => point?.coords)
+          .map(point =>
+            new google.maps.Marker({
+              map: mapRef.current,
+              position: point.coords,
+              title: point.title,
+              icon: waypointIcon,
+              zIndex: 7,
+            })
+          )
+
+        checkpointsRef.current = [startMarker, endMarker, ...waypointMarkers]
         setError('')
         setIsReady(true)
       } catch (err) {
@@ -175,10 +286,51 @@ const GoogleDroneMap = ({ route, droneCoordinate, orderCode, unavailableMessage 
     mapRef.current.panTo(droneCoordinate)
   }, [droneCoordinate, isReady, orderCode])
 
+  useEffect(() => {
+    if (!isReady || !progressPolylineRef.current) return
+
+    const completedPath = []
+
+    for (let index = 0; index <= currentIndex; index += 1) {
+      const point = route[index]
+      if (point?.coords) {
+        completedPath.push(point.coords)
+      }
+    }
+
+    if (droneCoordinate) {
+      const hasSameAsLast = completedPath.length
+        ?
+          completedPath[completedPath.length - 1].lat === droneCoordinate.lat &&
+          completedPath[completedPath.length - 1].lng === droneCoordinate.lng
+        : false
+
+      if (segmentProgress > 0 || (!completedPath.length && droneCoordinate)) {
+        if (!hasSameAsLast) {
+          completedPath.push(droneCoordinate)
+        }
+      }
+    }
+
+    if (!completedPath.length && route[0]?.coords) {
+      completedPath.push(route[0].coords)
+    }
+
+    progressPolylineRef.current.setPath(completedPath)
+  }, [currentIndex, droneCoordinate, isReady, route, segmentProgress])
+
   useEffect(() => () => {
     if (polylineRef.current) {
       polylineRef.current.setMap(null)
       polylineRef.current = null
+    }
+    if (progressPolylineRef.current) {
+      progressPolylineRef.current.setMap(null)
+      progressPolylineRef.current = null
+    }
+    if (shadowPolylineRef.current) {
+      shadowPolylineRef.current.setMap(null)
+      shadowPolylineRef.current = null
     }
     checkpointsRef.current.forEach(marker => marker.setMap(null))
     checkpointsRef.current = []
