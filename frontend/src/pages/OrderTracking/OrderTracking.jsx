@@ -238,6 +238,8 @@ const OrderTracking = () => {
               <GoogleDroneMap
                 route={route}
                 droneCoordinate={droneCoordinate}
+                currentIndex={currentIndex}
+                segmentProgress={segmentProgress}
                 orderCode={selectedOrder.code}
                 unavailableMessage={trackingPage.mapUnavailable}
               />
