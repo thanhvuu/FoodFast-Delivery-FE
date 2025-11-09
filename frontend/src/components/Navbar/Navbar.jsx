@@ -65,9 +65,9 @@ const Navbar = () => {
           </ul>
         </nav>
         <div className='navbar-right'>
-          <button type='button' className='icon-btn' aria-label={navText.searchAria}>
+          {/* <button type='button' className='icon-btn' aria-label={navText.searchAria}>
             <img src={assets.search_icon} alt='' />
-          </button>
+          </button> */}
           <Link to='/cart' className='navbar-search-icon' aria-label={navText.cartAria}>
             <img src={assets.basket_icon} alt={navText.cartAlt} />
             {cartItemCount && cartItemCount > 0 && <span className='dot' aria-hidden='true'></span>}

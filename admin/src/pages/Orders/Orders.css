@@ -1,0 +1,106 @@
+.admin-orders-list {
+    padding: 40px 36px;
+    background: #fff;
+    border-radius: 18px;
+    margin: 48px auto 0 auto;
+    box-shadow: 0 4px 32px #0001;
+    max-width: 1150px;
+}
+
+.admin-orders-list h2 {
+    margin-bottom: 30px;
+    font-size: 27px;
+    font-weight: 700;
+    color: #22223b;
+    letter-spacing: 0.5px;
+}
+
+.admin-orders-list table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 7px;
+}
+
+.admin-orders-list thead th {
+    background: #f3fafd;
+    padding: 16px 8px 16px 18px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #393e46;
+    border-radius: 7px 7px 0 0;
+}
+
+.admin-orders-list tbody td {
+    background: #fafbfc;
+    padding: 18px 12px 16px 20px;
+    font-size: 16px;
+    color: #25242c;
+    vertical-align: top;
+    border-bottom: 2.5px solid #f3fafd;
+    border-radius: 8px;
+}
+
+.admin-orders-list tr {
+    transition: box-shadow .13s;
+}
+
+.admin-orders-list tbody tr:hover {
+    box-shadow: 0 2px 16px #0002;
+    background: #f8fefe;
+}
+
+.badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    display: inline-block;
+    min-width: 104px;
+    text-align: center;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    opacity: 0.96;
+}
+
+.badge-delivered {
+    background: #dbfdd9;
+    color: #157026;
+}
+
+.badge-pending {
+    background: #fff2f0;
+    color: #b62326;
+}
+
+.badge-paid {
+    background: #e8fff7;
+    color: #12996a;
+}
+
+.badge-unpaid {
+    background: #fffae2;
+    color: #a87505;
+}
+
+.admin-orders-list td>button {
+    margin: 5px 7px 0 0;
+    padding: 7px 16px;
+    border-radius: 5px;
+    border: none;
+    background: #eff3fd;
+    color: #325dad;
+    font-weight: 500;
+    font-size: 15px;
+    transition: background .1s;
+    cursor: pointer;
+}
+
+.admin-orders-list td>button:hover {
+    background: #deefff;
+    color: #2a475f;
+}
+
+.admin-orders-list td {
+    line-height: 1.7;
+}
