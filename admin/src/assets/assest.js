@@ -206,7 +206,44 @@ export const order_list = [
         ],
         address: '212 Lý Chính Thắng, Quận 3',
         status: 'pending', // 'delivered', 'pending'
-        paid: true // true/false
+        paid: true, // true/false
+        route: [
+            {
+                id: 'pickup',
+                title: 'Nhận món tại nhà hàng',
+                eta: '10:05',
+                position: { x: 10, y: 70 },
+                description: 'Drone đã nhận đơn tại KFC Nguyễn Trãi và chuẩn bị cất cánh.'
+            },
+            {
+                id: 'takeoff',
+                title: 'Drone cất cánh',
+                eta: '10:07',
+                position: { x: 25, y: 55 },
+                description: 'Thiết bị bay rời điểm lấy hàng và tăng độ cao an toàn.'
+            },
+            {
+                id: 'enroute',
+                title: 'Đang trên đường giao',
+                eta: '10:12',
+                position: { x: 50, y: 45 },
+                description: 'Drone bay qua Quận 1, kiểm soát tốc độ và tránh vật cản.'
+            },
+            {
+                id: 'arriving',
+                title: 'Chuẩn bị hạ cánh',
+                eta: '10:15',
+                position: { x: 75, y: 40 },
+                description: 'Drone đang tiếp cận vị trí giao hàng với tốc độ thấp.'
+            },
+            {
+                id: 'delivered',
+                title: 'Hoàn tất giao hàng',
+                eta: '10:17',
+                position: { x: 88, y: 65 },
+                description: 'Đơn hàng được giao thành công cho khách Nguyễn Văn A.'
+            }
+        ]
     },
     {
         id: 'o2',
@@ -218,7 +255,44 @@ export const order_list = [
         ],
         address: '45 Trần Hưng Đạo, Quận 1',
         status: 'delivered',
-        paid: false
+        paid: false,
+        route: [
+            {
+                id: 'pickup',
+                title: 'Nhận món tại nhà hàng',
+                eta: '09:40',
+                position: { x: 8, y: 75 },
+                description: 'Drone đã nhận món tại Pizza 4P Pasteur.'
+            },
+            {
+                id: 'takeoff',
+                title: 'Drone cất cánh',
+                eta: '09:42',
+                position: { x: 22, y: 60 },
+                description: 'Drone khởi hành và kiểm tra hệ thống định vị.'
+            },
+            {
+                id: 'enroute',
+                title: 'Đang trên đường giao',
+                eta: '09:48',
+                position: { x: 48, y: 47 },
+                description: 'Thiết bị bay qua trung tâm Quận 1, tín hiệu ổn định.'
+            },
+            {
+                id: 'arriving',
+                title: 'Chuẩn bị hạ cánh',
+                eta: '09:51',
+                position: { x: 70, y: 45 },
+                description: 'Drone đã thông báo khách hàng chuẩn bị nhận món.'
+            },
+            {
+                id: 'delivered',
+                title: 'Hoàn tất giao hàng',
+                eta: '09:53',
+                position: { x: 90, y: 60 },
+                description: 'Đơn hàng bàn giao thành công cho khách Trần Thị B.'
+            }
+        ]
     },
     // ... thêm đơn nữa
 ]
