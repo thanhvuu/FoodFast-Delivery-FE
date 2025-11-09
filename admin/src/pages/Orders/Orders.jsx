@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { order_list } from '../../assets/assest'
 import './Orders.css'
+import { useAdminLanguage } from '../../context/LanguageContext'
 
 const Orders = () => {
     const [orders, setOrders] = useState(order_list)
+    const { dictionary, formatCurrency } = useAdminLanguage()
+    const t = dictionary.ordersPage
 
     // Toggle trạng thái giao hàng (Cho từng order)
     const handleToggleStatus = (id) => {
@@ -35,17 +38,17 @@ const Orders = () => {
 
     return (
         <div className="admin-orders-list">
-            <h2>Danh sách đơn hàng</h2>
+            <h2>{t.title}</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Khách hàng</th>
-                        <th>Sản phẩm</th>
-                        <th>Địa chỉ</th>
-                        <th>Trạng thái giao</th>
-                        <th>Thanh toán</th>
-                        <th>Thành tiền</th>
-                        <th>Điều chỉnh</th>
+                        <th>{t.columns.customer}</th>
+                        <th>{t.columns.items}</th>
+                        <th>{t.columns.address}</th>
+                        <th>{t.columns.status}</th>
+                        <th>{t.columns.payment}</th>
+                        <th>{t.columns.total}</th>
+                        <th>{t.columns.actions}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,28 +61,29 @@ const Orders = () => {
                                         <span style={{ fontWeight: 500 }}>{it.name}</span>
                                         {" "}x{it.quantity || 1}
                                         <span style={{ color: '#888', marginLeft: 2, fontSize: 15 }}>
-                                            ({(Number(it.price) * Number(it.quantity || 1)).toLocaleString()}đ)
+                                            ({formatCurrency(Number(it.price) * Number(it.quantity || 1))})
                                         </span>
                                     </div>
                                 )}
                             </td>
                             <td>{order.address}</td>
                             <td>
-                                <span className={order.status === 'delivered' ? 'badge badge-delivered' : 'badge badge-pending'}>
-                                    {order.status === 'delivered' ? 'Đã giao' : 'Chưa giao'}
+                                <span className={order.status === 'delivered' ? 'badge badge-delivered' : 'badge badge-pending'}
+>
+                                    {order.status === 'delivered' ? t.statuses.delivered : t.statuses.pending}
                                 </span>
                             </td>
                             <td>
                                 <span className={order.paid ? 'badge badge-paid' : 'badge badge-unpaid'}>
-                                    {order.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                                    {order.paid ? t.payment.paid : t.payment.unpaid}
                                 </span>
                             </td>
                             <td>
-                                {getOrderTotal(order).toLocaleString()} đ
+                                {formatCurrency(getOrderTotal(order))}
                             </td>
                             <td>
-                                <button onClick={() => handleToggleStatus(order.id)}>Đổi trạng thái giao</button>
-                                <button onClick={() => handleTogglePaid(order.id)}>Đổi thanh toán</button>
+                                <button onClick={() => handleToggleStatus(order.id)}>{t.buttons.toggleStatus}</button>
+                                <button onClick={() => handleTogglePaid(order.id)}>{t.buttons.togglePayment}</button>
                             </td>
                         </tr>
                     )}

@@ -2,25 +2,28 @@ import React from 'react'
 import './Sidebar.css'
 import { assests } from '../../assets/assest'
 import { NavLink } from 'react-router-dom'
+import { useAdminLanguage } from '../../context/LanguageContext'
 const Sidebar = () => {
+    const { dictionary } = useAdminLanguage()
+    const { sidebar } = dictionary
     return (
         <div className='sidebar'>
             <div className="sidebar-options">
                 <NavLink to='/add' className="sidebar-option">
                     <img src={assests.add_icon} alt="" />
-                    <p>Add New Item</p>
+                    <p>{sidebar.add}</p>
                 </NavLink>
                 <NavLink to='/list' className="sidebar-option">
                     <img src={assests.order_icon} alt="" />
-                    <p>List Items</p>
+                    <p>{sidebar.list}</p>
                 </NavLink>
                 <NavLink to='/orders' className="sidebar-option">
                     <img src={assests.order_icon} alt="" />
-                    <p>Orders</p>
+                    <p>{sidebar.orders}</p>
                 </NavLink>
                 <NavLink to='/tracking' className="sidebar-option">
                     <img src={assests.order_icon} alt="" />
-                    <p>Drone Tracking</p>
+                    <p>{sidebar.tracking}</p>
                 </NavLink>
             </div>
 

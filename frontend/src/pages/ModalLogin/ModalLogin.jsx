@@ -48,6 +48,7 @@ export default function ModalLogin({ open, onClose, onLoginSuccess }) {
         const matched = Array.isArray(users) && users.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase() && u.password === password)
         if (matched) {
           localStorage.setItem('user', JSON.stringify(matched))
+          window.dispatchEvent(new CustomEvent('foodfast-auth-change'))
           setSuccess('Đăng nhập thành công')
           setTimeout(() => {
             resetForm()
