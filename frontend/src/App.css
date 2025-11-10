@@ -1,0 +1,11 @@
+.app--super-admin {
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
+  background-color: #eef1f8;
+}
+
+.app--super-admin .super-admin {
+  width: 100%;
+  margin: 0;
+}
