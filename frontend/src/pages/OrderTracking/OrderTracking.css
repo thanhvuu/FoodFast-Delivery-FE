@@ -88,6 +88,16 @@
   gap: 10px;
 }
 
+.summary-card .summary-muted {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.summary-card strong + .summary-muted {
+  margin-top: -4px;
+}
+
 .summary-label {
   font-size: 13px;
   letter-spacing: 0.08em;

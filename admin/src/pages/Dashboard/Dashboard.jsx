@@ -1,0 +1,306 @@
+import React, { useEffect, useMemo, useState } from 'react'
+import './Dashboard.css'
+import { order_list } from '../../assets/assest'
+import { useAdminLanguage } from '../../context/LanguageContext'
+
+const ORDERS_STORAGE_KEY = 'foodfast-orders'
+
+const readStoredOrders = () => {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem(ORDERS_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+}
+
+const digitsOnly = value => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, value)
+  }
+  if (typeof value === 'string') {
+    const numeric = value.replace(/[^0-9]/g, '')
+    return numeric ? Number(numeric) : 0
+  }
+  return 0
+}
+
+const normaliseItem = item => ({
+  name: item?.name ?? 'Product',
+  quantity: Math.max(1, digitsOnly(item?.quantity)),
+  price: digitsOnly(item?.price),
+})
+
+const transformOrder = order => {
+  const items = Array.isArray(order?.items) ? order.items.map(normaliseItem) : []
+  const status = order?.adminStatus ?? order?.status
+  return {
+    id: order?.id ?? `order-${Math.random().toString(36).slice(2, 9)}`,
+    customer: order?.customer ?? 'Customer',
+    address: order?.address ?? '',
+    status: status === 'delivered' ? 'delivered' : 'pending',
+    trackingStatus: order?.trackingStatus,
+    paid: Boolean(order?.paid),
+    deliveryFee: digitsOnly(order?.deliveryFee),
+    total: digitsOnly(order?.total),
+    items,
+    deliveryMethod: order?.deliveryMethod ?? 'drone',
+    estimatedArrival: order?.estimatedArrival ?? '',
+    estimatedMinutes: digitsOnly(order?.estimatedMinutes),
+    createdAt: order?.createdAt ?? null,
+  }
+}
+
+const mergeOrders = (baseOrders, dynamicOrders) => {
+  const unique = new Map()
+  baseOrders.forEach(order => unique.set(order.id, order))
+  dynamicOrders.forEach(order => unique.set(order.id, order))
+  return Array.from(unique.values())
+}
+
+const calculateOrderTotal = order => {
+  const itemsTotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const deliveryFee = order.deliveryFee || 0
+  const storedTotal = order.total || 0
+  return storedTotal || itemsTotal + deliveryFee
+}
+
+const sortByRecency = (a, b) => {
+  const parseDate = value => {
+    if (!value) return Number.NEGATIVE_INFINITY
+    const timestamp = Date.parse(value)
+    return Number.isFinite(timestamp) ? timestamp : Number.NEGATIVE_INFINITY
+  }
+  return parseDate(b.createdAt) - parseDate(a.createdAt)
+}
+
+const Dashboard = ({ products = [] }) => {
+  const { dictionary, formatCurrency } = useAdminLanguage()
+  const t = dictionary.dashboardPage
+  const ordersTranslations = dictionary.ordersPage
+
+  const staticOrders = useMemo(() => order_list.map(transformOrder), [])
+
+  const loadOrders = () => {
+    const stored = readStoredOrders().map(transformOrder)
+    return mergeOrders(staticOrders, stored)
+  }
+
+  const [orders, setOrders] = useState(loadOrders)
+
+  useEffect(() => {
+    const sync = () => setOrders(loadOrders())
+    sync()
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', sync)
+      window.addEventListener('foodfast-orders-update', sync)
+      return () => {
+        window.removeEventListener('storage', sync)
+        window.removeEventListener('foodfast-orders-update', sync)
+      }
+    }
+    return undefined
+  }, [staticOrders])
+
+  const metrics = useMemo(() => {
+    const totalOrders = orders.length
+    const deliveredOrders = orders.filter(order => order.status === 'delivered')
+    const pendingOrders = totalOrders - deliveredOrders.length
+
+    const totalRevenue = orders.reduce((sum, order) => sum + calculateOrderTotal(order), 0)
+
+    const methodBreakdown = orders.reduce(
+      (acc, order) => {
+        const method = order.deliveryMethod ?? 'drone'
+        acc[method] = (acc[method] || 0) + 1
+        return acc
+      },
+      {}
+    )
+
+    const estimatedMinutes = orders
+      .map(order => order.estimatedMinutes)
+      .filter(value => value > 0)
+
+    const averageEta = estimatedMinutes.length
+      ? Math.round(estimatedMinutes.reduce((sum, value) => sum + value, 0) / estimatedMinutes.length)
+      : null
+
+    return {
+      totalProducts: products.length,
+      totalOrders,
+      deliveredOrders: deliveredOrders.length,
+      pendingOrders,
+      deliveredRate: totalOrders ? Math.round((deliveredOrders.length / totalOrders) * 100) : 0,
+      totalRevenue,
+      methodBreakdown,
+      averageEta,
+    }
+  }, [orders, products.length])
+
+  const topProducts = useMemo(() => {
+    const counter = new Map()
+    orders.forEach(order => {
+      order.items.forEach(item => {
+        const key = item.name
+        const quantity = item.quantity || 0
+        counter.set(key, (counter.get(key) || 0) + quantity)
+      })
+    })
+    return Array.from(counter.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+  }, [orders])
+
+  const recentOrders = useMemo(() => {
+    return [...orders]
+      .sort(sortByRecency)
+      .slice(0, 6)
+  }, [orders])
+
+  const methodLabels = t.methodBreakdown.labels
+
+  const formatMethodLabel = method => methodLabels[method] ?? methodLabels.default ?? method
+
+  return (
+    <div className='dashboard-page'>
+      <header className='dashboard-header'>
+        <div>
+          <h1>{t.title}</h1>
+          <p>{t.subtitle}</p>
+        </div>
+        <div className='dashboard-highlight'>
+          <span>{t.metrics.deliveredRate}</span>
+          <strong>{metrics.deliveredRate}%</strong>
+          <small>
+            {metrics.totalOrders > 0
+              ? t.metrics.deliveredRateHint.replace('{{completed}}', metrics.deliveredOrders).replace('{{total}}', metrics.totalOrders)
+              : t.metrics.noOrders}
+          </small>
+        </div>
+      </header>
+
+      <section className='dashboard-metrics'>
+        <article className='metric-card'>
+          <span className='metric-label'>{t.metrics.totalProducts}</span>
+          <strong className='metric-value'>{metrics.totalProducts}</strong>
+          <small>{t.metrics.totalProductsHint}</small>
+        </article>
+        <article className='metric-card'>
+          <span className='metric-label'>{t.metrics.activeOrders}</span>
+          <strong className='metric-value'>{metrics.pendingOrders}</strong>
+          <small>{t.metrics.activeOrdersHint}</small>
+        </article>
+        <article className='metric-card'>
+          <span className='metric-label'>{t.metrics.totalRevenue}</span>
+          <strong className='metric-value'>{formatCurrency(metrics.totalRevenue)}</strong>
+          <small>{t.metrics.totalRevenueHint}</small>
+        </article>
+        <article className='metric-card'>
+          <span className='metric-label'>{t.metrics.averageEta}</span>
+          <strong className='metric-value'>
+            {metrics.averageEta ? `${metrics.averageEta}′` : t.metrics.averageEtaFallback}
+          </strong>
+          <small>{t.metrics.averageEtaHint}</small>
+        </article>
+      </section>
+
+      <section className='dashboard-grid'>
+        <article className='delivery-split'>
+          <h2>{t.methodBreakdown.title}</h2>
+          <p className='section-description'>{t.methodBreakdown.description}</p>
+          <div className='split-list'>
+            {Object.keys(metrics.methodBreakdown).length ? (
+              Object.entries(metrics.methodBreakdown).map(([method, count]) => {
+                const ratio = metrics.totalOrders ? Math.round((count / metrics.totalOrders) * 100) : 0
+                return (
+                  <div key={method} className='split-row'>
+                    <div className='split-info'>
+                      <span className={`split-dot split-${method}`} />
+                      <div>
+                        <strong>{formatMethodLabel(method)}</strong>
+                        <small>{t.methodBreakdown.orders.replace('{{count}}', count)}</small>
+                      </div>
+                    </div>
+                    <div className='split-progress'>
+                      <div style={{ width: `${ratio}%` }} />
+                    </div>
+                    <span className='split-percentage'>{ratio}%</span>
+                  </div>
+                )
+              })
+            ) : (
+              <p className='empty-copy'>{t.methodBreakdown.empty}</p>
+            )}
+          </div>
+        </article>
+
+        <article className='top-products'>
+          <h2>{t.topProducts.title}</h2>
+          <p className='section-description'>{t.topProducts.description}</p>
+          {topProducts.length ? (
+            <ul>
+              {topProducts.map(([name, quantity]) => (
+                <li key={name}>
+                  <span>{name}</span>
+                  <strong>{quantity}</strong>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className='empty-copy'>{t.topProducts.empty}</p>
+          )}
+        </article>
+      </section>
+
+      <section className='recent-orders'>
+        <div className='section-heading'>
+          <h2>{t.recentOrders.title}</h2>
+          <p>{t.recentOrders.description}</p>
+        </div>
+        {recentOrders.length ? (
+          <table>
+            <thead>
+              <tr>
+                <th>{t.recentOrders.headers.code}</th>
+                <th>{t.recentOrders.headers.customer}</th>
+                <th>{t.recentOrders.headers.method}</th>
+                <th>{t.recentOrders.headers.status}</th>
+                <th>{t.recentOrders.headers.total}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentOrders.map(order => {
+                const method = formatMethodLabel(order.deliveryMethod ?? 'drone')
+                const statusLabel = order.status === 'delivered'
+                  ? ordersTranslations.statuses.delivered
+                  : ordersTranslations.statuses.pending
+                return (
+                  <tr key={order.id}>
+                    <td>{order.id.toUpperCase()}</td>
+                    <td>{order.customer}</td>
+                    <td>{method}</td>
+                    <td>
+                      <span className={`status-chip ${order.status === 'delivered' ? 'delivered' : 'pending'}`}>
+                        {statusLabel}
+                      </span>
+                    </td>
+                    <td>{formatCurrency(calculateOrderTotal(order))}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p className='empty-copy'>{t.recentOrders.empty}</p>
+        )}
+      </section>
+    </div>
+  )
+}
+
+export default Dashboard

@@ -5,13 +5,39 @@ import { useNavigate } from 'react-router-dom'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
+const DELIVERY_OPTIONS = {
+    motorbike: {
+        key: 'motorbike',
+        label: 'Giao xe máy',
+        icon: '🛵',
+        description: 'Tiết kiệm chi phí, phù hợp nội thành.',
+        etaRange: '25 - 35 phút',
+        estimatedMinutes: 28,
+        baseFee: 15000,
+        freeThreshold: 120000,
+        benefitTag: '💰 Tiết kiệm',
+    },
+    drone: {
+        key: 'drone',
+        label: 'Giao drone',
+        icon: '🚁',
+        description: 'Nhanh chóng, tránh kẹt xe và theo dõi trực tiếp.',
+        etaRange: '10 - 15 phút',
+        estimatedMinutes: 14,
+        baseFee: 45000,
+        discountThreshold: 150000,
+        discountedFee: 35000,
+        benefitTag: '⚡ Nhanh nhất',
+    },
+}
+
 const generateOrderCode = (timestamp) => {
     const randomSegment = Math.floor(100 + (timestamp % 900))
     const suffix = String(timestamp).slice(-3)
     return `FF-${randomSegment}${suffix}`
 }
 
-const generateRoute = (createdAt, address) => {
+const generateDroneRoute = (createdAt, address) => {
     const baseLat = 10.772673
     const baseLng = 106.660987
     const seed = createdAt.getTime() / 1000
@@ -55,6 +81,58 @@ const generateRoute = (createdAt, address) => {
     })
 }
 
+const generateMotorbikeRoute = (createdAt, address) => {
+    const baseLat = 10.775112
+    const baseLng = 106.700214
+    const seed = createdAt.getTime() / 1200
+
+    const pseudoRandom = (factor) => {
+        const x = Math.sin(seed * factor) * 10000
+        return x - Math.floor(x)
+    }
+
+    const latDelta = 0.01 + pseudoRandom(1.5) * 0.006
+    const lngDelta = 0.014 + pseudoRandom(0.9) * 0.008
+
+    const checkpoints = [
+        { offset: 0, id: 'pickup', title: 'Tài xế nhận món', description: 'Tài xế FoodFast đã nhận đơn và kiểm tra túi giữ nhiệt.' },
+        { offset: 4, id: 'depart', title: 'Rời nhà hàng', description: 'Xe máy rời bếp trung tâm và nhập tuyến đường nhanh nhất.' },
+        { offset: 9, id: 'enroute', title: 'Đang di chuyển', description: 'Tài xế điều chỉnh tốc độ để tránh kẹt xe giờ cao điểm.' },
+        { offset: 15, id: 'arriving', title: 'Sắp đến nơi', description: 'Tài xế liên hệ khách xác nhận điểm giao tại sảnh.' },
+        { offset: 20, id: 'delivered', title: 'Hoàn tất giao hàng', description: `Đơn hàng được bàn giao cho khách tại ${address}.` },
+    ]
+
+    const etaFormatter = new Intl.DateTimeFormat('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+
+    return checkpoints.map((checkpoint, index) => {
+        const progression = index / (checkpoints.length - 1 || 1)
+        const coords = {
+            lat: baseLat + latDelta * progression,
+            lng: baseLng + lngDelta * progression,
+        }
+
+        const eta = new Date(createdAt.getTime() + checkpoint.offset * 60 * 1000)
+
+        return {
+            id: checkpoint.id,
+            eta: etaFormatter.format(eta),
+            title: checkpoint.title,
+            description: checkpoint.description,
+            coords,
+        }
+    })
+}
+
+const generateRoute = (method, createdAt, address) => {
+    if (method === 'motorbike') {
+        return generateMotorbikeRoute(createdAt, address)
+    }
+    return generateDroneRoute(createdAt, address)
+}
+
 const readStoredOrders = () => {
     if (typeof window === 'undefined') return []
     try {
@@ -70,7 +148,34 @@ const readStoredOrders = () => {
 
 const PlaceOrder = () => {
     const { cartItems, cartTotal, food_list, setCartItems } = useContext(StoreContext)
-    const deliveryFee = cartTotal > 0 && cartTotal < 100000 ? 15000 : 0
+    const [deliveryMethod, setDeliveryMethod] = useState('motorbike')
+
+    const calculateDeliveryFee = (method) => {
+        const option = DELIVERY_OPTIONS[method]
+        if (!option || cartTotal <= 0) {
+            return 0
+        }
+        if (method === 'motorbike') {
+            if (option.freeThreshold && cartTotal >= option.freeThreshold) {
+                return 0
+            }
+            return option.baseFee
+        }
+        if (method === 'drone') {
+            if (option.discountThreshold && cartTotal >= option.discountThreshold) {
+                return option.discountedFee ?? option.baseFee
+            }
+            return option.baseFee
+        }
+        return option.baseFee ?? 0
+    }
+
+    const deliveryFee = useMemo(
+        () => calculateDeliveryFee(deliveryMethod),
+        [deliveryMethod, cartTotal]
+    )
+
+    const selectedDeliveryOption = DELIVERY_OPTIONS[deliveryMethod] ?? DELIVERY_OPTIONS.motorbike
     const grandTotal = cartTotal + deliveryFee
 
     const [paymentMethod, setPaymentMethod] = useState('atm')
@@ -159,11 +264,14 @@ const PlaceOrder = () => {
             subtotal: cartTotal,
             deliveryFee,
             total: grandTotal,
+            deliveryMethod,
+            estimatedArrival: selectedDeliveryOption.etaRange,
+            estimatedMinutes: selectedDeliveryOption.estimatedMinutes,
             status: 'pending',
             trackingStatus: 'inTransit',
             paid: paymentMethod !== 'cod',
             paymentMethod,
-            route: generateRoute(createdAt, fullAddress),
+            route: generateRoute(deliveryMethod, createdAt, fullAddress),
             createdAt: createdAt.toISOString(),
         }
 
@@ -212,9 +320,56 @@ const PlaceOrder = () => {
             <div className="place-order-right">
                 <div className="order-summary">
                     <h2>Order Summary</h2>
+                    <div className="delivery-methods">
+                        <p className="delivery-title">Chọn phương thức giao hàng</p>
+                        <div className="delivery-options">
+                            {Object.values(DELIVERY_OPTIONS).map(option => {
+                                const isSelected = option.key === deliveryMethod
+                                const optionFee = calculateDeliveryFee(option.key)
+                                return (
+                                    <label
+                                        key={option.key}
+                                        className={`delivery-option ${isSelected ? 'selected' : ''}`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="deliveryMethod"
+                                            value={option.key}
+                                            checked={isSelected}
+                                            onChange={() => setDeliveryMethod(option.key)}
+                                        />
+                                        <div className="delivery-option-content">
+                                            <div className="option-header">
+                                                <span className="option-icon" aria-hidden="true">{option.icon}</span>
+                                                <div className="option-text">
+                                                    <strong>{option.label}</strong>
+                                                    <span>{option.description}</span>
+                                                </div>
+                                                <div className="option-price">
+                                                    {optionFee === 0 ? 'Miễn phí' : formatCurrency(optionFee)}
+                                                </div>
+                                            </div>
+                                            <div className="option-meta">
+                                                <span>⏱ {option.etaRange}</span>
+                                                <span>{option.benefitTag}</span>
+                                            </div>
+                                        </div>
+                                    </label>
+                                )
+                            })}
+                        </div>
+                    </div>
                     <div className="summary-row">
                         <span>Subtotal</span>
                         <span>{formatCurrency(cartTotal)}</span>
+                    </div>
+                    <div className="summary-row">
+                        <span>Delivery method</span>
+                        <span>{selectedDeliveryOption.label}</span>
+                    </div>
+                    <div className="summary-row">
+                        <span>ETA</span>
+                        <span>{selectedDeliveryOption.etaRange}</span>
                     </div>
                     <div className="summary-row">
                         <span>Delivery fee</span>

@@ -16,6 +16,10 @@ const Tracking = () => {
     )
 
     const route = selectedOrder?.route ?? []
+    const deliveryMethod = selectedOrder?.deliveryMethod ?? 'drone'
+    const methodLabels = t.summaryLabels.methodNames ?? {}
+    const methodLabel = methodLabels[deliveryMethod] ?? methodLabels.default ?? deliveryMethod
+    const estimatedArrival = selectedOrder?.estimatedArrival ?? '—'
     const [progress, setProgress] = useState(0)
     const [lastUpdated, setLastUpdated] = useState(new Date())
 
@@ -75,6 +79,9 @@ const Tracking = () => {
         : t.summaryLabels.unpaid
 
     const legendText = t.legendUpdated.replace('{{time}}', lastUpdated.toLocaleTimeString())
+    const legendPrefixes = t.legendPrefixes ?? {}
+    const legendPrefix = legendPrefixes[deliveryMethod] ?? legendPrefixes.default ?? 'Drone #'
+    const vehicleEmoji = deliveryMethod === 'motorbike' ? '🛵' : '🚁'
 
     return (
         <div className='tracking-page'>
@@ -125,7 +132,15 @@ const Tracking = () => {
                             </strong>
                         </div>
                         <div className='summary-card'>
-                            <span className='summary-label'>{t.summaryLabels.flightProgress}</span>
+                            <span className='summary-label'>{t.summaryLabels.deliveryMethod}</span>
+                            <strong>{methodLabel}</strong>
+                        </div>
+                        <div className='summary-card'>
+                            <span className='summary-label'>{t.summaryLabels.estimatedArrival}</span>
+                            <strong>{estimatedArrival}</strong>
+                        </div>
+                        <div className='summary-card'>
+                            <span className='summary-label'>{t.summaryLabels.deliveryProgress}</span>
                             <div className='progress'>
                                 <div className='progress-bar' style={{ width: `${completion}%` }} />
                             </div>
@@ -165,11 +180,11 @@ const Tracking = () => {
                                     <span className='point-label'>{point.title}</span>
                                 </div>
                             ))}
-                            <div className='drone-icon' style={interpolatePosition()}>
-                                <span role='img' aria-label='Drone đang di chuyển'>🚁</span>
+                            <div className='vehicle-icon' style={interpolatePosition()}>
+                                <span role='img' aria-label='Phương tiện đang di chuyển'>{vehicleEmoji}</span>
                             </div>
                             <div className='map-legend'>
-                                <strong>Drone #{selectedOrder.id.toUpperCase()}</strong>
+                                <strong>{legendPrefix}{selectedOrder.id.toUpperCase()}</strong>
                                 <span>{legendText}</span>
                             </div>
                         </div>
