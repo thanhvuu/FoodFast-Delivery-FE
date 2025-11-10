@@ -200,6 +200,10 @@ export const order_list = [
     {
         id: 'o1',
         customer: 'Nguyễn Văn A',
+        deliveryMethod: 'drone',
+        estimatedArrival: '10 phút',
+        estimatedMinutes: 12,
+        createdAt: '2024-05-12T03:20:00.000Z',
         items: [
             { name: 'Gà rán', quantity: 2, price: 30000 },
             { name: 'Cơm chiên Dương Châu', quantity: 1, price: 40000 }
@@ -248,6 +252,10 @@ export const order_list = [
     {
         id: 'o2',
         customer: 'Trần Thị B',
+        deliveryMethod: 'motorbike',
+        estimatedArrival: '25 phút',
+        estimatedMinutes: 26,
+        createdAt: '2024-05-12T01:45:00.000Z',
         items: [
             { name: 'Pizza', quantity: 1, price: 50000 },
             { name: 'Kem ốc quế', quantity: 3, price: 15000 },
@@ -259,38 +267,38 @@ export const order_list = [
         route: [
             {
                 id: 'pickup',
-                title: 'Nhận món tại nhà hàng',
+                title: 'Tài xế nhận món',
                 eta: '09:40',
                 position: { x: 8, y: 75 },
-                description: 'Drone đã nhận món tại Pizza 4P Pasteur.'
+                description: 'Tài xế đã nhận đơn tại Pizza 4P Pasteur và kiểm tra túi giữ nhiệt.'
             },
             {
-                id: 'takeoff',
-                title: 'Drone cất cánh',
+                id: 'depart',
+                title: 'Rời nhà hàng',
                 eta: '09:42',
                 position: { x: 22, y: 60 },
-                description: 'Drone khởi hành và kiểm tra hệ thống định vị.'
+                description: 'Xe máy rời điểm lấy hàng và nhập tuyến đường tối ưu.'
             },
             {
                 id: 'enroute',
-                title: 'Đang trên đường giao',
+                title: 'Đang di chuyển',
                 eta: '09:48',
                 position: { x: 48, y: 47 },
-                description: 'Thiết bị bay qua trung tâm Quận 1, tín hiệu ổn định.'
+                description: 'Tài xế đang chạy qua trung tâm Quận 1, điều chỉnh tốc độ vì kẹt xe nhẹ.'
             },
             {
                 id: 'arriving',
-                title: 'Chuẩn bị hạ cánh',
+                title: 'Đang tới nơi',
                 eta: '09:51',
                 position: { x: 70, y: 45 },
-                description: 'Drone đã thông báo khách hàng chuẩn bị nhận món.'
+                description: 'Tài xế liên hệ khách hàng để xác nhận vị trí giao.'
             },
             {
                 id: 'delivered',
                 title: 'Hoàn tất giao hàng',
                 eta: '09:53',
                 position: { x: 90, y: 60 },
-                description: 'Đơn hàng bàn giao thành công cho khách Trần Thị B.'
+                description: 'Đơn hàng bàn giao thành công và tài xế đang chụp ảnh xác nhận.'
             }
         ]
     },

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
-import GoogleDroneMap from './GoogleDroneMap'
+import GoogleDeliveryMap from './GoogleDeliveryMap'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
@@ -134,6 +134,11 @@ const OrderTracking = () => {
   )
 
   const route = selectedOrder?.route ?? []
+  const deliveryMethod = selectedOrder?.deliveryMethod ?? 'drone'
+  const methodInfo = trackingPage.methods?.[deliveryMethod] ?? trackingPage.methods?.drone ?? {}
+  const methodLabel = methodInfo.label ?? (deliveryMethod === 'motorbike' ? 'Motorbike courier' : 'Drone delivery')
+  const estimatedArrival = selectedOrder?.estimatedArrival ?? methodInfo.etaShort ?? '—'
+  const estimatedMinutes = selectedOrder?.estimatedMinutes
   const [progress, setProgress] = useState(0)
   const [lastUpdated, setLastUpdated] = useState(new Date())
 
@@ -145,9 +150,12 @@ const OrderTracking = () => {
   useEffect(() => {
     if (route.length < 2) return undefined
 
+    const step = deliveryMethod === 'motorbike' ? 0.01 : 0.015
+    const interval = deliveryMethod === 'motorbike' ? 2500 : 2000
+
     const timer = setInterval(() => {
       setProgress(prev => {
-        const next = prev + 0.015
+        const next = prev + step
         if (next >= route.length - 1) {
           clearInterval(timer)
           setLastUpdated(new Date())
@@ -156,10 +164,10 @@ const OrderTracking = () => {
         setLastUpdated(new Date())
         return next
       })
-    }, 2000)
+    }, interval)
 
     return () => clearInterval(timer)
-  }, [route])
+  }, [deliveryMethod, route])
 
   const currentIndex = Math.floor(progress)
   const nextIndex = Math.min(currentIndex + 1, route.length - 1)
@@ -168,7 +176,7 @@ const OrderTracking = () => {
   const currentPoint = route[currentIndex] ?? route[0]
   const nextPoint = route[nextIndex] ?? route[route.length - 1]
 
-  const droneCoordinate = useMemo(() => {
+  const vehicleCoordinate = useMemo(() => {
     if (!currentPoint?.coords) return null
     if (!nextPoint?.coords) {
       return { ...currentPoint.coords }
@@ -201,6 +209,10 @@ const OrderTracking = () => {
     '{{time}}',
     lastUpdated.toLocaleTimeString()
   )
+  const legendTemplate = trackingPage.legend?.[deliveryMethod] ?? trackingPage.legend?.drone ?? ''
+  const legendLabel = legendTemplate
+    ? legendTemplate.replace('{{code}}', selectedOrder?.code ?? '')
+    : `Order #${selectedOrder?.code ?? ''}`
 
   return (
     <main className='order-tracking-page'>
@@ -277,7 +289,19 @@ const OrderTracking = () => {
               </span>
             </article>
             <article className='summary-card'>
-              <span className='summary-label'>{summaryLabels.flightProgress}</span>
+              <span className='summary-label'>{summaryLabels.deliveryMethod}</span>
+              <strong>{methodLabel}</strong>
+              {methodInfo.description && <small className='summary-muted'>{methodInfo.description}</small>}
+            </article>
+            <article className='summary-card'>
+              <span className='summary-label'>{summaryLabels.estimatedArrival}</span>
+              <strong>{estimatedArrival}</strong>
+              {estimatedMinutes ? (
+                <small className='summary-muted'>≈ {estimatedMinutes} min</small>
+              ) : null}
+            </article>
+            <article className='summary-card'>
+              <span className='summary-label'>{summaryLabels.deliveryProgress}</span>
               <div className='summary-progress'>
                 <div className='summary-progress-bar'>
                   <div style={{ width: `${completion}%` }} />
@@ -295,19 +319,17 @@ const OrderTracking = () => {
 
           <div className='tracking-grid'>
             <div className='tracking-map'>
-              <GoogleDroneMap
+              <GoogleDeliveryMap
                 route={route}
-                droneCoordinate={droneCoordinate}
+                vehicleCoordinate={vehicleCoordinate}
                 currentIndex={currentIndex}
                 segmentProgress={segmentProgress}
                 orderCode={selectedOrder.code}
+                mode={deliveryMethod}
                 unavailableMessage={trackingPage.mapUnavailable}
               />
               <div className='map-legend'>
-                <strong>
-                  {trackingPage.legend.prefix}
-                  {selectedOrder.code}
-                </strong>
+                <strong>{legendLabel}</strong>
                 <span>{legendText}</span>
               </div>
             </div>

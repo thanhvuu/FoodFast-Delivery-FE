@@ -31,16 +31,56 @@ const loadGoogleMaps = apiKey => {
   })
 }
 
-const createDroneIcon = google => {
+const paletteByMode = {
+  drone: {
+    primary: '#3b82f6',
+    shadow: '#dbeafe',
+    progress: '#22c55e',
+    waypoint: '#2563eb',
+    fallbackIcon: '🚁',
+    startGradient: ['#38bdf8', '#6366f1'],
+  },
+  motorbike: {
+    primary: '#f97316',
+    shadow: '#fed7aa',
+    progress: '#ea580c',
+    waypoint: '#fb923c',
+    fallbackIcon: '🛵',
+    startGradient: ['#fb923c', '#f97316'],
+  },
+}
+
+const createVehicleIcon = (google, mode) => {
+  if (mode === 'motorbike') {
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+    <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bike-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fb923c" />
+          <stop offset="100%" stop-color="#f97316" />
+        </linearGradient>
+      </defs>
+      <circle cx="28" cy="28" r="24" fill="url(#bike-grad)" opacity="0.95" />
+      <path d="M17 34h8.6l2.6-7.5h7.4l2 4.2H41a5.6 5.6 0 0 1 0 11.2h-1.8a5.6 5.6 0 0 1-10.9 0H23a5.6 5.6 0 1 1-6-7.9Z" fill="#fff"/>
+      <circle cx="21" cy="39" r="4.4" fill="rgba(15,23,42,0.18)" />
+      <circle cx="37" cy="39" r="4.4" fill="rgba(15,23,42,0.18)" />
+    </svg>`
+    return {
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+      scaledSize: new google.maps.Size(56, 56),
+      anchor: new google.maps.Point(28, 28),
+    }
+  }
+
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="drone-grad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#38bdf8" />
         <stop offset="100%" stop-color="#6366f1" />
       </linearGradient>
     </defs>
-    <circle cx="28" cy="28" r="24" fill="url(#grad)" opacity="0.92" />
+    <circle cx="28" cy="28" r="24" fill="url(#drone-grad)" opacity="0.92" />
     <path d="M28 14l4 6h-8l4-6zm0 28l-4-6h8l-4 6zm14-14l-6 4v-8l6 4zm-28 0l6-4v8l-6-4z" fill="#f8fafc"/>
   </svg>`
 
@@ -51,10 +91,11 @@ const createDroneIcon = google => {
   }
 }
 
-const createEndpointIcon = (google, type) => {
+const createEndpointIcon = (google, type, palette) => {
   const isStart = type === 'start'
-  const gradientStart = isStart ? '#38bdf8' : '#fb923c'
-  const gradientEnd = isStart ? '#3b82f6' : '#ef4444'
+  const [startColor, endColor] = palette.startGradient
+  const gradientStart = isStart ? startColor : '#f97316'
+  const gradientEnd = isStart ? endColor : '#ef4444'
   const glyph = isStart ? 'A' : 'B'
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -68,7 +109,7 @@ const createEndpointIcon = (google, type) => {
         <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(15,23,42,0.35)" />
       </filter>
     </defs>
-    <path d="M24 0C11.297 0 1 10.297 1 23c0 15.422 18.078 35.086 22.766 40.082.66.698 1.808.698 2.468 0C28.922 58.086 47 38.422 47 23 47 10.297 36.703 0 24 0z" fill="url(#grad-${type})" filter="url(#shadow-${type})" />
+    <path d="M24 0C11.3 0 1 10.3 1 23c0 15.4 18.1 35.1 22.8 40.1.7.7 1.7.7 2.5 0C28.9 58.1 47 38.4 47 23 47 10.3 36.7 0 24 0z" fill="url(#grad-${type})" filter="url(#shadow-${type})" />
     <circle cx="24" cy="23" r="12" fill="white" />
     <text x="24" y="27" text-anchor="middle" font-size="14" font-family="'Inter', 'Arial', sans-serif" font-weight="700" fill="#0f172a">${glyph}</text>
   </svg>`
@@ -81,11 +122,11 @@ const createEndpointIcon = (google, type) => {
   }
 }
 
-const createWaypointIcon = google => {
+const createWaypointIcon = (google, palette) => {
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="9" cy="9" r="8" fill="rgba(59,130,246,0.18)" />
-    <circle cx="9" cy="9" r="4" fill="#2563eb" />
+    <circle cx="9" cy="9" r="8" fill="${palette.shadow}" />
+    <circle cx="9" cy="9" r="4" fill="${palette.waypoint}" />
   </svg>`
 
   return {
@@ -95,12 +136,13 @@ const createWaypointIcon = google => {
   }
 }
 
-const GoogleDroneMap = ({
+const GoogleDeliveryMap = ({
   route,
-  droneCoordinate,
+  vehicleCoordinate,
   currentIndex,
   segmentProgress,
   orderCode,
+  mode = 'drone',
   unavailableMessage,
 }) => {
   const containerRef = useRef(null)
@@ -108,10 +150,12 @@ const GoogleDroneMap = ({
   const polylineRef = useRef(null)
   const progressPolylineRef = useRef(null)
   const shadowPolylineRef = useRef(null)
-  const droneMarkerRef = useRef(null)
+  const vehicleMarkerRef = useRef(null)
   const checkpointsRef = useRef([])
   const [error, setError] = useState('')
   const [isReady, setIsReady] = useState(false)
+
+  const palette = paletteByMode[mode] ?? paletteByMode.drone
 
   const coordinates = useMemo(
     () =>
@@ -146,7 +190,6 @@ const GoogleDroneMap = ({
 
         if (!containerRef.current) return
 
-        // Cleanup previous map artefacts
         if (polylineRef.current) {
           polylineRef.current.setMap(null)
           polylineRef.current = null
@@ -161,10 +204,11 @@ const GoogleDroneMap = ({
         }
         checkpointsRef.current.forEach(marker => marker.setMap(null))
         checkpointsRef.current = []
-        if (droneMarkerRef.current) {
-          droneMarkerRef.current.setMap(null)
-          droneMarkerRef.current = null
+        if (vehicleMarkerRef.current) {
+          vehicleMarkerRef.current.setMap(null)
+          vehicleMarkerRef.current = null
         }
+
         mapRef.current = new google.maps.Map(containerRef.current, {
           center: coordinates[0],
           zoom: 14,
@@ -180,7 +224,7 @@ const GoogleDroneMap = ({
         shadowPolylineRef.current = new google.maps.Polyline({
           map: mapRef.current,
           path: coordinates,
-          strokeColor: '#e2e8f0',
+          strokeColor: palette.shadow,
           strokeOpacity: 0.9,
           strokeWeight: 8,
           geodesic: true,
@@ -189,8 +233,8 @@ const GoogleDroneMap = ({
         polylineRef.current = new google.maps.Polyline({
           map: mapRef.current,
           path: coordinates,
-          strokeColor: '#3b82f6',
-          strokeOpacity: 0.75,
+          strokeColor: palette.primary,
+          strokeOpacity: 0.85,
           strokeWeight: 4,
           geodesic: true,
           icons: [
@@ -199,6 +243,7 @@ const GoogleDroneMap = ({
                 path: 'M 0,-1 0,1',
                 strokeOpacity: 1,
                 scale: 3,
+                strokeColor: palette.primary,
               },
               offset: '0',
               repeat: '22px',
@@ -209,7 +254,7 @@ const GoogleDroneMap = ({
         progressPolylineRef.current = new google.maps.Polyline({
           map: mapRef.current,
           path: [coordinates[0]],
-          strokeColor: '#22c55e',
+          strokeColor: palette.progress,
           strokeOpacity: 1,
           strokeWeight: 5,
           geodesic: true,
@@ -224,18 +269,18 @@ const GoogleDroneMap = ({
           map: mapRef.current,
           position: coordinates[0],
           title: route[0]?.title ?? 'Start',
-          icon: createEndpointIcon(google, 'start'),
+          icon: createEndpointIcon(google, 'start', palette),
           zIndex: 8,
         })
         const endMarker = new google.maps.Marker({
           map: mapRef.current,
           position: coordinates[coordinates.length - 1],
           title: route[route.length - 1]?.title ?? 'Destination',
-          icon: createEndpointIcon(google, 'end'),
+          icon: createEndpointIcon(google, 'end', palette),
           zIndex: 8,
         })
 
-        const waypointIcon = createWaypointIcon(google)
+        const waypointIcon = createWaypointIcon(google, palette)
         const waypointMarkers = route
           .slice(1, -1)
           .filter(point => point?.coords)
@@ -264,27 +309,27 @@ const GoogleDroneMap = ({
     return () => {
       cancelled = true
     }
-  }, [coordinates, unavailableMessage])
+  }, [coordinates, mode, palette, unavailableMessage])
 
   useEffect(() => {
-    if (!isReady || !mapRef.current || !droneCoordinate) return
+    if (!isReady || !mapRef.current || !vehicleCoordinate) return
     const google = window.google
     if (!google?.maps) return
 
-    if (!droneMarkerRef.current) {
-      droneMarkerRef.current = new google.maps.Marker({
+    if (!vehicleMarkerRef.current) {
+      vehicleMarkerRef.current = new google.maps.Marker({
         map: mapRef.current,
-        position: droneCoordinate,
-        title: orderCode ? `Drone ${orderCode}` : 'Drone position',
-        icon: createDroneIcon(google),
+        position: vehicleCoordinate,
+        title: orderCode ? `${mode === 'motorbike' ? 'Courier' : 'Drone'} ${orderCode}` : 'Current position',
+        icon: createVehicleIcon(google, mode),
         zIndex: 10,
       })
     } else {
-      droneMarkerRef.current.setPosition(droneCoordinate)
+      vehicleMarkerRef.current.setPosition(vehicleCoordinate)
     }
 
-    mapRef.current.panTo(droneCoordinate)
-  }, [droneCoordinate, isReady, orderCode])
+    mapRef.current.panTo(vehicleCoordinate)
+  }, [isReady, mode, orderCode, vehicleCoordinate])
 
   useEffect(() => {
     if (!isReady || !progressPolylineRef.current) return
@@ -298,16 +343,16 @@ const GoogleDroneMap = ({
       }
     }
 
-    if (droneCoordinate) {
+    if (vehicleCoordinate) {
       const hasSameAsLast = completedPath.length
         ?
-          completedPath[completedPath.length - 1].lat === droneCoordinate.lat &&
-          completedPath[completedPath.length - 1].lng === droneCoordinate.lng
+            completedPath[completedPath.length - 1].lat === vehicleCoordinate.lat &&
+            completedPath[completedPath.length - 1].lng === vehicleCoordinate.lng
         : false
 
-      if (segmentProgress > 0 || (!completedPath.length && droneCoordinate)) {
+      if (segmentProgress > 0 || (!completedPath.length && vehicleCoordinate)) {
         if (!hasSameAsLast) {
-          completedPath.push(droneCoordinate)
+          completedPath.push(vehicleCoordinate)
         }
       }
     }
@@ -317,7 +362,7 @@ const GoogleDroneMap = ({
     }
 
     progressPolylineRef.current.setPath(completedPath)
-  }, [currentIndex, droneCoordinate, isReady, route, segmentProgress])
+  }, [currentIndex, isReady, route, segmentProgress, vehicleCoordinate])
 
   useEffect(() => () => {
     if (polylineRef.current) {
@@ -334,14 +379,15 @@ const GoogleDroneMap = ({
     }
     checkpointsRef.current.forEach(marker => marker.setMap(null))
     checkpointsRef.current = []
-    if (droneMarkerRef.current) {
-      droneMarkerRef.current.setMap(null)
-      droneMarkerRef.current = null
+    if (vehicleMarkerRef.current) {
+      vehicleMarkerRef.current.setMap(null)
+      vehicleMarkerRef.current = null
     }
     mapRef.current = null
   }, [])
 
   const showFallback = Boolean(error)
+  const fallbackIcon = palette.fallbackIcon
 
   return (
     <div className='google-map-wrapper'>
@@ -353,7 +399,7 @@ const GoogleDroneMap = ({
       />
       {showFallback && (
         <div className='map-fallback' role='status'>
-          <div className='map-fallback-icon' aria-hidden='true'>🚁</div>
+          <div className='map-fallback-icon' aria-hidden='true'>{fallbackIcon}</div>
           <p>{error}</p>
           {route?.length ? (
             <ol className='map-fallback-steps'>
@@ -372,4 +418,4 @@ const GoogleDroneMap = ({
   )
 }
 
-export default GoogleDroneMap
+export default GoogleDeliveryMap
