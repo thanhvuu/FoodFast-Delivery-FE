@@ -4,6 +4,7 @@ import './Orders.css'
 import { useAdminLanguage } from '../../context/LanguageContext'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
+const ORDER_STATUS_FLOW = ['new', 'preparing', 'completed']
 
 const readStoredOrders = () => {
     if (typeof window === 'undefined') return []
@@ -41,14 +42,25 @@ const nextFallbackId = () => {
     return `order-${fallbackIdCounter}`
 }
 
+const normaliseStatus = (status) => {
+    if (!status) return ORDER_STATUS_FLOW[0]
+    if (ORDER_STATUS_FLOW.includes(status)) {
+        return status
+    }
+    if (status === 'delivered') return 'completed'
+    if (status === 'pending' || status === 'new_order') return 'new'
+    if (status === 'in_progress') return 'preparing'
+    return ORDER_STATUS_FLOW[0]
+}
+
 const transformOrder = (order) => {
     const items = Array.isArray(order?.items) ? order.items.map(normaliseItem) : []
-    const status = order?.adminStatus ?? order?.status
+    const status = normaliseStatus(order?.adminStatus ?? order?.status)
     return {
         id: order?.id ?? nextFallbackId(),
         customer: order?.customer ?? 'Khách hàng',
         address: order?.address ?? '',
-        status: status === 'delivered' ? 'delivered' : 'pending',
+        status,
         trackingStatus: order?.trackingStatus,
         paid: Boolean(order?.paid),
         deliveryFee: digitsOnly(order?.deliveryFee),
@@ -70,6 +82,14 @@ const calculateOrderTotal = (order) => {
     const deliveryFee = order.deliveryFee || 0
     const storedTotal = order.total || 0
     return storedTotal || (itemsTotal + deliveryFee)
+}
+
+const getNextStatus = (status) => {
+    const index = ORDER_STATUS_FLOW.indexOf(status)
+    if (index === -1) {
+        return ORDER_STATUS_FLOW[0]
+    }
+    return ORDER_STATUS_FLOW[index + 1] ?? null
 }
 
 const Orders = () => {
@@ -106,31 +126,28 @@ const Orders = () => {
         window.dispatchEvent(new CustomEvent('foodfast-orders-update'))
     }
 
-    const handleToggleStatus = (id) => {
+    const handleAdvanceStatus = (id) => {
         setOrders(prev => {
-            let nextStatus = null
-            let nextTrackingStatus = null
             const updated = prev.map(order => {
                 if (order.id !== id) return order
-                const isDelivered = order.status === 'delivered'
-                nextStatus = isDelivered ? 'pending' : 'delivered'
-                nextTrackingStatus = order.trackingStatus
-                    ? (order.trackingStatus === 'delivered' ? 'inTransit' : 'delivered')
-                    : undefined
-                return {
-                    ...order,
-                    status: nextStatus,
-                    trackingStatus: nextTrackingStatus ?? order.trackingStatus,
+                const nextStatus = getNextStatus(order.status)
+                if (!nextStatus) {
+                    return order
                 }
-            })
-
-            if (nextStatus) {
+                const nextTrackingStatus = nextStatus === 'completed'
+                    ? 'delivered'
+                    : 'inTransit'
                 updateStoredOrder(id, current => ({
                     adminStatus: nextStatus,
                     status: nextStatus,
                     trackingStatus: nextTrackingStatus ?? current.trackingStatus,
                 }))
-            }
+                return {
+                    ...order,
+                    status: nextStatus,
+                    trackingStatus: nextTrackingStatus,
+                }
+            })
 
             return updated
         })
@@ -185,8 +202,8 @@ const Orders = () => {
                             </td>
                             <td>{order.address}</td>
                             <td>
-                                <span className={order.status === 'delivered' ? 'badge badge-delivered' : 'badge badge-pending'}>
-                                    {order.status === 'delivered' ? t.statuses.delivered : t.statuses.pending}
+                                <span className={`badge ${order.status === 'completed' ? 'badge-completed' : order.status === 'preparing' ? 'badge-preparing' : 'badge-new'}`}>
+                                    {t.statuses[order.status] ?? order.status}
                                 </span>
                             </td>
                             <td>
@@ -198,7 +215,12 @@ const Orders = () => {
                                 {formatCurrency(calculateOrderTotal(order))}
                             </td>
                             <td>
-                                <button onClick={() => handleToggleStatus(order.id)}>{t.buttons.toggleStatus}</button>
+                                <button
+                                    onClick={() => handleAdvanceStatus(order.id)}
+                                    disabled={!getNextStatus(order.status)}
+                                >
+                                    {t.buttons.advanceStatus?.[order.status] ?? t.buttons.advanceFallback}
+                                </button>
                                 <button onClick={() => handleTogglePaid(order.id)}>{t.buttons.togglePayment}</button>
                             </td>
                         </tr>

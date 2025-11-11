@@ -70,9 +70,10 @@ const Tracking = () => {
 
     const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
 
-    const statusLabel = selectedOrder?.status === 'delivered'
-        ? t.summaryLabels.delivered
-        : t.summaryLabels.inTransit
+    const statusKey = selectedOrder?.status ?? 'new'
+    const statusDictionary = t.summaryLabels.statusValues ?? {}
+    const statusLabel = statusDictionary[statusKey] ?? statusDictionary.default ?? statusKey
+    const statusClass = statusKey === 'completed' ? 'badge-success' : statusKey === 'preparing' ? 'badge-progress' : 'badge-pending'
 
     const paymentLabel = selectedOrder?.paid
         ? t.summaryLabels.paid
@@ -121,9 +122,7 @@ const Tracking = () => {
                         </div>
                         <div className='summary-card'>
                             <span className='summary-label'>{t.summaryLabels.status}</span>
-                            <strong className={selectedOrder.status === 'delivered' ? 'badge-success' : 'badge-pending'}>
-                                {statusLabel}
-                            </strong>
+                            <strong className={statusClass}>{statusLabel}</strong>
                         </div>
                         <div className='summary-card'>
                             <span className='summary-label'>{t.summaryLabels.payment}</span>

@@ -37,12 +37,20 @@ const normaliseItem = item => ({
 
 const transformOrder = order => {
   const items = Array.isArray(order?.items) ? order.items.map(normaliseItem) : []
-  const status = order?.adminStatus ?? order?.status
+  const normaliseStatus = value => {
+    if (!value) return 'new'
+    if (['new', 'preparing', 'completed'].includes(value)) return value
+    if (value === 'delivered') return 'completed'
+    if (value === 'pending' || value === 'new_order') return 'new'
+    if (value === 'in_progress') return 'preparing'
+    return 'new'
+  }
+  const status = normaliseStatus(order?.adminStatus ?? order?.status)
   return {
     id: order?.id ?? `order-${Math.random().toString(36).slice(2, 9)}`,
     customer: order?.customer ?? 'Customer',
     address: order?.address ?? '',
-    status: status === 'delivered' ? 'delivered' : 'pending',
+    status,
     trackingStatus: order?.trackingStatus,
     paid: Boolean(order?.paid),
     deliveryFee: digitsOnly(order?.deliveryFee),
@@ -127,8 +135,8 @@ const Dashboard = ({ products = [] }) => {
 
   const metrics = useMemo(() => {
     const totalOrders = orders.length
-    const deliveredOrders = orders.filter(order => order.status === 'delivered')
-    const pendingOrders = totalOrders - deliveredOrders.length
+    const completedOrders = orders.filter(order => order.status === 'completed')
+    const pendingOrders = totalOrders - completedOrders.length
 
     const totalRevenue = orders.reduce((sum, order) => sum + calculateOrderTotal(order), 0)
 
@@ -152,9 +160,9 @@ const Dashboard = ({ products = [] }) => {
     return {
       totalProducts: products.length,
       totalOrders,
-      deliveredOrders: deliveredOrders.length,
+      deliveredOrders: completedOrders.length,
       pendingOrders,
-      deliveredRate: totalOrders ? Math.round((deliveredOrders.length / totalOrders) * 100) : 0,
+      deliveredRate: totalOrders ? Math.round((completedOrders.length / totalOrders) * 100) : 0,
       totalRevenue,
       methodBreakdown,
       averageEta,
@@ -413,16 +421,20 @@ const Dashboard = ({ products = [] }) => {
             <tbody>
               {recentOrders.map(order => {
                 const method = formatMethodLabel(order.deliveryMethod ?? 'drone')
-                const statusLabel = order.status === 'delivered'
-                  ? ordersTranslations.statuses.delivered
-                  : ordersTranslations.statuses.pending
+                const statusKey = order.status ?? 'new'
+                const statusLabel = ordersTranslations.statuses?.[statusKey] ?? statusKey
+                const statusClass = statusKey === 'completed'
+                  ? 'completed'
+                  : statusKey === 'preparing'
+                    ? 'preparing'
+                    : 'new'
                 return (
                   <tr key={order.id}>
                     <td>{order.id.toUpperCase()}</td>
                     <td>{order.customer}</td>
                     <td>{method}</td>
                     <td>
-                      <span className={`status-chip ${order.status === 'delivered' ? 'delivered' : 'pending'}`}>
+                      <span className={`status-chip ${statusClass}`}>
                         {statusLabel}
                       </span>
                     </td>

@@ -365,12 +365,17 @@
   font-weight: 600;
 }
 
-.status-chip.delivered {
+.status-chip.completed {
   background: rgba(16, 185, 129, 0.15);
   color: #047857;
 }
 
-.status-chip.pending {
+.status-chip.preparing {
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+}
+
+.status-chip.new {
   background: rgba(249, 115, 22, 0.15);
   color: #c2410c;
 }
