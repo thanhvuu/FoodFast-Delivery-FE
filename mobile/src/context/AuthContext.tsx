@@ -1,14 +1,9 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AUTH_USER_STORAGE_KEY, USERS_API_URL } from '../constants/api';
+import { AUTH_USER_STORAGE_KEY } from '../constants/api';
+import { readUsersFromFile, saveUsersToFile, StoredUserRecord } from '../utils/userFileStore';
 
-type StoredUser = {
-  id: number | string;
-  username?: string;
-  email: string;
-  password?: string;
-  [key: string]: unknown;
-};
+type StoredUser = Omit<StoredUserRecord, 'password'> & { password?: string };
 
 type RegisterPayload = {
   username: string;
@@ -43,21 +38,6 @@ const parseStoredUser = (value: string | null): StoredUser | null => {
   }
 };
 
-const fetchUsers = async (): Promise<StoredUser[]> => {
-  const response = await fetch(USERS_API_URL);
-  if (!response.ok) {
-    throw new Error('Không thể giao tiếp với server');
-  }
-
-  try {
-    const data = await response.json();
-    return Array.isArray(data) ? (data as StoredUser[]) : [];
-  } catch (error) {
-    console.warn('Không thể phân tích danh sách người dùng', error);
-    return [];
-  }
-};
-
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<StoredUser | null>(null);
   const [initializing, setInitializing] = useState<boolean>(true);
@@ -86,7 +66,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       throw new Error('Vui lòng nhập email và mật khẩu');
     }
 
-    const users = await fetchUsers();
+    const users = await readUsersFromFile();
     const matched = users.find(
       (item) => item.email?.toLowerCase() === trimmedEmail && item.password === password
     );
@@ -95,9 +75,11 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       throw new Error('Thông tin đăng nhập không chính xác');
     }
 
-    setUser(matched);
-    await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(matched));
-    return matched;
+    const { password: _password, ...sanitized } = matched;
+    const sanitizedUser: StoredUser = sanitized;
+    setUser(sanitizedUser);
+    await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
+    return sanitizedUser;
   }, []);
 
   const register = useCallback(async ({ username, email, password }: RegisterPayload) => {
@@ -107,25 +89,27 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       throw new Error('Vui lòng nhập đầy đủ và chính xác thông tin');
     }
 
-    const users = await fetchUsers();
+    const users = await readUsersFromFile();
     const existed = users.some((item) => item.email?.toLowerCase() === trimmedEmail);
 
     if (existed) {
       throw new Error('Email đã tồn tại');
     }
 
-    const response = await fetch(USERS_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email: trimmedEmail, password }),
-    });
+    const newUser: StoredUserRecord = {
+      id: Date.now().toString(),
+      username,
+      email: trimmedEmail,
+      password,
+    };
 
-    if (!response.ok) {
-      throw new Error('Không thể tạo tài khoản mới');
-    }
+    const nextUsers = [...users, newUser];
 
-    const created = (await response.json()) as StoredUser;
-    return created;
+    await saveUsersToFile(nextUsers);
+
+    const { password: _password, ...sanitized } = newUser;
+    const sanitizedUser: StoredUser = sanitized;
+    return sanitizedUser;
   }, []);
 
   const logout = useCallback(async () => {
