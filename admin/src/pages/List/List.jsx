@@ -1,19 +1,22 @@
-import React, { useState } from 'react'
-import { food_list } from '../../assets/assest'
+import React, { useMemo, useState } from 'react'
 import './List.css'
 import FoodEdit from '../../component/FoodEdit/FoodEdit' // Đường dẫn đúng đến FoodEdit.jsx
 import { useAdminLanguage } from '../../context/LanguageContext'
 
-const List = () => {
-    const [products, setProducts] = useState(food_list)
+const List = ({ products = [], onDelete, onUpdate }) => {
     const [editingProduct, setEditingProduct] = useState(null)
     const { dictionary, formatCurrency } = useAdminLanguage()
     const t = dictionary.listPage
 
+    const enhancedProducts = useMemo(() => products.map(item => ({
+        status: 'available',
+        ...item,
+    })), [products])
+
     // Xoá sản phẩm
     const handleDelete = (id) => {
         if (window.confirm(t.confirmDelete)) {
-            setProducts(products.filter(item => item._id !== id))
+            onDelete?.(id)
         }
     }
 
@@ -24,14 +27,19 @@ const List = () => {
 
     // Lưu sản phẩm đã sửa từ popup
     const handleSaveEdit = (updatedProduct) => {
-        setProducts(products.map(item =>
-            item._id === updatedProduct._id ? updatedProduct : item
-        ))
+        onUpdate?.(updatedProduct)
         setEditingProduct(null)
     }
 
     // Đóng popup
     const handleCloseEdit = () => setEditingProduct(null)
+
+    const handleToggleStatus = (product) => {
+        const nextStatus = product.status === 'available' ? 'out_of_stock' : 'available'
+        onUpdate?.({ ...product, status: nextStatus })
+    }
+
+    const statusLabels = t.statusLabels || {}
 
     return (
         <div className="admin-products-list">
@@ -45,11 +53,12 @@ const List = () => {
                         <th>{t.columns.category}</th>
                         <th>{t.columns.price}</th>
                         <th>{t.columns.restaurant}</th>
+                        <th>{t.columns.status}</th>
                         <th>{t.columns.actions}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {products.map(item => (
+                    {enhancedProducts.map(item => (
                         <tr key={item._id}>
                             <td>
                                 <img src={item.image} alt={item.name} className='prod-img' />
@@ -63,8 +72,20 @@ const List = () => {
                                 <span style={{ fontSize: 12, color: '#888' }}>{item.restaurant?.address}</span>
                             </td>
                             <td>
+                                <span className={`status-pill ${item.status === 'available' ? 'status-available' : 'status-out'}`}>
+                                    {statusLabels[item.status] || item.status}
+                                </span>
+                            </td>
+                            <td>
                                 <button className="edit-btn" onClick={() => handleEdit(item)}>{t.edit}</button>
                                 <button className="delete-btn" onClick={() => handleDelete(item._id)}>{t.delete}</button>
+                                <button
+                                    className="status-toggle-btn"
+                                    onClick={() => handleToggleStatus(item)}
+                                    type='button'
+                                >
+                                    {item.status === 'available' ? t.markOutOfStock : t.markAvailable}
+                                </button>
                             </td>
                         </tr>
                     ))}

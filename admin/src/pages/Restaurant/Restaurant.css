@@ -1,0 +1,188 @@
+.restaurant-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 40px;
+  color: #1f2933;
+}
+
+.restaurant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.restaurant-header h1 {
+  margin: 0 0 10px;
+  font-size: 30px;
+  color: #0f172a;
+}
+
+.restaurant-header p {
+  margin: 0;
+  max-width: 520px;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.restaurant-status {
+  background: #dcfce7;
+  color: #166534;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  align-self: center;
+}
+
+.restaurant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 28px;
+}
+
+.restaurant-form {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.restaurant-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.restaurant-form input,
+.restaurant-form textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #f8fafc;
+  transition: border 0.2s ease;
+}
+
+.restaurant-form input:focus,
+.restaurant-form textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+  background: #ffffff;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.form-full {
+  width: 100%;
+}
+
+.form-half {
+  max-width: 280px;
+}
+
+.input-with-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-with-hint small {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.restaurant-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.form-actions button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.form-actions button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.last-saved {
+  color: #475569;
+  font-size: 14px;
+}
+
+.restaurant-summary {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: #f8fafc;
+  border-radius: 24px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.25);
+}
+
+.restaurant-summary h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.restaurant-summary p {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.75);
+  line-height: 1.5;
+}
+
+.restaurant-summary dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.restaurant-summary dt {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(248, 250, 252, 0.7);
+}
+
+.restaurant-summary dd {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .restaurant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .restaurant-summary {
+    order: -1;
+  }
+}

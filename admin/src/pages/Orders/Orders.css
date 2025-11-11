@@ -63,14 +63,19 @@
     opacity: 0.96;
 }
 
-.badge-delivered {
-    background: #dbfdd9;
-    color: #157026;
+.badge-new {
+    background: #fff3cd;
+    color: #8c6d1f;
 }
 
-.badge-pending {
-    background: #fff2f0;
-    color: #b62326;
+.badge-preparing {
+    background: #e0f2ff;
+    color: #0b5394;
+}
+
+.badge-completed {
+    background: #dbfdd9;
+    color: #157026;
 }
 
 .badge-paid {
@@ -99,6 +104,12 @@
 .admin-orders-list td>button:hover {
     background: #deefff;
     color: #2a475f;
+}
+
+.admin-orders-list td>button:disabled {
+    background: #edf2f7;
+    color: #a0aec0;
+    cursor: not-allowed;
 }
 
 .admin-orders-list td {
