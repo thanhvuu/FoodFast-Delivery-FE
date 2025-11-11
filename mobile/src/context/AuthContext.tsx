@@ -3,7 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_USER_STORAGE_KEY } from '../constants/api';
 import { readUsersFromFile, saveUsersToFile, StoredUserRecord } from '../utils/userFileStore';
 
+export type UserRole = 'customer' | 'admin' | 'restaurant';
+
 type StoredUser = Omit<StoredUserRecord, 'password'> & { password?: string };
+export type AuthenticatedUser = StoredUser;
 
 type RegisterPayload = {
   username: string;
@@ -22,6 +25,41 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const presetUsers: StoredUserRecord[] = [
+  {
+    id: 'admin',
+    username: 'Nguyễn Quản Trị',
+    email: 'admin@gmail.com',
+    password: 'admin',
+    role: 'admin',
+    phone: '0909000900',
+    address: 'Trụ sở chính FoodFast, Thủ Đức',
+    hub: 'FoodFast Hub',
+  },
+  {
+    id: 'restaurant',
+    username: 'FastGrill Station',
+    email: 'res@gmail.com',
+    password: 'res',
+    role: 'restaurant',
+    phone: '0908123456',
+    address: 'Pad-05, Khu vực trung tâm',
+    contactName: 'Mai Anh',
+  },
+];
+
+const ensureRole = (data: StoredUser | null): StoredUser | null => {
+  if (!data) {
+    return null;
+  }
+
+  if (!data.role) {
+    return { ...data, role: 'customer' };
+  }
+
+  return data;
+};
+
 const parseStoredUser = (value: string | null): StoredUser | null => {
   if (!value) {
     return null;
@@ -29,7 +67,7 @@ const parseStoredUser = (value: string | null): StoredUser | null => {
   try {
     const parsed = JSON.parse(value);
     if (parsed && typeof parsed === 'object') {
-      return parsed as StoredUser;
+      return ensureRole(parsed as StoredUser);
     }
     return null;
   } catch (error) {
@@ -66,6 +104,18 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       throw new Error('Vui lòng nhập email và mật khẩu');
     }
 
+    const matchedPreset = presetUsers.find(
+      (item) => item.email.toLowerCase() === trimmedEmail && item.password === password
+    );
+
+    if (matchedPreset) {
+      const { password: _password, ...sanitized } = matchedPreset;
+      const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
+      setUser(sanitizedUser);
+      await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
+      return sanitizedUser;
+    }
+
     const users = await readUsersFromFile();
     const matched = users.find(
       (item) => item.email?.toLowerCase() === trimmedEmail && item.password === password
@@ -76,7 +126,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
     }
 
     const { password: _password, ...sanitized } = matched;
-    const sanitizedUser: StoredUser = sanitized;
+    const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
     setUser(sanitizedUser);
     await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
     return sanitizedUser;
@@ -101,6 +151,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       username,
       email: trimmedEmail,
       password,
+      role: 'customer',
     };
 
     const nextUsers = [...users, newUser];
@@ -108,7 +159,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
     await saveUsersToFile(nextUsers);
 
     const { password: _password, ...sanitized } = newUser;
-    const sanitizedUser: StoredUser = sanitized;
+    const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
     return sanitizedUser;
   }, []);
 

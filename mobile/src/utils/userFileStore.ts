@@ -5,6 +5,11 @@ export type StoredUserRecord = {
   username?: string;
   email: string;
   password?: string;
+  role?: 'customer' | 'admin' | 'restaurant';
+  phone?: string;
+  address?: string;
+  contactName?: string;
+  hub?: string;
   [key: string]: unknown;
 };
 
