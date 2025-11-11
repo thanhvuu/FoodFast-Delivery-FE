@@ -2,21 +2,18 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import HomeScreen from '../screen/HomeScreen';
-import FoodDetailScreen from '../screen/FoodDetailScreen';
-import ContactScreen from '../screen/ContactScreen';
-import TrackingScreen from '../screen/TrackingScreen';
-import AuthScreen from '../screen/AuthScreen';
-import { useAuth } from '../context/AuthContext';
+import {
+  HomeScreen,
+  FoodDetailScreen,
+  ContactScreen,
+  TrackingScreen,
+  AuthScreen,
+  CartScreen,
+  CheckoutScreen,
+} from '../screen';
+import { useAuth } from '../context';
 import colors from '../theme/colors';
-
-export type RootStackParamList = {
-  Auth: undefined;
-  Home: undefined;
-  FoodDetail: { id: string } | undefined;
-  Contact: undefined;
-  Tracking: undefined;
-};
+import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,6 +42,8 @@ const AppNavigator: React.FC = () => {
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="Contact" component={ContactScreen} />
             <Stack.Screen name="Tracking" component={TrackingScreen} />
           </>

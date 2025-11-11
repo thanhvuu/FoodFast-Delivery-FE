@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList } from '../navigation/types';
 import { featured, popular } from '../data/menu';
 import FoodCard from '../components/FoodCard';
+import { useCart } from '../context/CartContext';
 
 const allFood = [...featured, ...popular];
 
@@ -21,7 +22,19 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     return allFood.find((item) => item.id === route.params?.id) ?? allFood[0];
   }, [route.params?.id]);
 
-  const recommendations = useMemo(() => allFood.filter((item) => item.id !== selected.id).slice(0, 3), [selected.id]);
+  const recommendations = useMemo(
+    () => allFood.filter((item) => item.id !== selected.id).slice(0, 3),
+    [selected.id],
+  );
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem(selected);
+    Alert.alert('Thành công', `${selected.name} đã được thêm vào giỏ hàng.`, [
+      { text: 'Tiếp tục chọn món' },
+      { text: 'Xem giỏ hàng', onPress: () => navigation.navigate('Cart') },
+    ]);
+  };
 
   return (
     <ScreenContainer>
@@ -53,7 +66,7 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
               <Text style={styles.metaValue}>2 người</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.9}>
+          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.9} onPress={handleAddToCart}>
             <Text style={styles.ctaLabel}>Thêm vào giỏ hàng</Text>
           </TouchableOpacity>
         </View>
@@ -79,15 +92,15 @@ const styles = StyleSheet.create({
     width: '90%',
     height: 220,
     borderRadius: 24,
+    marginVertical: spacing.lg,
     alignSelf: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg,
   },
   card: {
     backgroundColor: colors.surface,
     marginHorizontal: spacing.lg,
     borderRadius: 32,
     padding: spacing.xl,
+    marginBottom: spacing.xl,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -96,99 +109,105 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 12,
-    color: colors.accent,
+    color: colors.primary,
     fontWeight: '600',
-    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
   },
   title: {
-    marginTop: spacing.xs,
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 20,
+    fontWeight: '700',
     color: colors.text,
   },
   pricePill: {
     backgroundColor: '#FFE8DA',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 20,
+    borderRadius: 16,
   },
   price: {
-    color: colors.primary,
+    fontSize: 16,
     fontWeight: '700',
+    color: colors.primary,
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: spacing.md,
+    marginBottom: spacing.lg,
   },
   rating: {
+    fontSize: 14,
     fontWeight: '700',
     color: colors.text,
     marginRight: spacing.xs,
   },
   votes: {
+    fontSize: 12,
     color: colors.muted,
   },
   description: {
-    marginTop: spacing.md,
+    fontSize: 13,
+    lineHeight: 20,
     color: colors.muted,
-    lineHeight: 22,
-    fontSize: 14,
+    marginBottom: spacing.lg,
   },
   metaBlock: {
     flexDirection: 'row',
-    marginTop: spacing.lg,
     justifyContent: 'space-between',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
   },
   metaItem: {
-    backgroundColor: '#F4F5FC',
-    padding: spacing.md,
-    borderRadius: 20,
     flex: 1,
+    alignItems: 'center',
   },
   metaItemLeft: {
-    marginRight: spacing.sm,
+    borderRightWidth: 1,
+    borderRightColor: '#E0E0E0',
+    paddingRight: spacing.md,
   },
   metaItemRight: {
-    marginLeft: spacing.sm,
+    paddingLeft: spacing.md,
   },
   metaLabel: {
+    fontSize: 11,
     color: colors.muted,
-    fontSize: 12,
+    fontWeight: '600',
     marginBottom: spacing.xs,
   },
   metaValue: {
-    color: colors.text,
+    fontSize: 13,
     fontWeight: '700',
+    color: colors.text,
   },
   ctaButton: {
-    marginTop: spacing.xl,
     backgroundColor: colors.primary,
+    borderRadius: 20,
     paddingVertical: spacing.md,
-    borderRadius: 32,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   ctaLabel: {
     color: '#fff',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: 14,
   },
   sectionTitle: {
-    marginTop: spacing.xl,
-    marginHorizontal: spacing.lg,
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
     color: colors.text,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
   },
   recommendations: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     paddingHorizontal: spacing.lg,
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
   recommendationItem: {
-    width: '48%',
-    marginTop: spacing.lg,
+    flex: 1,
   },
 });
 
