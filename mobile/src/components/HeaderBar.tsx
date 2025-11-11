@@ -45,6 +45,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
     navigation.navigate('Cart');
   }, [navigation]);
 
+  const handleAccountPress = useCallback(() => {
+    navigation.navigate('Account');
+  }, [navigation]);
+
   const displayName = user?.username || user?.email || '';
 
   return (
@@ -65,7 +69,13 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
             accessibilityRole="button"
             activeOpacity={0.85}
           >
-            <Text style={styles.cartIcon}>🛒</Text>
+            <View style={styles.cartIconWrapper}>
+              <View style={styles.cartHandle} />
+              <View style={styles.cartBasket}>
+                <View style={[styles.cartDivider, { left: 6 }]} />
+                <View style={[styles.cartDivider, { right: 6 }]} />
+              </View>
+            </View>
             {totalItems > 0 ? (
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeLabel}>{totalItems}</Text>
@@ -77,9 +87,16 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           user ? (
             <View style={styles.authRow}>
               {displayName ? (
-                <Text style={styles.userLabel} numberOfLines={1}>
-                  {String(displayName)}
-                </Text>
+                <TouchableOpacity
+                  onPress={handleAccountPress}
+                  accessibilityRole="button"
+                  style={styles.userLabelButton}
+                  activeOpacity={0.85}
+                >
+                  <Text style={styles.userLabel} numberOfLines={1}>
+                    {String(displayName)}
+                  </Text>
+                </TouchableOpacity>
               ) : null}
               <TouchableOpacity
                 onPress={handleAuthPress}
@@ -153,8 +170,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.sm,
   },
-  cartIcon: {
-    fontSize: 20,
+  cartIconWrapper: {
+    width: 22,
+    alignItems: 'center',
+  },
+  cartHandle: {
+    width: 16,
+    height: 8,
+    borderWidth: 1.6,
+    borderColor: colors.text,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    marginBottom: -1,
+  },
+  cartBasket: {
+    width: 20,
+    height: 10,
+    borderWidth: 1.6,
+    borderColor: colors.text,
+    borderTopWidth: 1.1,
+    borderRadius: 4,
+    justifyContent: 'flex-end',
+    paddingBottom: 2,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  cartDivider: {
+    position: 'absolute',
+    top: 2,
+    bottom: 2,
+    width: 1.2,
+    backgroundColor: colors.text,
+    opacity: 0.85,
   },
   cartBadge: {
     position: 'absolute',
@@ -177,9 +225,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  userLabelButton: {
+    marginRight: spacing.xs,
+    paddingVertical: spacing.xs / 2,
+    paddingHorizontal: spacing.xs,
+    borderRadius: 14,
+    backgroundColor: 'transparent',
+  },
   userLabel: {
     color: colors.muted,
-    marginRight: spacing.xs,
     maxWidth: 140,
   },
   authButton: {
