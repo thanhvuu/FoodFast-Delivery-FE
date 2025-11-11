@@ -10,6 +10,8 @@ import {
   AuthScreen,
   CartScreen,
   CheckoutScreen,
+  AccountScreen,
+  OrderHistoryScreen,
 } from '../screen';
 import { useAuth } from '../context';
 import colors from '../theme/colors';
@@ -46,6 +48,8 @@ const AppNavigator: React.FC = () => {
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="Contact" component={ContactScreen} />
             <Stack.Screen name="Tracking" component={TrackingScreen} />
+            <Stack.Screen name="Account" component={AccountScreen} />
+            <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

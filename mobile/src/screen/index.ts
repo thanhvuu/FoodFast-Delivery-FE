@@ -5,3 +5,5 @@ export { default as CheckoutScreen } from './CheckoutScreen';
 export { default as FoodDetailScreen } from './FoodDetailScreen';
 export { default as ContactScreen } from './ContactScreen';
 export { default as TrackingScreen } from './TrackingScreen';
+export { default as AccountScreen } from './AccountScreen';
+export { default as OrderHistoryScreen } from './OrderHistoryScreen';

@@ -6,4 +6,6 @@ export type RootStackParamList = {
   Tracking: undefined;
   Cart: undefined;
   Checkout: undefined;
+  Account: undefined;
+  OrderHistory: undefined;
 };
