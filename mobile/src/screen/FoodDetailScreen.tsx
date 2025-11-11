@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
@@ -8,6 +8,7 @@ import spacing from '../theme/spacing';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { featured, popular } from '../data/menu';
 import FoodCard from '../components/FoodCard';
+import { useCart } from '../context/CartContext';
 
 const allFood = [...featured, ...popular];
 
@@ -22,6 +23,15 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   }, [route.params?.id]);
 
   const recommendations = useMemo(() => allFood.filter((item) => item.id !== selected.id).slice(0, 3), [selected.id]);
+  const { addItem } = useCart();
+
+  const handleAddToCart = () => {
+    addItem(selected);
+    Alert.alert('Thành công', `${selected.name} đã được thêm vào giỏ hàng.`, [
+      { text: 'Tiếp tục chọn món' },
+      { text: 'Xem giỏ hàng', onPress: () => navigation.navigate('Cart') },
+    ]);
+  };
 
   return (
     <ScreenContainer>
@@ -53,7 +63,7 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
               <Text style={styles.metaValue}>2 người</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.9}>
+          <TouchableOpacity style={styles.ctaButton} activeOpacity={0.9} onPress={handleAddToCart}>
             <Text style={styles.ctaLabel}>Thêm vào giỏ hàng</Text>
           </TouchableOpacity>
         </View>
