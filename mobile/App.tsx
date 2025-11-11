@@ -1,11 +1,13 @@
 import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
-import { AuthProvider } from './src/context/AuthContext';
+import { AuthProvider, CartProvider } from './src/context';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AppNavigator />
+      <CartProvider>
+        <AppNavigator />
+      </CartProvider>
     </AuthProvider>
   );
 };

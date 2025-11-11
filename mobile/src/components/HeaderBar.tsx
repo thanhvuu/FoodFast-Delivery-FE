@@ -4,18 +4,26 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { useAuth } from '../context/AuthContext';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { useAuth } from '../context';
+import { RootStackParamList } from '../navigation/types';
+import { useCart } from '../context';
 
 export type HeaderBarProps = {
   title?: string;
   onBackPress?: () => void;
   showAuthControls?: boolean;
+  showCartButton?: boolean;
 };
 
-const HeaderBar: React.FC<HeaderBarProps> = ({ title, onBackPress, showAuthControls = true }) => {
+const HeaderBar: React.FC<HeaderBarProps> = ({
+  title,
+  onBackPress,
+  showAuthControls = true,
+  showCartButton = true,
+}) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleAuthPress = useCallback(async () => {
@@ -33,7 +41,11 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ title, onBackPress, showAuthContr
     }
   }, [logout, navigation, user]);
 
-  const displayName = user?.username || user?.email;
+  const handleCartPress = useCallback(() => {
+    navigation.navigate('Cart');
+  }, [navigation]);
+
+  const displayName = user?.username || user?.email || '';
 
   return (
     <View style={styles.container}>
@@ -46,12 +58,27 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ title, onBackPress, showAuthContr
       )}
       <Text style={styles.title}>{title ?? 'FoodFast'}</Text>
       <View style={styles.actionContainer}>
+        {showCartButton ? (
+          <TouchableOpacity
+            onPress={handleCartPress}
+            style={styles.cartButton}
+            accessibilityRole="button"
+            activeOpacity={0.85}
+          >
+            <Text style={styles.cartIcon}>🛒</Text>
+            {totalItems > 0 ? (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeLabel}>{totalItems}</Text>
+              </View>
+            ) : null}
+          </TouchableOpacity>
+        ) : null}
         {showAuthControls ? (
           user ? (
             <View style={styles.authRow}>
               {displayName ? (
                 <Text style={styles.userLabel} numberOfLines={1}>
-                  {displayName}
+                  {String(displayName)}
                 </Text>
               ) : null}
               <TouchableOpacity
@@ -116,6 +143,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  cartButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#F4F5FC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  cartIcon: {
+    fontSize: 20,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeLabel: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   authRow: {
     flexDirection: 'row',
