@@ -72,6 +72,112 @@
   gap: 12px;
 }
 
+.revenue-analytics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 26px 55px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chart-heading {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.chart-heading h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.chart-legend {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  min-height: 180px;
+}
+
+.bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.bar-item strong {
+  font-size: 13px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.bar {
+  width: 48px;
+  border-radius: 18px 18px 6px 6px;
+  background: linear-gradient(180deg, #6366f1 0%, #3b82f6 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  position: relative;
+  transition: height 0.3s ease;
+  color: white;
+  font-weight: 600;
+}
+
+.bar span {
+  font-size: 13px;
+}
+
+.lineup-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bar-item.horizontal {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.bar.horizontal {
+  width: 0;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+  background: linear-gradient(90deg, #22d3ee 0%, #6366f1 100%);
+  color: white;
+  font-weight: 600;
+  transition: width 0.3s ease;
+}
+
+.bar.horizontal span {
+  font-size: 14px;
+}
+
 .metric-label {
   font-size: 13px;
   font-weight: 600;
@@ -288,6 +394,10 @@
 @media (max-width: 768px) {
   .dashboard-metrics {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .revenue-analytics {
+    grid-template-columns: 1fr;
   }
 
   .recent-orders table {

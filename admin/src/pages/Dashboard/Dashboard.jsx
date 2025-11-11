@@ -78,10 +78,19 @@ const sortByRecency = (a, b) => {
   return parseDate(b.createdAt) - parseDate(a.createdAt)
 }
 
+const toValidDate = value => {
+  const timestamp = Date.parse(value)
+  if (!Number.isFinite(timestamp)) {
+    return null
+  }
+  return new Date(timestamp)
+}
+
 const Dashboard = ({ products = [] }) => {
   const { dictionary, formatCurrency } = useAdminLanguage()
   const t = dictionary.dashboardPage
   const ordersTranslations = dictionary.ordersPage
+  const locale = dictionary.common?.currencyLocale ?? 'vi-VN'
 
   const staticOrders = useMemo(() => order_list.map(transformOrder), [])
 
@@ -91,6 +100,16 @@ const Dashboard = ({ products = [] }) => {
   }
 
   const [orders, setOrders] = useState(loadOrders)
+
+  const dailyFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short' }),
+    [locale]
+  )
+
+  const monthlyFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }),
+    [locale]
+  )
 
   useEffect(() => {
     const sync = () => setOrders(loadOrders())
@@ -166,6 +185,64 @@ const Dashboard = ({ products = [] }) => {
 
   const formatMethodLabel = method => methodLabels[method] ?? methodLabels.default ?? method
 
+  const analytics = useMemo(() => {
+    const base = { daily: [], monthly: [], maxDailyOrders: 0, maxMonthlyRevenue: 0 }
+    if (!orders.length) {
+      return base
+    }
+
+    const validOrders = orders
+      .map(order => ({ order, date: toValidDate(order.createdAt) }))
+      .filter(entry => entry.date)
+
+    if (!validOrders.length) {
+      return base
+    }
+
+    const byDay = new Map()
+    validOrders.forEach(({ order, date }) => {
+      const dayKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+      const current = byDay.get(dayKey) || { date, orders: 0, revenue: 0 }
+      current.orders += 1
+      current.revenue += calculateOrderTotal(order)
+      byDay.set(dayKey, current)
+    })
+
+    const daily = Array.from(byDay.values())
+      .sort((a, b) => a.date - b.date)
+      .slice(-7)
+      .map(entry => ({
+        label: dailyFormatter.format(entry.date),
+        orders: entry.orders,
+        revenue: entry.revenue,
+      }))
+
+    const maxDailyOrders = daily.reduce((max, item) => Math.max(max, item.orders), 0)
+
+    const byMonth = new Map()
+    validOrders.forEach(({ order, date }) => {
+      const monthDate = new Date(date.getFullYear(), date.getMonth(), 1)
+      const monthKey = monthDate.getTime()
+      const current = byMonth.get(monthKey) || { date: monthDate, orders: 0, revenue: 0 }
+      current.orders += 1
+      current.revenue += calculateOrderTotal(order)
+      byMonth.set(monthKey, current)
+    })
+
+    const monthly = Array.from(byMonth.values())
+      .sort((a, b) => a.date - b.date)
+      .slice(-6)
+      .map(entry => ({
+        label: monthlyFormatter.format(entry.date),
+        orders: entry.orders,
+        revenue: entry.revenue,
+      }))
+
+    const maxMonthlyRevenue = monthly.reduce((max, item) => Math.max(max, item.revenue), 0)
+
+    return { daily, monthly, maxDailyOrders, maxMonthlyRevenue }
+  }, [orders, dailyFormatter, monthlyFormatter])
+
   return (
     <div className='dashboard-page'>
       <header className='dashboard-header'>
@@ -206,6 +283,66 @@ const Dashboard = ({ products = [] }) => {
             {metrics.averageEta ? `${metrics.averageEta}′` : t.metrics.averageEtaFallback}
           </strong>
           <small>{t.metrics.averageEtaHint}</small>
+        </article>
+      </section>
+
+      <section className='revenue-analytics'>
+        <article className='chart-card'>
+          <div className='chart-heading'>
+            <div>
+              <h2>{t.revenueAnalytics.daily.title}</h2>
+              <p className='section-description'>{t.revenueAnalytics.daily.description}</p>
+            </div>
+            <span className='chart-legend'>{t.revenueAnalytics.daily.ordersLabel}</span>
+          </div>
+          {analytics.daily.length ? (
+            <div className='bar-chart'>
+              {analytics.daily.map(item => {
+                const height = analytics.maxDailyOrders
+                  ? Math.max(8, (item.orders / analytics.maxDailyOrders) * 100)
+                  : 0
+                return (
+                  <div key={item.label} className='bar-item'>
+                    <div className='bar' style={{ height: `${height}%` }}>
+                      <span>{item.orders}</span>
+                    </div>
+                    <strong>{item.label}</strong>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{t.revenueAnalytics.empty}</p>
+          )}
+        </article>
+
+        <article className='chart-card'>
+          <div className='chart-heading'>
+            <div>
+              <h2>{t.revenueAnalytics.monthly.title}</h2>
+              <p className='section-description'>{t.revenueAnalytics.monthly.description}</p>
+            </div>
+            <span className='chart-legend'>{t.revenueAnalytics.monthly.revenueLabel}</span>
+          </div>
+          {analytics.monthly.length ? (
+            <div className='lineup-chart'>
+              {analytics.monthly.map(item => {
+                const width = analytics.maxMonthlyRevenue
+                  ? Math.max(12, (item.revenue / analytics.maxMonthlyRevenue) * 100)
+                  : 0
+                return (
+                  <div key={item.label} className='bar-item horizontal'>
+                    <div className='bar horizontal' style={{ width: `${width}%` }}>
+                      <span>{formatCurrency(item.revenue)}</span>
+                    </div>
+                    <strong>{item.label}</strong>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{t.revenueAnalytics.empty}</p>
+          )}
         </article>
       </section>
 
