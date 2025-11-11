@@ -63,6 +63,19 @@ const translations = {
           total: 'Giá trị',
         },
       },
+      revenueAnalytics: {
+        empty: 'Chưa có dữ liệu biểu đồ.',
+        daily: {
+          title: 'Đơn theo ngày',
+          description: 'Số lượng đơn phát sinh trong 7 ngày gần nhất.',
+          ordersLabel: 'Số đơn mỗi ngày',
+        },
+        monthly: {
+          title: 'Doanh thu theo tháng',
+          description: 'Tổng doanh thu ước tính trong 6 tháng gần nhất.',
+          revenueLabel: 'Doanh thu (ước tính)',
+        },
+      },
     },
     addPage: {
       uploadLabel: 'Tải ảnh',
@@ -234,6 +247,19 @@ const translations = {
           method: 'Method',
           status: 'Status',
           total: 'Value',
+        },
+      },
+      revenueAnalytics: {
+        empty: 'No analytics data available yet.',
+        daily: {
+          title: 'Daily order volume',
+          description: 'Orders completed across the last 7 days.',
+          ordersLabel: 'Orders per day',
+        },
+        monthly: {
+          title: 'Monthly revenue trend',
+          description: 'Estimated revenue for the latest 6 months.',
+          revenueLabel: 'Revenue (est.)',
         },
       },
     },
