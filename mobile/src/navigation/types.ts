@@ -9,3 +9,15 @@ export type RootStackParamList = {
   Account: undefined;
   OrderHistory: undefined;
 };
+
+export type AdminTabParamList = {
+  AdminDashboard: undefined;
+  AdminRestaurants: undefined;
+  AdminAccount: undefined;
+};
+
+export type RestaurantTabParamList = {
+  RestaurantOverview: undefined;
+  RestaurantOrders: undefined;
+  RestaurantAccount: undefined;
+};
