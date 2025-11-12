@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
-import GoogleDeliveryMap from './GoogleDeliveryMap'
+import OrsDeliveryMap from './OrsDeliveryMap'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
@@ -319,7 +319,7 @@ const OrderTracking = () => {
 
           <div className='tracking-grid'>
             <div className='tracking-map'>
-              <GoogleDeliveryMap
+              <OrsDeliveryMap
                 route={route}
                 vehicleCoordinate={vehicleCoordinate}
                 currentIndex={currentIndex}

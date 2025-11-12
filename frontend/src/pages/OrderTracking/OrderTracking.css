@@ -164,20 +164,58 @@
   gap: 16px;
 }
 
+.delivery-map-wrapper,
 .google-map-wrapper {
   position: relative;
   min-height: 380px;
+  height: clamp(360px, 48vh, 520px);
   border-radius: 28px;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.25), 0 25px 45px rgba(15, 23, 42, 0.2);
   background: linear-gradient(160deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.1));
 }
 
+.delivery-map-canvas,
 .google-map-canvas {
   width: 100%;
   height: 100%;
 }
 
+.delivery-map-wrapper .leaflet-container {
+  font-family: inherit;
+}
+
+.map-loading-indicator {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  pointer-events: none;
+}
+
+.map-loading-indicator span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(148, 163, 184, 0.45);
+  border-top-color: #38bdf8;
+  animation: map-spin 0.9s linear infinite;
+}
+
+@keyframes map-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.delivery-map-canvas.is-hidden,
 .google-map-canvas.is-hidden {
   display: none;
 }

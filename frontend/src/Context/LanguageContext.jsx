@@ -142,7 +142,7 @@ const translationData = {
       noOrdersDescription:
         'Chúng tôi chưa tìm thấy đơn hàng nào thuộc tài khoản của bạn. Hãy đặt món và quay lại trang này sau nhé!',
       mapUnavailable:
-        'Không thể tải bản đồ Google Maps. Vui lòng kiểm tra khóa API VITE_GOOGLE_MAPS_API_KEY.',
+        'Không thể tải bản đồ giao hàng. Vui lòng kiểm tra khóa API VITE_ORS_API_KEY hoặc kết nối mạng.',
       summaryLabels: {
         customer: 'Khách hàng',
         address: 'Địa chỉ giao',
@@ -425,7 +425,7 @@ const translationData = {
       noOrdersDescription:
         'We could not find any orders linked to your account. Place an order and come back to watch the drone fly!',
       mapUnavailable:
-        'Unable to load Google Maps. Make sure the VITE_GOOGLE_MAPS_API_KEY environment variable is configured.',
+        'Unable to load the delivery map. Confirm the VITE_ORS_API_KEY environment variable or your connection.',
       summaryLabels: {
         customer: 'Customer',
         address: 'Delivery address',
