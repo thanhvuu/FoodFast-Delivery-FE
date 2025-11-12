@@ -1,117 +1,143 @@
 .admin-orders-list {
-    padding: 40px 36px;
-    background: #fff;
-    border-radius: 18px;
-    margin: 48px auto 0 auto;
-    box-shadow: 0 4px 32px #0001;
-    max-width: 1150px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 28px;
+    padding: clamp(24px, 4vw, 36px);
+    box-shadow: 0 26px 55px rgba(255, 122, 69, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #7a3417;
 }
 
 .admin-orders-list h2 {
-    margin-bottom: 30px;
-    font-size: 27px;
+    font-size: clamp(24px, 3vw, 30px);
     font-weight: 700;
-    color: #22223b;
-    letter-spacing: 0.5px;
+    margin: 0;
 }
 
 .admin-orders-list table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 7px;
+    border-spacing: 0 8px;
+    font-size: 15px;
 }
 
 .admin-orders-list thead th {
-    background: #f3fafd;
-    padding: 16px 8px 16px 18px;
-    font-size: 17px;
+    background: rgba(255, 122, 69, 0.12);
+    padding: 14px 12px;
     font-weight: 700;
-    color: #393e46;
-    border-radius: 7px 7px 0 0;
+    color: rgba(122, 52, 23, 0.75);
+    border-radius: 12px 12px 0 0;
+    text-align: left;
+    letter-spacing: 0.04em;
 }
 
 .admin-orders-list tbody td {
-    background: #fafbfc;
-    padding: 18px 12px 16px 20px;
-    font-size: 16px;
-    color: #25242c;
-    vertical-align: top;
-    border-bottom: 2.5px solid #f3fafd;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 18px 14px;
+    color: #7a3417;
+    border-bottom: 1px solid rgba(255, 122, 69, 0.12);
+    border-radius: 12px;
 }
 
-.admin-orders-list tr {
-    transition: box-shadow .13s;
+.admin-orders-list tbody tr {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .admin-orders-list tbody tr:hover {
-    box-shadow: 0 2px 16px #0002;
-    background: #f8fefe;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(255, 122, 69, 0.15);
 }
 
 .badge {
     padding: 8px 16px;
     border-radius: 20px;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     border: none;
     display: inline-block;
-    min-width: 104px;
+    min-width: 112px;
     text-align: center;
-    margin-top: 3px;
-    margin-bottom: 3px;
+    margin-top: 4px;
+    margin-bottom: 4px;
     opacity: 0.96;
 }
 
 .badge-new {
-    background: #fff3cd;
-    color: #8c6d1f;
+    background: rgba(250, 204, 21, 0.22);
+    color: #b45309;
 }
 
 .badge-preparing {
-    background: #e0f2ff;
-    color: #0b5394;
+    background: rgba(96, 165, 250, 0.18);
+    color: #2563eb;
 }
 
 .badge-completed {
-    background: #dbfdd9;
-    color: #157026;
+    background: rgba(52, 211, 153, 0.18);
+    color: #047857;
 }
 
 .badge-paid {
-    background: #e8fff7;
-    color: #12996a;
+    background: rgba(52, 211, 153, 0.16);
+    color: #0f766e;
 }
 
 .badge-unpaid {
-    background: #fffae2;
-    color: #a87505;
+    background: rgba(250, 204, 21, 0.22);
+    color: #92400e;
 }
 
-.admin-orders-list td>button {
-    margin: 5px 7px 0 0;
-    padding: 7px 16px;
-    border-radius: 5px;
+.admin-orders-list td > button {
+    margin: 6px 8px 0 0;
+    padding: 8px 18px;
+    border-radius: 999px;
     border: none;
-    background: #eff3fd;
-    color: #325dad;
-    font-weight: 500;
-    font-size: 15px;
-    transition: background .1s;
+    background: rgba(255, 122, 69, 0.16);
+    color: #7a3417;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.15s ease, transform 0.15s ease;
     cursor: pointer;
 }
 
-.admin-orders-list td>button:hover {
-    background: #deefff;
-    color: #2a475f;
+.admin-orders-list td > button:hover {
+    background: rgba(255, 122, 69, 0.28);
+    transform: translateY(-1px);
 }
 
-.admin-orders-list td>button:disabled {
-    background: #edf2f7;
-    color: #a0aec0;
+.admin-orders-list td > button:disabled {
+    background: rgba(122, 52, 23, 0.12);
+    color: rgba(122, 52, 23, 0.45);
     cursor: not-allowed;
+    transform: none;
 }
 
 .admin-orders-list td {
     line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+    .admin-orders-list table {
+        font-size: 14px;
+    }
+
+    .admin-orders-list thead {
+        display: none;
+    }
+
+    .admin-orders-list tbody td {
+        display: block;
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .admin-orders-list tbody tr {
+        display: block;
+        margin-bottom: 18px;
+    }
+
+    .admin-orders-list td > button {
+        width: 100%;
+    }
 }

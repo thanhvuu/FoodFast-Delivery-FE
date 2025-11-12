@@ -136,7 +136,7 @@ const Orders = () => {
                     return order
                 }
                 const isCompletedStep = nextStatus === 'completed'
-                const persistedStatus = isCompletedStep ? 'conplete' : nextStatus
+                const persistedStatus = isCompletedStep ? 'complete' : nextStatus
                 const nextTrackingStatus = isCompletedStep ? 'delivered' : 'inTransit'
                 updateStoredOrder(id, current => ({
                     adminStatus: persistedStatus,

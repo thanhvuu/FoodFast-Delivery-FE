@@ -32,20 +32,21 @@ const App = () => {
   }
 
   return (
-    <div>
-      <Navbar />
-      <hr />
-      <div className="app-content">
-        <Sidebar />
-        <Routes>
-          <Route path="/" element={<Dashboard products={products} />} />
-          <Route path="/dashboard" element={<Dashboard products={products} />} />
-          <Route path="/add" element={<Add onAddProduct={addProduct} />} />
-          <Route path="/list" element={<List products={products} onDelete={deleteProduct} onUpdate={updateProduct} />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/restaurant" element={<Restaurant />} />
-          <Route path="/tracking" element={<Tracking />} />
-        </Routes>
+    <div className="admin-app">
+      <Sidebar />
+      <div className="admin-main">
+        <Navbar />
+        <main className="admin-content">
+          <Routes>
+            <Route path="/" element={<Dashboard products={products} />} />
+            <Route path="/dashboard" element={<Dashboard products={products} />} />
+            <Route path="/add" element={<Add onAddProduct={addProduct} />} />
+            <Route path="/list" element={<List products={products} onDelete={deleteProduct} onUpdate={updateProduct} />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/restaurant" element={<Restaurant />} />
+            <Route path="/tracking" element={<Tracking />} />
+          </Routes>
+        </main>
       </div>
     </div>
   )
