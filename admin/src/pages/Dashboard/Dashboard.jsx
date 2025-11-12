@@ -40,6 +40,7 @@ const transformOrder = order => {
   const normaliseStatus = value => {
     if (!value) return 'new'
     if (['new', 'preparing', 'completed'].includes(value)) return value
+    if (value === 'complete' || value === 'conplete') return 'completed'
     if (value === 'delivered') return 'completed'
     if (value === 'pending' || value === 'new_order') return 'new'
     if (value === 'in_progress') return 'preparing'

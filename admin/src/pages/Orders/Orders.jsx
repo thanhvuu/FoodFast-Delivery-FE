@@ -47,6 +47,7 @@ const normaliseStatus = (status) => {
     if (ORDER_STATUS_FLOW.includes(status)) {
         return status
     }
+    if (status === 'complete' || status === 'conplete') return 'completed'
     if (status === 'delivered') return 'completed'
     if (status === 'pending' || status === 'new_order') return 'new'
     if (status === 'in_progress') return 'preparing'
@@ -134,12 +135,12 @@ const Orders = () => {
                 if (!nextStatus) {
                     return order
                 }
-                const nextTrackingStatus = nextStatus === 'completed'
-                    ? 'delivered'
-                    : 'inTransit'
+                const isCompletedStep = nextStatus === 'completed'
+                const persistedStatus = isCompletedStep ? 'conplete' : nextStatus
+                const nextTrackingStatus = isCompletedStep ? 'delivered' : 'inTransit'
                 updateStoredOrder(id, current => ({
-                    adminStatus: nextStatus,
-                    status: nextStatus,
+                    adminStatus: persistedStatus,
+                    status: persistedStatus,
                     trackingStatus: nextTrackingStatus ?? current.trackingStatus,
                 }))
                 return {
