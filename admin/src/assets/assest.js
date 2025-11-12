@@ -22,7 +22,7 @@ export const assests = {
     logo,
     add_icon,
     order_icon,
-    upload_area
+    upload_area,
 }
 
 export const food_list = [
@@ -274,7 +274,7 @@ export const order_list = [
             { name: 'Hamburger', quantity: 2, price: 35000 }
         ],
         address: '45 Trần Hưng Đạo, Quận 1',
-        status: 'completed',
+        status: 'complete',
         paid: false,
         route: [
             {
@@ -314,5 +314,121 @@ export const order_list = [
             }
         ]
     },
-    // ... thêm đơn nữa
+    {
+        id: 'o3',
+        customer: 'Phạm Văn C',
+        deliveryMethod: 'drone',
+        estimatedArrival: '18 phút',
+        estimatedMinutes: 18,
+        createdAt: '2024-05-11T09:10:00.000Z',
+        deliveryFee: 15000,
+        items: [
+            { name: 'Bún bò Huế', quantity: 2, price: 50000 },
+            { name: 'Khoai tây chiên', quantity: 1, price: 30000 }
+        ],
+        address: '19 Nguyễn Đình Chiểu, Quận 3',
+        status: 'preparing',
+        paid: true,
+        trackingStatus: 'inTransit',
+        route: [
+            {
+                id: 'pickup',
+                title: 'Drone nhận đơn',
+                eta: '11:05',
+                position: { x: 12, y: 72 },
+                description: 'Drone đã lấy món tại Bún bò Huế O Lý.'
+            },
+            {
+                id: 'takeoff',
+                title: 'Cất cánh',
+                eta: '11:07',
+                position: { x: 28, y: 60 },
+                description: 'Hệ thống đang điều chỉnh độ cao.'
+            },
+            {
+                id: 'enroute',
+                title: 'Đang giao',
+                eta: '11:13',
+                position: { x: 52, y: 46 },
+                description: 'Drone bay qua khu vực trung tâm.'
+            }
+        ]
+    },
+    {
+        id: 'o4',
+        customer: 'Lê Thị D',
+        deliveryMethod: 'motorbike',
+        estimatedArrival: '35 phút',
+        estimatedMinutes: 34,
+        createdAt: '2024-05-10T14:25:00.000Z',
+        deliveryFee: 20000,
+        items: [
+            { name: 'Phở bò', quantity: 3, price: 50000 },
+            { name: 'Kem ốc quế', quantity: 2, price: 15000 }
+        ],
+        address: '260 Cách Mạng Tháng 8, Quận 10',
+        status: 'complete',
+        paid: true,
+        trackingStatus: 'delivered',
+        total: 205000,
+        route: [
+            {
+                id: 'pickup',
+                title: 'Nhận món',
+                eta: '14:05',
+                position: { x: 10, y: 75 },
+                description: 'Tài xế xác nhận đã nhận đầy đủ món ăn.'
+            },
+            {
+                id: 'depart',
+                title: 'Rời quán',
+                eta: '14:09',
+                position: { x: 24, y: 63 },
+                description: 'Đơn rời Phở Hòa Pasteur và di chuyển về Quận 10.'
+            },
+            {
+                id: 'delivered',
+                title: 'Hoàn tất',
+                eta: '14:36',
+                position: { x: 88, y: 58 },
+                description: 'Khách đã nhận món và ký xác nhận.'
+            }
+        ]
+    },
+    {
+        id: 'o5',
+        customer: 'Võ Ngọc E',
+        deliveryMethod: 'drone',
+        estimatedArrival: '12 phút',
+        estimatedMinutes: 11,
+        createdAt: '2024-05-12T05:50:00.000Z',
+        deliveryFee: 10000,
+        items: [
+            { name: 'Panna Cotta', quantity: 4, price: 15000 },
+            { name: 'Gà viên', quantity: 2, price: 40000 }
+        ],
+        address: '101 Nguyễn Công Trứ, Quận 1',
+        status: 'new',
+        paid: false,
+        trackingStatus: 'awaitingPickup'
+    },
+    {
+        id: 'o6',
+        customer: 'Huỳnh Gia F',
+        deliveryMethod: 'motorbike',
+        estimatedArrival: '28 phút',
+        estimatedMinutes: 29,
+        createdAt: '2024-05-09T17:35:00.000Z',
+        deliveryFee: 15000,
+        items: [
+            { name: 'Mỳ Ý', quantity: 1, price: 60000 },
+            { name: 'Hamburger', quantity: 2, price: 35000 },
+            { name: 'Kem ốc quế', quantity: 2, price: 15000 }
+        ],
+        address: '92 Lê Thánh Tôn, Quận 1',
+        status: 'complete',
+        paid: true,
+        trackingStatus: 'delivered',
+        total: 170000
+    }
 ]

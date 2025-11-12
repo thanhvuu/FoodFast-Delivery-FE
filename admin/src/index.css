@@ -6,7 +6,8 @@
 
 body {
   min-height: 100vh;
-  background-color: #fcfcfc;
+  background: var(--admin-background, linear-gradient(180deg, #fff8f3 0%, #ffe5d6 100%));
+  color: var(--admin-text, #7a3417);
 }
 
 a {
@@ -14,14 +15,11 @@ a {
   color: inherit;
 }
 
-hr {
-  border: none;
-  height: 1px;
-  background-color: #a9a9a9;
-}
-
-.app-content {
-  display: flex;
+button,
+select,
+input,
+textarea {
+  font-family: inherit;
 }
 
 .flex-col {
