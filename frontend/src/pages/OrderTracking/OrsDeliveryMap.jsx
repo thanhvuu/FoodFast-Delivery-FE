@@ -161,134 +161,45 @@ const OrsDeliveryMap = ({
 
   const orsApiKey = import.meta.env?.VITE_ORS_API_KEY
   const [tileProvider, setTileProvider] = useState(orsApiKey ? 'ors' : 'osm')
-  const [orsPath, setOrsPath] = useState([])
-  const [isFetchingOrs, setIsFetchingOrs] = useState(false)
-
-  useEffect(() => {
-    if (orsApiKey) {
-      setTileProvider(current => (current === 'ors' ? current : 'ors'))
-    } else {
-      setTileProvider('osm')
-    }
-  }, [orsApiKey])
 
   const routeLatLngs = useMemo(
     () => coordinates.map(coord => [coord.lat, coord.lng]),
     [coordinates]
   )
 
-  const coordinatesSignature = useMemo(
-    () =>
-      routeLatLngs
-        .map(([lat, lng]) => `${lat.toFixed(6)},${lng.toFixed(6)}`)
-        .join('|'),
-    [routeLatLngs]
-  )
+  const progressLatLngs = useMemo(() => {
+    if (!Array.isArray(route) || route.length === 0) return []
 
-  useEffect(() => {
-    if (!orsApiKey || routeLatLngs.length < 2) {
-      setOrsPath([])
-      setIsFetchingOrs(false)
-      return
+    const completed = []
+
+    for (let index = 0; index <= currentIndex; index += 1) {
+      const point = route[index]
+      if (point?.coords) {
+        completed.push([point.coords.lat, point.coords.lng])
+      }
     }
 
-    const controller = new AbortController()
-    const fetchRoute = async () => {
-      setIsFetchingOrs(true)
-      try {
-        const profile = mode === 'motorbike' ? 'driving-car' : 'driving-car'
-        const response = await fetch(
-          `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: orsApiKey,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              coordinates: routeLatLngs.map(([lat, lng]) => [lng, lat]),
-            }),
-            signal: controller.signal,
-          }
-        )
+    if (vehicleCoordinate?.lat != null && vehicleCoordinate?.lng != null) {
+      const last = completed.length ? completed[completed.length - 1] : null
+      const sameAsLast = last
+        ? last[0] === vehicleCoordinate.lat && last[1] === vehicleCoordinate.lng
+        : false
 
-        if (!response.ok) {
-          throw new Error(`ORS request failed with status ${response.status}`)
-        }
-
-        const data = await response.json()
-        const feature = data?.features?.[0]
-        const geometryCoordinates = Array.isArray(feature?.geometry?.coordinates)
-          ? feature.geometry.coordinates
-          : []
-        const path = geometryCoordinates.map(([lng, lat]) => [lat, lng])
-
-        if (!controller.signal.aborted && path.length >= 2) {
-          setOrsPath(path)
-        } else if (!controller.signal.aborted) {
-          setOrsPath([])
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error(error)
-          setOrsPath([])
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsFetchingOrs(false)
+      if (segmentProgress > 0 || (!completed.length && vehicleCoordinate)) {
+        if (!sameAsLast) {
+          completed.push([vehicleCoordinate.lat, vehicleCoordinate.lng])
         }
       }
     }
 
-    fetchRoute()
-
-    return () => controller.abort()
-  }, [coordinatesSignature, mode, orsApiKey, routeLatLngs])
-
-  const pathLatLngs = useMemo(() => {
-    if (orsPath.length >= 2) {
-      return orsPath
-    }
-    return routeLatLngs
-  }, [orsPath, routeLatLngs])
-
-  const routeLength = route?.length ?? 0
-  const normalizedProgress = useMemo(() => {
-    if (routeLength <= 1) return 0
-    const raw = (currentIndex + segmentProgress) / (routeLength - 1)
-    if (!Number.isFinite(raw)) return 0
-    return Math.min(Math.max(raw, 0), 1)
-  }, [currentIndex, routeLength, segmentProgress])
-
-  const progressLatLngs = useMemo(() => {
-    if (pathLatLngs.length === 0) return []
-    if (pathLatLngs.length === 1) return pathLatLngs
-
-    const totalSegments = pathLatLngs.length - 1
-    const scaledIndex = normalizedProgress * totalSegments
-
-    if (scaledIndex >= totalSegments) {
-      return pathLatLngs.slice()
+    if (!completed.length && route[0]?.coords) {
+      completed.push([route[0].coords.lat, route[0].coords.lng])
     }
 
-    const lowerIndex = Math.max(0, Math.floor(scaledIndex))
-    const remainder = scaledIndex - lowerIndex
+    return completed
+  }, [currentIndex, route, segmentProgress, vehicleCoordinate])
 
-    const visited = pathLatLngs.slice(0, lowerIndex + 1)
-
-    const start = pathLatLngs[lowerIndex]
-    const end = pathLatLngs[lowerIndex + 1]
-
-    if (start && end && remainder > 0) {
-      visited.push([
-        start[0] + (end[0] - start[0]) * remainder,
-        start[1] + (end[1] - start[1]) * remainder,
-      ])
-    }
-
-    return visited
-  }, [normalizedProgress, pathLatLngs])
-
+  const showFallback = routeLatLngs.length === 0
   const fallbackIcon = palette.fallbackIcon
 
   const startIcon = useMemo(() => createEndpointIcon('start', palette), [palette])
@@ -296,38 +207,9 @@ const OrsDeliveryMap = ({
   const waypointIcon = useMemo(() => createWaypointIcon(palette), [palette])
   const vehicleIcon = useMemo(() => createVehicleIcon(mode), [mode])
 
-  const fallbackVehicleCoordinate = vehicleCoordinate
+  const vehicleLatLng = vehicleCoordinate
     ? [vehicleCoordinate.lat, vehicleCoordinate.lng]
     : null
-
-  const vehicleLatLng = useMemo(() => {
-    if (pathLatLngs.length === 0) {
-      return fallbackVehicleCoordinate
-    }
-
-    if (pathLatLngs.length === 1) {
-      return pathLatLngs[0]
-    }
-
-    const totalSegments = pathLatLngs.length - 1
-    const scaledIndex = normalizedProgress * totalSegments
-    const lowerIndex = Math.floor(scaledIndex)
-    const remainder = scaledIndex - lowerIndex
-
-    const start = pathLatLngs[lowerIndex]
-    const end = pathLatLngs[lowerIndex + 1]
-
-    if (start && end) {
-      return [
-        start[0] + (end[0] - start[0]) * remainder,
-        start[1] + (end[1] - start[1]) * remainder,
-      ]
-    }
-
-    return pathLatLngs[pathLatLngs.length - 1]
-  }, [fallbackVehicleCoordinate, normalizedProgress, pathLatLngs])
-
-  const showFallback = pathLatLngs.length === 0
 
   const tileConfig = useMemo(() => {
     if (tileProvider === 'ors' && orsApiKey) {
@@ -335,32 +217,22 @@ const OrsDeliveryMap = ({
         url: `https://maps.openrouteservice.org/openmaptiles/light/{z}/{x}/{y}.png?api_key=${orsApiKey}`,
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://openrouteservice.org/">openrouteservice</a>',
-        tileSize: 512,
-        zoomOffset: -1,
-        maxZoom: 19,
       }
     }
 
     return {
-      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      tileSize: 256,
-      zoomOffset: 0,
-      maxZoom: 19,
     }
   }, [orsApiKey, tileProvider])
-
-  const panTarget = vehicleLatLng
-    ? { lat: vehicleLatLng[0], lng: vehicleLatLng[1] }
-    : vehicleCoordinate
 
   return (
     <div className='delivery-map-wrapper'>
       {!showFallback ? (
         <MapContainer
           className='delivery-map-canvas'
-          center={pathLatLngs[0] ?? [0, 0]}
+          center={routeLatLngs[0] ?? [0, 0]}
           zoom={13}
           zoomControl={false}
           scrollWheelZoom
@@ -370,9 +242,6 @@ const OrsDeliveryMap = ({
             key={tileProvider}
             url={tileConfig.url}
             attribution={tileConfig.attribution}
-            tileSize={tileConfig.tileSize}
-            zoomOffset={tileConfig.zoomOffset}
-            maxZoom={tileConfig.maxZoom}
             eventHandlers={{
               tileerror: () => {
                 if (tileProvider === 'ors') {
@@ -381,12 +250,12 @@ const OrsDeliveryMap = ({
               },
             }}
           />
-          <FitRouteBounds positions={pathLatLngs} />
-          <PanToVehicle coordinate={panTarget} />
+          <FitRouteBounds positions={routeLatLngs} />
+          <PanToVehicle coordinate={vehicleCoordinate} />
 
-          {pathLatLngs.length ? (
+          {routeLatLngs.length ? (
             <Polyline
-              positions={pathLatLngs}
+              positions={routeLatLngs}
               pathOptions={{
                 color: palette.shadow,
                 weight: 9,
@@ -395,9 +264,9 @@ const OrsDeliveryMap = ({
             />
           ) : null}
 
-          {pathLatLngs.length ? (
+          {routeLatLngs.length ? (
             <Polyline
-              positions={pathLatLngs}
+              positions={routeLatLngs}
               pathOptions={{
                 color: palette.primary,
                 weight: 4,
@@ -418,18 +287,18 @@ const OrsDeliveryMap = ({
             />
           ) : null}
 
-          {pathLatLngs[0] ? (
+          {routeLatLngs[0] ? (
             <Marker
-              position={pathLatLngs[0]}
+              position={routeLatLngs[0]}
               icon={startIcon}
               title={route[0]?.title ?? 'Start'}
               zIndexOffset={200}
             />
           ) : null}
 
-          {pathLatLngs[pathLatLngs.length - 1] ? (
+          {routeLatLngs[routeLatLngs.length - 1] ? (
             <Marker
-              position={pathLatLngs[pathLatLngs.length - 1]}
+              position={routeLatLngs[routeLatLngs.length - 1]}
               icon={endIcon}
               title={route[route.length - 1]?.title ?? 'Destination'}
               zIndexOffset={200}
@@ -483,12 +352,6 @@ const OrsDeliveryMap = ({
           ) : null}
         </div>
       )}
-
-      {isFetchingOrs ? (
-        <div className='map-loading-indicator' aria-hidden='true'>
-          <span />
-        </div>
-      ) : null}
     </div>
   )
 }
