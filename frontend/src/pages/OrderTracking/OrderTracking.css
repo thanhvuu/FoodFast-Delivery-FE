@@ -164,6 +164,7 @@
   gap: 16px;
 }
 
+.delivery-map-wrapper,
 .google-map-wrapper {
   position: relative;
   min-height: 380px;
@@ -173,11 +174,13 @@
   background: linear-gradient(160deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.1));
 }
 
+.delivery-map-canvas,
 .google-map-canvas {
   width: 100%;
   height: 100%;
 }
 
+.delivery-map-canvas.is-hidden,
 .google-map-canvas.is-hidden {
   display: none;
 }
