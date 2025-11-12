@@ -1,0 +1,105 @@
+.sa-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 32px clamp(24px, 4vw, 48px) 0;
+}
+
+.profile-card,
+.overview-card {
+  flex: 1 1 320px;
+  background: #fff;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 24px 48px rgba(255, 117, 60, 0.12);
+}
+
+.profile-card {
+  background: linear-gradient(135deg, rgba(255, 143, 86, 0.16), rgba(255, 220, 204, 0.9));
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-label {
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #ff6b2c;
+}
+
+.profile-card button {
+  background: linear-gradient(135deg, #ff7a45, #ff5a1f);
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(255, 90, 31, 0.2);
+}
+
+.profile-info {
+  display: grid;
+  gap: 16px;
+}
+
+.profile-info strong {
+  display: block;
+  font-size: 18px;
+  color: #7a3417;
+}
+
+.profile-info span {
+  color: rgba(122, 52, 23, 0.75);
+  font-size: 14px;
+}
+
+.overview-card h2 {
+  margin: 0 0 20px;
+  font-size: 24px;
+  color: #7a3417;
+}
+
+.badge-list {
+  display: flex;
+  gap: 18px;
+}
+
+.badge {
+  flex: 1;
+  background: linear-gradient(135deg, #fff4ec, #ffe0d0);
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.badge strong {
+  font-size: 28px;
+  color: #ff5a1f;
+}
+
+.badge span {
+  font-size: 14px;
+  color: rgba(122, 52, 23, 0.75);
+}
+
+@media (max-width: 640px) {
+  .sa-topbar {
+    padding-inline: 20px;
+  }
+
+  .badge-list {
+    flex-direction: column;
+  }
+}
