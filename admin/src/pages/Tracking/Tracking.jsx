@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import './Tracking.css'
 import { order_list } from '../../assets/assest'
 import { useAdminLanguage } from '../../context/LanguageContext'
+import OrsDeliveryMap from './OrsDeliveryMap'
 
 const byRecency = (a, b) => {
     const parseDate = value => {
@@ -80,13 +81,15 @@ const Tracking = () => {
             left: `${currentPoint.position.x}%`,
             top: `${currentPoint.position.y}%`
         }
-        const left = currentPoint.position.x + (nextPoint.position.x - currentPoint.position.x) * segmentProgress
-        const top = currentPoint.position.y + (nextPoint.position.y - currentPoint.position.y) * segmentProgress
         return {
-            left: `${left}%`,
-            top: `${top}%`
+            lat:
+                currentPoint.coords.lat +
+                (nextPoint.coords.lat - currentPoint.coords.lat) * segmentProgress,
+            lng:
+                currentPoint.coords.lng +
+                (nextPoint.coords.lng - currentPoint.coords.lng) * segmentProgress,
         }
-    }
+    }, [currentPoint, nextPoint, segmentProgress])
 
     const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
 
@@ -106,7 +109,6 @@ const Tracking = () => {
     const legendText = t.legendUpdated.replace('{{time}}', lastUpdated.toLocaleTimeString())
     const legendPrefixes = t.legendPrefixes ?? {}
     const legendPrefix = legendPrefixes[deliveryMethod] ?? legendPrefixes.default ?? 'Drone #'
-    const vehicleEmoji = deliveryMethod === 'motorbike' ? '🛵' : '🚁'
 
     return (
         <div className='tracking-page'>
