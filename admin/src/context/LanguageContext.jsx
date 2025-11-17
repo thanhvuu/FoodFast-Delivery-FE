@@ -278,6 +278,7 @@ const translations = {
         default: 'Đơn #',
       },
       legendUpdated: 'Tọa độ hiện tại cập nhật lúc {{time}}',
+      mapUnavailable: 'Bản đồ đang tải, vui lòng xem nhanh các điểm lộ trình bên cạnh.',
       timelineTitle: 'Lộ trình giao hàng',
       empty: 'Không tìm thấy thông tin đơn hàng.',
     },
@@ -579,6 +580,7 @@ const translations = {
         default: 'Order #',
       },
       legendUpdated: 'Current co-ordinates updated at {{time}}',
+      mapUnavailable: 'Map tiles are loading — review the delivery stops while we reconnect.',
       timelineTitle: 'Delivery route',
       empty: 'Order information not available.',
     },
@@ -660,4 +662,5 @@ export const AdminLanguageProvider = ({ children }) => {
   return <AdminLanguageContext.Provider value={value}>{children}</AdminLanguageContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAdminLanguage = () => useContext(AdminLanguageContext)
