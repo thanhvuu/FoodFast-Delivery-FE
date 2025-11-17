@@ -75,10 +75,11 @@ const Tracking = () => {
     const currentPoint = route[currentIndex] ?? route[0]
     const nextPoint = route[nextIndex] ?? route[route.length - 1]
 
-    const vehicleCoordinate = useMemo(() => {
-        if (!currentPoint?.coords) return null
-        if (!nextPoint?.coords) {
-            return { ...currentPoint.coords }
+    const interpolatePosition = () => {
+        if (!currentPoint?.position) return { left: '10%', top: '70%' }
+        if (!nextPoint?.position) return {
+            left: `${currentPoint.position.x}%`,
+            top: `${currentPoint.position.y}%`
         }
         return {
             lat:
@@ -226,15 +227,35 @@ const Tracking = () => {
 
                     <section className='tracking-layout'>
                         <div className='tracking-map'>
-                            <OrsDeliveryMap
-                                route={route}
-                                vehicleCoordinate={vehicleCoordinate}
-                                currentIndex={currentIndex}
-                                segmentProgress={segmentProgress}
-                                orderCode={selectedOrder.code ?? selectedOrder.id.toUpperCase()}
-                                mode={deliveryMethod}
-                                unavailableMessage={t.mapUnavailable}
-                            />
+                            <div className='map-grid'>
+                                {[...Array(4)].map((_, index) => (
+                                    <span
+                                        key={index}
+                                        className='grid-line horizontal'
+                                        style={{ top: `${(index + 1) * 20}%` }}
+                                    />
+                                ))}
+                                {[...Array(4)].map((_, index) => (
+                                    <span
+                                        key={`v-${index}`}
+                                        className='grid-line vertical'
+                                        style={{ left: `${(index + 1) * 20}%` }}
+                                    />
+                                ))}
+                            </div>
+                            {route.map(point => (
+                                <div
+                                    key={point.id}
+                                    className='map-point'
+                                    style={{ left: `${point.position?.x ?? 0}%`, top: `${point.position?.y ?? 0}%` }}
+                                >
+                                    <span className='point-dot' />
+                                    <span className='point-label'>{point.title}</span>
+                                </div>
+                            ))}
+                            <div className='vehicle-icon' style={interpolatePosition()}>
+                                <span role='img' aria-label='Phương tiện đang di chuyển'>{vehicleEmoji}</span>
+                            </div>
                             <div className='map-legend'>
                                 <strong>{legendPrefix}{selectedOrder.code ?? selectedOrder.id.toUpperCase()}</strong>
                                 <span>{legendText}</span>
