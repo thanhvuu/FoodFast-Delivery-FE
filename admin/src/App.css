@@ -12,15 +12,15 @@
 .admin-app {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   background: var(--admin-background);
   color: var(--admin-text);
 }
 
-.admin-main {
+.admin-body {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  min-height: 0;
 }
 
 .admin-content {
@@ -33,7 +33,7 @@
 }
 
 @media (max-width: 900px) {
-  .admin-app {
+  .admin-body {
     flex-direction: column;
   }
 

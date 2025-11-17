@@ -1,0 +1,226 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Gà rán",
+      "image": "food_1.jpg",
+      "price": 30000,
+      "description": "Gà rán giòn rụm, thơm ngon",
+      "category": "Fast Food",
+      "status": "available",
+      "ingredients": ["Đùi gà", "Bột chiên", "Dầu ăn", "Tiêu", "Muối"],
+      "address": "273 An Dương Vương, Quận 5, TP.HCM",
+      "restaurant": {
+        "name": "KFC Nguyễn Trãi",
+        "address": "273 An Dương Vương, Quận 5, TP.HCM"
+      }
+    },
+    {
+      "id": "2",
+      "name": "Hamburger",
+      "image": "food_2.jpg",
+      "price": 35000,
+      "description": "Hamburger bò Mỹ, phô mai cheddar",
+      "category": "Fast Food",
+      "status": "available",
+      "ingredients": ["Bánh mì Burger", "Thịt bò", "Phô mai Cheddar", "Xà lách", "Cà chua", "Sốt đặc biệt"],
+      "address": "45 Trần Hưng Đạo, Quận 1, TP.HCM",
+      "restaurant": {
+        "name": "Burger King Trần Hưng Đạo",
+        "address": "45 Trần Hưng Đạo, Quận 1, TP.HCM"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Pizza",
+      "image": "food_3.webp",
+      "price": 50000,
+      "description": "Pizza hải sản, phô mai mozzarella",
+      "category": "Fast Food",
+      "status": "available",
+      "ingredients": ["Bột mì", "Tôm", "Mực", "Phô mai Mozzarella", "Sốt cà chua"],
+      "address": "198 Pasteur, Quận 3, TP.HCM",
+      "restaurant": {
+        "name": "Pizza 4P Pasteur",
+        "address": "198 Pasteur, Quận 3, TP.HCM"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Tacos",
+      "image": "food_4.jpg",
+      "price": 50000,
+      "description": "Tacos thịt bò, rau củ tươi ngon",
+      "category": "Fast Food",
+      "status": "out_of_stock",
+      "ingredients": ["Vỏ bánh tacos", "Thịt bò", "Hành tây", "Cà chua", "Xà lách", "Sốt salsa"],
+      "address": "81 Lê Lợi, Quận 1, TP.HCM",
+      "restaurant": {
+        "name": "Mexican Saigon",
+        "address": "81 Lê Lợi, Quận 1, TP.HCM"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Phở bò",
+      "image": "food_5.jpg",
+      "price": 50000,
+      "description": "Phở bò tái, nước dùng đậm đà",
+      "category": "Món nước",
+      "status": "available",
+      "ingredients": ["Bánh phở", "Thịt bò tái", "Nước dùng bò", "Hành lá", "Giá", "Ngò gai"],
+      "address": "260 Cách Mạng Tháng 8, Quận 10, TP.HCM",
+      "restaurant": {
+        "name": "Phở Hòa Pasteur",
+        "address": "260 Cách Mạng Tháng 8, Quận 10, TP.HCM"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Mỳ Ý",
+      "image": "food_6.jpg",
+      "price": 60000,
+      "description": "Mỳ Ý sốt bò bằm, phô mai Parmesan",
+      "category": "Món nước",
+      "status": "available",
+      "ingredients": ["Mỳ Ý Spaghetti", "Thịt bò bằm", "Sốt cà chua", "Phô mai Parmesan", "Hành tây"],
+      "address": "92 Lê Thánh Tôn, Quận 1, TP.HCM",
+      "restaurant": {
+        "name": "Italian Food Corner",
+        "address": "92 Lê Thánh Tôn, Quận 1, TP.HCM"
+      }
+    },
+    {
+      "id": "7",
+      "name": "Khoai tây chiên",
+      "image": "food_7.jpg",
+      "price": 30000,
+      "description": "Khoai tây chiên giòn rụm, muối tiêu",
+      "category": "Đồ ăn vặt",
+      "status": "available",
+      "ingredients": ["Khoai tây", "Dầu ăn", "Muối", "Tiêu"],
+      "address": "120 Nguyễn Tri Phương, Quận 10, TP.HCM",
+      "restaurant": {
+        "name": "Snack House",
+        "address": "120 Nguyễn Tri Phương, Quận 10, TP.HCM"
+      }
+    },
+    {
+      "id": "8",
+      "name": "Kem ốc quế",
+      "image": "food_8.jpg",
+      "price": 15000,
+      "description": "Kem ốc quế vani, socola",
+      "category": "Đồ ngọt",
+      "status": "available",
+      "ingredients": ["Kem vani", "Kem socola", "Ốc quế", "Sữa đặc"],
+      "address": "35 Nguyễn Văn Cừ, Quận 5, TP.HCM",
+      "restaurant": {
+        "name": "Ice Cream House",
+        "address": "35 Nguyễn Văn Cừ, Quận 5, TP.HCM"
+      }
+    },
+    {
+      "id": "9",
+      "name": "Gà viên",
+      "image": "food_9.jpg",
+      "price": 40000,
+      "description": "Gà viên chiên giòn, sốt mayonnaise",
+      "category": "Đồ ăn vặt",
+      "status": "available",
+      "ingredients": ["Thịt gà", "Bột chiên", "Dầu ăn", "Sốt mayonnaise", "Tiêu"],
+      "address": "14 Nguyễn Thành Ý, Quận 1, TP.HCM",
+      "restaurant": {
+        "name": "Chicken Balls Corner",
+        "address": "14 Nguyễn Thành Ý, Quận 1, TP.HCM"
+      }
+    },
+    {
+      "id": "10",
+      "name": "Bún bò Huế",
+      "image": "food_10.jpg",
+      "price": 50000,
+      "description": "Bún bò Huế cay nồng, đậm đà hương vị",
+      "category": "Món nước",
+      "status": "available",
+      "ingredients": ["Bún Huế", "Thịt bò", "Chả Huế", "Rau thơm", "Ớt", "Sả"],
+      "address": "19 Nguyễn Đình Chiểu, Quận 3, TP.HCM",
+      "restaurant": {
+        "name": "Bún bò Huế O Lý",
+        "address": "19 Nguyễn Đình Chiểu, Quận 3, TP.HCM"
+      }
+    },
+    {
+      "id": "11",
+      "name": "Cơm chiên Dương Châu",
+      "image": "food_11.png",
+      "price": 40000,
+      "description": "Cơm chiên Dương Châu thập cẩm, trứng, rau củ",
+      "category": "Món khô",
+      "status": "available",
+      "ingredients": ["Cơm", "Trứng", "Thịt xá xíu", "Đậu Hà Lan", "Cà rốt", "Lạp xưởng"],
+      "address": "212 Lý Chính Thắng, Quận 3, TP.HCM",
+      "restaurant": {
+        "name": "Quán Hoa Dương Châu",
+        "address": "212 Lý Chính Thắng, Quận 3, TP.HCM"
+      }
+    },
+    {
+      "id": "12",
+      "name": "Panna Cotta",
+      "image": "food_12.png",
+      "price": 15000,
+      "description": "Panna Cotta kem tươi, sốt dâu tây",
+      "category": "Đồ ngọt",
+      "status": "out_of_stock",
+      "ingredients": ["Kem tươi", "Sữa", "Gelatin", "Đường", "Sốt dâu tây"],
+      "address": "101 Nguyễn Công Trứ, Quận 1, TP.HCM",
+      "restaurant": {
+        "name": "Sweet Italy",
+        "address": "101 Nguyễn Công Trứ, Quận 1, TP.HCM"
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "o1",
+      "customer": "Nguyễn Văn A",
+      "deliveryMethod": "drone",
+      "estimatedArrival": "10 phút",
+      "items": [
+        { "name": "Gà rán", "quantity": 2, "price": 30000 },
+        { "name": "Cơm chiên Dương Châu", "quantity": 1, "price": 40000 }
+      ],
+      "address": "212 Lý Chính Thắng, Quận 3",
+      "status": "new",
+      "paid": true
+    },
+    {
+      "id": "o2",
+      "customer": "Trần Thị B",
+      "deliveryMethod": "motorbike",
+      "estimatedArrival": "25 phút",
+      "items": [
+        { "name": "Pizza", "quantity": 1, "price": 50000 },
+        { "name": "Kem ốc quế", "quantity": 3, "price": 15000 },
+        { "name": "Hamburger", "quantity": 2, "price": 35000 }
+      ],
+      "address": "45 Trần Hưng Đạo, Quận 1",
+      "status": "complete",
+      "paid": false
+    },
+    {
+      "id": "o3",
+      "customer": "Phạm Văn C",
+      "deliveryMethod": "drone",
+      "estimatedArrival": "18 phút",
+      "items": [
+        { "name": "Bún bò Huế", "quantity": 2, "price": 50000 },
+        { "name": "Khoai tây chiên", "quantity": 1, "price": 30000 }
+      ],
+      "address": "19 Nguyễn Đình Chiểu, Quận 3",
+      "status": "preparing",
+      "paid": true
+    }
+  ]
+}
