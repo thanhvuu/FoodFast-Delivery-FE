@@ -660,4 +660,5 @@ export const AdminLanguageProvider = ({ children }) => {
   return <AdminLanguageContext.Provider value={value}>{children}</AdminLanguageContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAdminLanguage = () => useContext(AdminLanguageContext)
