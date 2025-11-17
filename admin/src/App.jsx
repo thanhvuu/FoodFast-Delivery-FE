@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import './App.css'
 import Sidebar from './component/Sidebar/Sidebar'
 import Navbar from './component/navbar/Navbar'
 import Add from './pages/Add/Add'
@@ -33,15 +34,18 @@ const App = () => {
 
   return (
     <div className="admin-app">
-      <Sidebar />
-      <div className="admin-main">
-        <Navbar />
+      <Navbar />
+      <div className="admin-body">
+        <Sidebar />
         <main className="admin-content">
           <Routes>
             <Route path="/" element={<Dashboard products={products} />} />
             <Route path="/dashboard" element={<Dashboard products={products} />} />
             <Route path="/add" element={<Add onAddProduct={addProduct} />} />
-            <Route path="/list" element={<List products={products} onDelete={deleteProduct} onUpdate={updateProduct} />} />
+            <Route
+              path="/list"
+              element={<List products={products} onDelete={deleteProduct} onUpdate={updateProduct} />}
+            />
             <Route path="/orders" element={<Orders />} />
             <Route path="/restaurant" element={<Restaurant />} />
             <Route path="/tracking" element={<Tracking />} />
