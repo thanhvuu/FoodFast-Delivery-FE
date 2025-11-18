@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
 
 const paletteByMode = {
     drone: {
         primary: '#3b82f6',
-        shadow: '#bfdbfe',
+        shadow: '#dbeafe',
         progress: '#22c55e',
         waypoint: '#2563eb',
         fallbackIcon: '🚁',
@@ -19,45 +22,120 @@ const paletteByMode = {
     },
 }
 
-const createBoundingBox = (coordinates = []) => {
-    if (!coordinates.length) {
-        return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
+const encodeSvg = svg => `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+
+const createVehicleIcon = mode => {
+    if (mode === 'motorbike') {
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>
+    <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bike-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#fb923c" />
+          <stop offset="100%" stop-color="#f97316" />
+        </linearGradient>
+      </defs>
+      <circle cx="28" cy="28" r="24" fill="url(#bike-grad)" opacity="0.95" />
+      <path d="M17 34h8.6l2.6-7.5h7.4l2 4.2H41a5.6 5.6 0 0 1 0 11.2h-1.8a5.6 5.6 0 0 1-10.9 0H23a5.6 5.6 0 1 1-6-7.9Z" fill="#fff"/>
+      <circle cx="21" cy="39" r="4.4" fill="rgba(15,23,42,0.18)" />
+      <circle cx="37" cy="39" r="4.4" fill="rgba(15,23,42,0.18)" />
+    </svg>`
+
+        return L.icon({
+            iconUrl: encodeSvg(svg),
+            iconSize: [56, 56],
+            iconAnchor: [28, 28],
+            className: '',
+        })
     }
 
-    let minLat = Number.POSITIVE_INFINITY
-    let maxLat = Number.NEGATIVE_INFINITY
-    let minLng = Number.POSITIVE_INFINITY
-    let maxLng = Number.NEGATIVE_INFINITY
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="drone-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8" />
+        <stop offset="100%" stop-color="#6366f1" />
+      </linearGradient>
+    </defs>
+    <circle cx="28" cy="28" r="24" fill="url(#drone-grad)" opacity="0.92" />
+    <path d="M28 14l4 6h-8l4-6zm0 28l-4-6h8l-4 6zm14-14l-6 4v-8l6 4zm-28 0l6-4v8l-6-4z" fill="#f8fafc"/>
+  </svg>`
 
-    coordinates.forEach(coord => {
-        if (coord?.lat == null || coord?.lng == null) return
-        minLat = Math.min(minLat, coord.lat)
-        maxLat = Math.max(maxLat, coord.lat)
-        minLng = Math.min(minLng, coord.lng)
-        maxLng = Math.max(maxLng, coord.lng)
+    return L.icon({
+        iconUrl: encodeSvg(svg),
+        iconSize: [56, 56],
+        iconAnchor: [28, 28],
+        className: '',
     })
-
-    if (!Number.isFinite(minLat) || !Number.isFinite(maxLat) || !Number.isFinite(minLng) || !Number.isFinite(maxLng)) {
-        return { minLat: 0, maxLat: 1, minLng: 0, maxLng: 1 }
-    }
-
-    if (minLat === maxLat) {
-        minLat -= 0.01
-        maxLat += 0.01
-    }
-    if (minLng === maxLng) {
-        minLng -= 0.01
-        maxLng += 0.01
-    }
-
-    return { minLat, maxLat, minLng, maxLng }
 }
 
-const project = (coord, box) => {
-    if (!coord) return null
-    const x = ((coord.lng - box.minLng) / (box.maxLng - box.minLng)) * 100
-    const y = 100 - ((coord.lat - box.minLat) / (box.maxLat - box.minLat)) * 100
-    return { x, y }
+const createEndpointIcon = (type, palette) => {
+    const isStart = type === 'start'
+    const [startColor, endColor] = palette.startGradient
+    const gradientStart = isStart ? startColor : '#f97316'
+    const gradientEnd = isStart ? endColor : '#ef4444'
+    const glyph = isStart ? 'A' : 'B'
+
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg width="48" height="64" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="grad-${type}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${gradientStart}" />
+        <stop offset="100%" stop-color="${gradientEnd}" />
+      </linearGradient>
+      <filter id="shadow-${type}" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="rgba(15,23,42,0.35)" />
+      </filter>
+    </defs>
+    <path d="M24 0C11.3 0 1 10.3 1 23c0 15.4 18.1 35.1 22.8 40.1.7.7 1.7.7 2.5 0C28.9 58.1 47 38.4 47 23 47 10.3 36.7 0 24 0z" fill="url(#grad-${type})" filter="url(#shadow-${type})" />
+    <circle cx="24" cy="23" r="12" fill="white" />
+    <text x="24" y="27" text-anchor="middle" font-size="14" font-family="'Inter', 'Arial', sans-serif" font-weight="700" fill="#0f172a">${glyph}</text>
+  </svg>`
+
+    return L.icon({
+        iconUrl: encodeSvg(svg),
+        iconSize: [48, 64],
+        iconAnchor: [24, 64],
+        className: '',
+    })
+}
+
+const createWaypointIcon = palette => {
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="9" cy="9" r="8" fill="${palette.shadow}" />
+    <circle cx="9" cy="9" r="4" fill="${palette.waypoint}" />
+  </svg>`
+
+    return L.icon({
+        iconUrl: encodeSvg(svg),
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+        className: '',
+    })
+}
+
+const FitRouteBounds = ({ positions }) => {
+    const map = useMap()
+
+    useEffect(() => {
+        if (!map || positions.length === 0) return
+        const bounds = L.latLngBounds(positions)
+        if (!bounds.isValid()) return
+        map.fitBounds(bounds, { padding: [48, 48] })
+    }, [map, positions])
+
+    return null
+}
+
+const PanToVehicle = ({ coordinate }) => {
+    const map = useMap()
+
+    useEffect(() => {
+        if (!map || !coordinate) return
+        map.panTo([coordinate.lat, coordinate.lng], { animate: true, duration: 0.9 })
+    }, [map, coordinate?.lat, coordinate?.lng])
+
+    return null
 }
 
 const OrsDeliveryMap = ({
@@ -79,22 +157,17 @@ const OrsDeliveryMap = ({
         [route]
     )
 
-    const boundingBox = useMemo(
-        () => createBoundingBox([...coordinates, vehicleCoordinate].filter(Boolean)),
-        [coordinates, vehicleCoordinate]
+    const palette = paletteByMode[mode] ?? paletteByMode.drone
+
+    const orsApiKey = import.meta.env?.VITE_ORS_API_KEY
+    const [tileProvider, setTileProvider] = useState(orsApiKey ? 'ors' : 'osm')
+
+    const routeLatLngs = useMemo(
+        () => coordinates.map(coord => [coord.lat, coord.lng]),
+        [coordinates]
     )
 
-    const projectedRoute = useMemo(
-        () => coordinates.map(coord => project(coord, boundingBox)).filter(Boolean),
-        [boundingBox, coordinates]
-    )
-
-    const projectedVehicle = useMemo(
-        () => project(vehicleCoordinate, boundingBox),
-        [boundingBox, vehicleCoordinate]
-    )
-
-    const progressPoints = useMemo(() => {
+    const progressLatLngs = useMemo(() => {
         if (!Array.isArray(route) || route.length === 0) return []
 
         const completed = []
@@ -102,168 +175,168 @@ const OrsDeliveryMap = ({
         for (let index = 0; index <= currentIndex; index += 1) {
             const point = route[index]
             if (point?.coords) {
-                const projected = project(point.coords, boundingBox)
-                if (projected) completed.push(projected)
+                completed.push([point.coords.lat, point.coords.lng])
             }
         }
 
-        if (projectedVehicle) {
+        if (vehicleCoordinate?.lat != null && vehicleCoordinate?.lng != null) {
             const last = completed.length ? completed[completed.length - 1] : null
-            const sameAsLast = last ? last.x === projectedVehicle.x && last.y === projectedVehicle.y : false
+            const sameAsLast = last
+                ? last[0] === vehicleCoordinate.lat && last[1] === vehicleCoordinate.lng
+                : false
 
-            if (segmentProgress > 0 || (!completed.length && projectedVehicle)) {
+            if (segmentProgress > 0 || (!completed.length && vehicleCoordinate)) {
                 if (!sameAsLast) {
-                    completed.push(projectedVehicle)
+                    completed.push([vehicleCoordinate.lat, vehicleCoordinate.lng])
                 }
             }
         }
 
-        if (!completed.length && projectedRoute[0]) {
-            completed.push(projectedRoute[0])
+        if (!completed.length && route[0]?.coords) {
+            completed.push([route[0].coords.lat, route[0].coords.lng])
         }
 
         return completed
-    }, [boundingBox, currentIndex, projectedRoute, projectedVehicle, route, segmentProgress])
+    }, [currentIndex, route, segmentProgress, vehicleCoordinate])
 
-    const palette = paletteByMode[mode] ?? paletteByMode.drone
-    const showFallback = projectedRoute.length === 0
+    const showFallback = routeLatLngs.length === 0
+    const fallbackIcon = palette.fallbackIcon
 
-    const renderWaypoint = (point, index) => (
-        <g key={point.id ?? index}>
-            <circle cx={point.x} cy={point.y} r='2.3' fill={palette.waypoint} opacity='0.9' />
-            <circle cx={point.x} cy={point.y} r='5.5' fill='none' stroke={palette.shadow} strokeWidth='2' />
-        </g>
-    )
+    const startIcon = useMemo(() => createEndpointIcon('start', palette), [palette])
+    const endIcon = useMemo(() => createEndpointIcon('end', palette), [palette])
+    const waypointIcon = useMemo(() => createWaypointIcon(palette), [palette])
+    const vehicleIcon = useMemo(() => createVehicleIcon(mode), [mode])
+
+    const vehicleLatLng = vehicleCoordinate
+        ? [vehicleCoordinate.lat, vehicleCoordinate.lng]
+        : null
+
+    const tileConfig = useMemo(() => {
+        if (tileProvider === 'ors' && orsApiKey) {
+            return {
+                url: `https://maps.openrouteservice.org/openmaptiles/light/{z}/{x}/{y}.png?api_key=${orsApiKey}`,
+                attribution:
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://openrouteservice.org/">openrouteservice</a>',
+            }
+        }
+
+        return {
+            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }
+    }, [orsApiKey, tileProvider])
 
     return (
         <div className='delivery-map-wrapper'>
             {!showFallback ? (
-                <svg className='delivery-map-canvas' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid meet'>
-                    <defs>
-                        <linearGradient id='route-bg' x1='0%' y1='0%' x2='0%' y2='100%'>
-                            <stop offset='0%' stopColor='rgba(14,165,233,0.14)' />
-                            <stop offset='100%' stopColor='rgba(99,102,241,0.14)' />
-                        </linearGradient>
-                        <filter id='glow'>
-                            <feGaussianBlur stdDeviation='1.4' result='blur' />
-                            <feMerge>
-                                <feMergeNode in='blur' />
-                                <feMergeNode in='SourceGraphic' />
-                            </feMerge>
-                        </filter>
-                        <linearGradient id='start-grad' x1='0%' y1='0%' x2='100%' y2='100%'>
-                            <stop offset='0%' stopColor={palette.startGradient[0]} />
-                            <stop offset='100%' stopColor={palette.startGradient[1]} />
-                        </linearGradient>
-                    </defs>
+                <MapContainer
+                    className='delivery-map-canvas'
+                    center={routeLatLngs[0] ?? [0, 0]}
+                    zoom={13}
+                    zoomControl={false}
+                    scrollWheelZoom
+                    key={orderCode || mode}
+                >
+                    <TileLayer
+                        key={tileProvider}
+                        url={tileConfig.url}
+                        attribution={tileConfig.attribution}
+                        eventHandlers={{
+                            tileerror: () => {
+                                if (tileProvider === 'ors') {
+                                    setTileProvider('osm')
+                                }
+                            },
+                        }}
+                    />
+                    <FitRouteBounds positions={routeLatLngs} />
+                    <PanToVehicle coordinate={vehicleCoordinate} />
 
-                    <rect x='0' y='0' width='100' height='100' fill='url(#route-bg)' />
-
-                    {projectedRoute.length ? (
-                        <polyline
-                            points={projectedRoute.map(point => `${point.x},${point.y}`).join(' ')}
-                            fill='none'
-                            stroke={palette.shadow}
-                            strokeWidth='5.5'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            opacity='0.85'
+                    {routeLatLngs.length ? (
+                        <Polyline
+                            positions={routeLatLngs}
+                            pathOptions={{
+                                color: palette.shadow,
+                                weight: 9,
+                                opacity: 0.9,
+                            }}
                         />
                     ) : null}
 
-                    {projectedRoute.length ? (
-                        <polyline
-                            points={projectedRoute.map(point => `${point.x},${point.y}`).join(' ')}
-                            fill='none'
-                            stroke={palette.primary}
-                            strokeWidth='2.4'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeDasharray='6 8'
-                            opacity='0.95'
+                    {routeLatLngs.length ? (
+                        <Polyline
+                            positions={routeLatLngs}
+                            pathOptions={{
+                                color: palette.primary,
+                                weight: 4,
+                                opacity: 0.85,
+                                dashArray: '6 16',
+                            }}
                         />
                     ) : null}
 
-                    {progressPoints.length ? (
-                        <polyline
-                            points={progressPoints.map(point => `${point.x},${point.y}`).join(' ')}
-                            fill='none'
-                            stroke={palette.progress}
-                            strokeWidth='3.6'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            filter='url(#glow)'
+                    {progressLatLngs.length ? (
+                        <Polyline
+                            positions={progressLatLngs}
+                            pathOptions={{
+                                color: palette.progress,
+                                weight: 5,
+                                opacity: 1,
+                            }}
                         />
                     ) : null}
 
-                    {projectedRoute[0] ? (
-                        <g transform={`translate(${projectedRoute[0].x}, ${projectedRoute[0].y})`}>
-                            <circle r='7.5' fill='url(#start-grad)' opacity='0.92' />
-                            <text
-                                x='0'
-                                y='2.6'
-                                textAnchor='middle'
-                                fontSize='5.2'
-                                fontWeight='700'
-                                fill='#0f172a'
-                            >
-                                A
-                            </text>
-                        </g>
+                    {routeLatLngs[0] ? (
+                        <Marker
+                            position={routeLatLngs[0]}
+                            icon={startIcon}
+                            title={route[0]?.title ?? 'Start'}
+                            zIndexOffset={200}
+                        />
                     ) : null}
 
-                    {projectedRoute[projectedRoute.length - 1] ? (
-                        <g transform={`translate(${projectedRoute[projectedRoute.length - 1].x}, ${projectedRoute[projectedRoute.length - 1].y})`}>
-                            <circle r='7.5' fill='#f43f5e' opacity='0.95' />
-                            <text
-                                x='0'
-                                y='2.6'
-                                textAnchor='middle'
-                                fontSize='5.2'
-                                fontWeight='700'
-                                fill='#fff7ed'
-                            >
-                                B
-                            </text>
-                        </g>
+                    {routeLatLngs[routeLatLngs.length - 1] ? (
+                        <Marker
+                            position={routeLatLngs[routeLatLngs.length - 1]}
+                            icon={endIcon}
+                            title={route[route.length - 1]?.title ?? 'Destination'}
+                            zIndexOffset={200}
+                        />
                     ) : null}
 
-                    {projectedRoute
+                    {route
                         .slice(1, -1)
-                        .map((point, index) => renderWaypoint(point, route[index + 1]?.id ?? index))}
+                        .filter(point => point?.coords)
+                        .map(point => (
+                            <Marker
+                                key={point.id}
+                                position={[point.coords.lat, point.coords.lng]}
+                                icon={waypointIcon}
+                                title={point.title}
+                                zIndexOffset={150}
+                            />
+                        ))}
 
-                    {projectedVehicle ? (
-                        <g transform={`translate(${projectedVehicle.x}, ${projectedVehicle.y})`}>
-                            <circle r='8' fill={palette.primary} opacity='0.95' />
-                            <text
-                                x='0'
-                                y='2.6'
-                                textAnchor='middle'
-                                fontSize='5.2'
-                                fontWeight='700'
-                                fill='#f8fafc'
-                            >
-                                {mode === 'motorbike' ? '🛵' : '🚁'}
-                            </text>
-                        </g>
+                    {vehicleLatLng ? (
+                        <Marker
+                            position={vehicleLatLng}
+                            icon={vehicleIcon}
+                            title={
+                                orderCode
+                                    ? `${mode === 'motorbike' ? 'Courier' : 'Drone'} ${orderCode}`
+                                    : 'Current position'
+                            }
+                            zIndexOffset={300}
+                        />
                     ) : null}
-
-                    <text
-                        x='6'
-                        y='10'
-                        fontSize='6'
-                        fontWeight='600'
-                        fill='rgba(15,23,42,0.55)'
-                    >
-                        {orderCode ? `Route ${orderCode}` : 'Route preview'}
-                    </text>
-                </svg>
+                </MapContainer>
             ) : null}
 
             {showFallback && (
                 <div className='map-fallback' role='status'>
                     <div className='map-fallback-icon' aria-hidden='true'>
-                        {palette.fallbackIcon}
+                        {fallbackIcon}
                     </div>
                     <p>{unavailableMessage}</p>
                     {route?.length ? (

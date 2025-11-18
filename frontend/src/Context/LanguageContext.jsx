@@ -221,7 +221,7 @@ const translationData = {
           customerEmail: 'tranthi.b@example.com',
           status: 'delivered',
           paid: false,
-          deliveryMethod: 'motorbike',
+          deliveryMethod: 'drone',
           estimatedArrival: '25 - 35 phút',
           estimatedMinutes: 28,
           route: [
@@ -504,7 +504,7 @@ const translationData = {
           customerEmail: 'tranthi.b@example.com',
           status: 'delivered',
           paid: false,
-          deliveryMethod: 'motorbike',
+          deliveryMethod: 'drone',
           estimatedArrival: '25 - 35 mins',
           estimatedMinutes: 28,
           route: [
