@@ -3,6 +3,7 @@ import './Tracking.css'
 import { order_list } from '../../assets/assest'
 import { useAdminLanguage } from '../../context/LanguageContext'
 import OrsDeliveryMap from './OrsDeliveryMap'
+import 'leaflet/dist/leaflet.css'
 
 const byRecency = (a, b) => {
     const parseDate = value => {
@@ -75,11 +76,13 @@ const Tracking = () => {
     const currentPoint = route[currentIndex] ?? route[0]
     const nextPoint = route[nextIndex] ?? route[route.length - 1]
 
-    const interpolatePosition = () => {
-        if (!currentPoint?.position) return { left: '10%', top: '70%' }
-        if (!nextPoint?.position) return {
-            left: `${currentPoint.position.x}%`,
-            top: `${currentPoint.position.y}%`
+    const vehicleCoordinate = useMemo(() => {
+        if (!currentPoint?.coords) return null
+        if (!nextPoint?.coords) {
+            return {
+                lat: currentPoint.coords.lat,
+                lng: currentPoint.coords.lng,
+            }
         }
         return {
             lat:
@@ -227,35 +230,15 @@ const Tracking = () => {
 
                     <section className='tracking-layout'>
                         <div className='tracking-map'>
-                            <div className='map-grid'>
-                                {[...Array(4)].map((_, index) => (
-                                    <span
-                                        key={index}
-                                        className='grid-line horizontal'
-                                        style={{ top: `${(index + 1) * 20}%` }}
-                                    />
-                                ))}
-                                {[...Array(4)].map((_, index) => (
-                                    <span
-                                        key={`v-${index}`}
-                                        className='grid-line vertical'
-                                        style={{ left: `${(index + 1) * 20}%` }}
-                                    />
-                                ))}
-                            </div>
-                            {route.map(point => (
-                                <div
-                                    key={point.id}
-                                    className='map-point'
-                                    style={{ left: `${point.position?.x ?? 0}%`, top: `${point.position?.y ?? 0}%` }}
-                                >
-                                    <span className='point-dot' />
-                                    <span className='point-label'>{point.title}</span>
-                                </div>
-                            ))}
-                            <div className='vehicle-icon' style={interpolatePosition()}>
-                                <span role='img' aria-label='Phương tiện đang di chuyển'>{vehicleEmoji}</span>
-                            </div>
+                            <OrsDeliveryMap
+                                route={route}
+                                vehicleCoordinate={vehicleCoordinate}
+                                currentIndex={currentIndex}
+                                segmentProgress={segmentProgress}
+                                orderCode={selectedOrder.code ?? selectedOrder.id.toUpperCase()}
+                                mode={deliveryMethod}
+                                unavailableMessage={t.mapUnavailable ?? 'Map không khả dụng'}
+                            />
                             <div className='map-legend'>
                                 <strong>{legendPrefix}{selectedOrder.code ?? selectedOrder.id.toUpperCase()}</strong>
                                 <span>{legendText}</span>
