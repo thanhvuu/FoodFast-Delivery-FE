@@ -6,17 +6,6 @@ import { useNavigate } from 'react-router-dom'
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
 const DELIVERY_OPTIONS = {
-    motorbike: {
-        key: 'motorbike',
-        label: 'Giao xe máy',
-        icon: '🛵',
-        description: 'Tiết kiệm chi phí, phù hợp nội thành.',
-        etaRange: '25 - 35 phút',
-        estimatedMinutes: 28,
-        baseFee: 15000,
-        freeThreshold: 120000,
-        benefitTag: '💰 Tiết kiệm',
-    },
     drone: {
         key: 'drone',
         label: 'Giao drone',
@@ -81,55 +70,7 @@ const generateDroneRoute = (createdAt, address) => {
     })
 }
 
-const generateMotorbikeRoute = (createdAt, address) => {
-    const baseLat = 10.775112
-    const baseLng = 106.700214
-    const seed = createdAt.getTime() / 1200
-
-    const pseudoRandom = (factor) => {
-        const x = Math.sin(seed * factor) * 10000
-        return x - Math.floor(x)
-    }
-
-    const latDelta = 0.01 + pseudoRandom(1.5) * 0.006
-    const lngDelta = 0.014 + pseudoRandom(0.9) * 0.008
-
-    const checkpoints = [
-        { offset: 0, id: 'pickup', title: 'Tài xế nhận món', description: 'Tài xế FoodFast đã nhận đơn và kiểm tra túi giữ nhiệt.' },
-        { offset: 4, id: 'depart', title: 'Rời nhà hàng', description: 'Xe máy rời bếp trung tâm và nhập tuyến đường nhanh nhất.' },
-        { offset: 9, id: 'enroute', title: 'Đang di chuyển', description: 'Tài xế điều chỉnh tốc độ để tránh kẹt xe giờ cao điểm.' },
-        { offset: 15, id: 'arriving', title: 'Sắp đến nơi', description: 'Tài xế liên hệ khách xác nhận điểm giao tại sảnh.' },
-        { offset: 20, id: 'delivered', title: 'Hoàn tất giao hàng', description: `Đơn hàng được bàn giao cho khách tại ${address}.` },
-    ]
-
-    const etaFormatter = new Intl.DateTimeFormat('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-    })
-
-    return checkpoints.map((checkpoint, index) => {
-        const progression = index / (checkpoints.length - 1 || 1)
-        const coords = {
-            lat: baseLat + latDelta * progression,
-            lng: baseLng + lngDelta * progression,
-        }
-
-        const eta = new Date(createdAt.getTime() + checkpoint.offset * 60 * 1000)
-
-        return {
-            id: checkpoint.id,
-            eta: etaFormatter.format(eta),
-            title: checkpoint.title,
-            description: checkpoint.description,
-            coords,
-        }
-    })
-}
-
 const generateRoute = (method, createdAt, address) => {
-    if (method === 'motorbike') {
-        return generateMotorbikeRoute(createdAt, address)
-    }
     return generateDroneRoute(createdAt, address)
 }
 
@@ -148,18 +89,12 @@ const readStoredOrders = () => {
 
 const PlaceOrder = () => {
     const { cartItems, cartTotal, food_list, setCartItems } = useContext(StoreContext)
-    const [deliveryMethod, setDeliveryMethod] = useState('motorbike')
+    const [deliveryMethod, setDeliveryMethod] = useState('drone')
 
     const calculateDeliveryFee = (method) => {
         const option = DELIVERY_OPTIONS[method]
         if (!option || cartTotal <= 0) {
             return 0
-        }
-        if (method === 'motorbike') {
-            if (option.freeThreshold && cartTotal >= option.freeThreshold) {
-                return 0
-            }
-            return option.baseFee
         }
         if (method === 'drone') {
             if (option.discountThreshold && cartTotal >= option.discountThreshold) {
@@ -269,7 +204,7 @@ const PlaceOrder = () => {
             estimatedMinutes: selectedDeliveryOption.estimatedMinutes,
             status: 'pending',
             trackingStatus: 'inTransit',
-            paid: paymentMethod !== 'cod',
+            paid: true,
             paymentMethod,
             route: generateRoute(deliveryMethod, createdAt, fullAddress),
             createdAt: createdAt.toISOString(),
@@ -321,7 +256,7 @@ const PlaceOrder = () => {
                 <div className="order-summary">
                     <h2>Order Summary</h2>
                     <div className="delivery-methods">
-                        <p className="delivery-title">Chọn phương thức giao hàng</p>
+                        <p className="delivery-title">Phương thức giao hàng</p>
                         <div className="delivery-options">
                             {Object.values(DELIVERY_OPTIONS).map(option => {
                                 const isSelected = option.key === deliveryMethod
@@ -380,7 +315,7 @@ const PlaceOrder = () => {
                         <span style={{ fontWeight: 'bold', color: '#1a237e' }}>{formatCurrency(grandTotal)}</span>
                     </div>
                     <div className="payment-methods">
-                        <p className="payment-title">Chọn phương thức thanh toán</p>
+                        <p className="payment-title">Phương thức thanh toán</p>
                         <label className="payment-option">
                             <input
                                 type="radio"
@@ -390,16 +325,6 @@ const PlaceOrder = () => {
                                 onChange={() => setPaymentMethod('atm')}
                             />
                             <span>ATM Card (Online payment)</span>
-                        </label>
-                        <label className="payment-option">
-                            <input
-                                type="radio"
-                                name="paymentMethod"
-                                value="cod"
-                                checked={paymentMethod === 'cod'}
-                                onChange={() => setPaymentMethod('cod')}
-                            />
-                            <span>Cash on Delivery</span>
                         </label>
                     </div>
                     <button className="checkout-btn" type="submit">
