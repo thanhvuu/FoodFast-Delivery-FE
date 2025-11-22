@@ -14,7 +14,7 @@ import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useCart } from '../context';
-import type { RootStackParamList } from '../navigation/types';
+import type { CustomerHomeStackParamList } from '../navigation/types';
 
 const DELIVERY_METHODS = [
   {
@@ -35,7 +35,7 @@ const DELIVERY_METHODS = [
 
 type DeliveryMethodKey = (typeof DELIVERY_METHODS)[number]['key'];
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Checkout'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Checkout'>;
 
 type CheckoutForm = {
   fullName: string;

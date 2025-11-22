@@ -1,12 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import shadows from '../theme/shadows';
-import { RootStackParamList } from '../navigation/types';
 
 const ORDERS = [
   {
@@ -36,11 +32,12 @@ const ORDERS = [
 ];
 
 const OrderHistoryScreen: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   return (
     <View style={styles.container}>
-      <HeaderBar title="Lịch sử đặt món" onBackPress={() => navigation.goBack()} />
+      <View style={styles.header}>
+        <Text style={styles.title}>Đơn hàng</Text>
+        <Text style={styles.subtitle}>Theo dõi và xem lại các đơn đã đặt</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.content}>
         {ORDERS.map((order) => (
           <View key={order.id} style={styles.card}>
@@ -72,6 +69,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  subtitle: {
+    marginTop: 4,
+    color: colors.muted,
   },
   content: {
     padding: spacing.lg,

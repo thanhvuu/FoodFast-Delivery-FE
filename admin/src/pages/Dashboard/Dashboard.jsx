@@ -40,6 +40,7 @@ const transformOrder = order => {
   const normaliseStatus = value => {
     if (!value) return 'new'
     if (['new', 'preparing', 'completed'].includes(value)) return value
+    if (value === 'complete' || value === 'conplete') return 'completed'
     if (value === 'delivered') return 'completed'
     if (value === 'pending' || value === 'new_order') return 'new'
     if (value === 'in_progress') return 'preparing'
@@ -169,6 +170,36 @@ const Dashboard = ({ products = [] }) => {
     }
   }, [orders, products.length])
 
+  const statusSummary = useMemo(() => {
+    const keys = ['new', 'preparing', 'completed']
+    const counts = keys.reduce((acc, key) => ({ ...acc, [key]: 0 }), {})
+    orders.forEach(order => {
+      const key = keys.includes(order.status) ? order.status : 'new'
+      counts[key] = (counts[key] || 0) + 1
+    })
+    const total = keys.reduce((sum, key) => sum + (counts[key] || 0), 0)
+    const percentages = keys.reduce((acc, key) => {
+      acc[key] = total ? Math.round(((counts[key] || 0) / total) * 100) : 0
+      return acc
+    }, {})
+    return { counts, percentages, total }
+  }, [orders])
+
+  const customerInsights = useMemo(() => {
+    const totals = new Map()
+    orders.forEach(order => {
+      const amount = calculateOrderTotal(order)
+      const name = order.customer ?? 'Customer'
+      totals.set(name, (totals.get(name) || 0) + amount)
+    })
+    const list = Array.from(totals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, total]) => ({ name, total }))
+    const max = list.length ? list[0].total : 0
+    return { list, max }
+  }, [orders])
+
   const topProducts = useMemo(() => {
     const counter = new Map()
     orders.forEach(order => {
@@ -250,6 +281,35 @@ const Dashboard = ({ products = [] }) => {
 
     return { daily, monthly, maxDailyOrders, maxMonthlyRevenue }
   }, [orders, dailyFormatter, monthlyFormatter])
+
+  const dailyVelocity = useMemo(() => {
+    const series = analytics.daily ?? []
+    const maxRevenue = series.reduce((max, item) => Math.max(max, item.revenue), 0)
+    return { series, maxRevenue }
+  }, [analytics.daily])
+
+  const statusTexts = {
+    title: 'Tình trạng xử lý đơn',
+    description: 'Theo dõi tiến độ xử lý đơn hiện tại.',
+    completionLabel: 'Tỷ lệ hoàn tất',
+    labels: {},
+    countTemplate: '{{count}} · {{percentage}}%',
+    ...(t.statusInsights ?? {}),
+  }
+  const customerTexts = {
+    title: 'Khách hàng giá trị',
+    description: 'Những khách có tổng giá trị đơn cao nhất.',
+    empty: 'Chưa có dữ liệu khách hàng.',
+    ...(t.customerInsights ?? {}),
+  }
+  const velocityTexts = {
+    title: 'Nhịp đơn theo ngày',
+    description: 'So sánh số lượng đơn và doanh thu từng ngày.',
+    empty: 'Chưa có dữ liệu nhịp đơn.',
+    ...(t.orderVelocity ?? {}),
+  }
+  const completionRate = metrics.deliveredRate
+  const radialGradient = `conic-gradient(#ff7a45 0% ${completionRate}%, rgba(255, 122, 69, 0.16) ${completionRate}% 100%)`
 
   return (
     <div className='dashboard-page'>
@@ -350,6 +410,116 @@ const Dashboard = ({ products = [] }) => {
             </div>
           ) : (
             <p className='empty-copy'>{t.revenueAnalytics.empty}</p>
+          )}
+        </article>
+      </section>
+
+      <section className='dashboard-insights'>
+        <article className='insight-card status-insight'>
+          <div className='insight-heading'>
+            <h2>{statusTexts.title}</h2>
+            <p className='section-description'>{statusTexts.description}</p>
+          </div>
+          <div className='status-content'>
+            <div className='radial-chart' style={{ background: radialGradient }}>
+              <strong>{completionRate}%</strong>
+              <span>{statusTexts.completionLabel}</span>
+            </div>
+            <ul className='status-legend'>
+              {['completed', 'preparing', 'new'].map(statusKey => {
+                const count = statusSummary.counts[statusKey] ?? 0
+                const percentage = statusSummary.percentages[statusKey] ?? 0
+                const statusLabel = ordersTranslations.statuses?.[statusKey]
+                  ?? statusTexts.labels?.[statusKey]
+                  ?? statusKey
+                const detail = typeof statusTexts.countTemplate === 'string'
+                  ? statusTexts.countTemplate
+                    .replace('{{count}}', count)
+                    .replace('{{percentage}}', percentage)
+                  : `${count} · ${percentage}%`
+                return (
+                  <li key={statusKey}>
+                    <span className={`legend-dot legend-${statusKey}`} aria-hidden='true' />
+                    <div className='legend-copy'>
+                      <span>{statusLabel}</span>
+                      <small>{detail}</small>
+                    </div>
+                    <span className='legend-percentage'>{percentage}%</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </article>
+
+        <article className='insight-card customers-insight'>
+          <div className='insight-heading'>
+            <h2>{customerTexts.title}</h2>
+            <p className='section-description'>{customerTexts.description}</p>
+          </div>
+          {customerInsights.list.length ? (
+            <ul className='customer-list'>
+              {customerInsights.list.map(customer => {
+                const ratio = customerInsights.max
+                  ? Math.max(10, Math.round((customer.total / customerInsights.max) * 100))
+                  : 0
+                return (
+                  <li key={customer.name}>
+                    <div className='customer-copy'>
+                      <strong>{customer.name}</strong>
+                      <span>{formatCurrency(customer.total)}</span>
+                    </div>
+                    <div className='customer-progress'>
+                      <div style={{ width: `${ratio}%` }} />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className='empty-copy'>{customerTexts.empty}</p>
+          )}
+        </article>
+
+        <article className='insight-card velocity-insight'>
+          <div className='insight-heading'>
+            <h2>{velocityTexts.title}</h2>
+            <p className='section-description'>{velocityTexts.description}</p>
+          </div>
+          {dailyVelocity.series.length ? (
+            <div className='spark-chart'>
+              {dailyVelocity.series.map(item => {
+                const ordersHeight = analytics.maxDailyOrders
+                  ? Math.max(8, Math.round((item.orders / analytics.maxDailyOrders) * 100))
+                  : 0
+                const revenueHeight = dailyVelocity.maxRevenue
+                  ? Math.max(6, Math.round((item.revenue / dailyVelocity.maxRevenue) * 100))
+                  : 0
+                return (
+                  <div key={item.label} className='spark-column'>
+                    <div className='spark-bars'>
+                      <div
+                        className='spark-orders'
+                        style={{ height: `${ordersHeight}%` }}
+                        title={`${velocityTexts.ordersLabel ?? t.revenueAnalytics.daily.ordersLabel}: ${item.orders}`}
+                      />
+                      <div
+                        className='spark-revenue'
+                        style={{ height: `${revenueHeight}%` }}
+                        title={`${velocityTexts.revenueLabel ?? t.revenueAnalytics.monthly.revenueLabel}: ${formatCurrency(item.revenue)}`}
+                      />
+                    </div>
+                    <span className='spark-label'>{item.label}</span>
+                    <div className='spark-values'>
+                      <strong>{item.orders}</strong>
+                      <small>{formatCurrency(item.revenue)}</small>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{velocityTexts.empty ?? t.revenueAnalytics.empty}</p>
           )}
         </article>
       </section>

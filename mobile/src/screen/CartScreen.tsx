@@ -14,11 +14,11 @@ import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useCart, type CartItem } from '../context';
-import type { RootStackParamList } from '../navigation/types';
+import type { CustomerHomeStackParamList } from '../navigation/types';
 
 const DELIVERY_FEE = 15000;
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Cart'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Cart'>;
 
 const CartScreen: React.FC<Props> = ({ navigation }) => {
   const { items, subtotal, updateQuantity, removeItem } = useCart();

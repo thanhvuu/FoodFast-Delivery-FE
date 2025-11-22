@@ -5,13 +5,13 @@ import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { CustomerHomeStackParamList } from '../navigation/types';
 import InfoCard from '../components/InfoCard';
 import AppFooter from '../components/AppFooter';
 
 const mapImage = 'https://images.unsplash.com/photo-1529927336841-95c6c1c76045?auto=format&fit=crop&w=1200&q=80';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Contact'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Contact'>;
 
 const ContactScreen: React.FC<Props> = ({ navigation }) => {
   return (
