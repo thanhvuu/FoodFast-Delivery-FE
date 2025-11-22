@@ -7,15 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionHeader from '../components/SectionHeader';
 import TagPill from '../components/TagPill';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { CustomerHomeStackParamList, CustomerTabParamList } from '../navigation/types';
+import { CustomerHomeStackParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
@@ -32,8 +30,6 @@ const quickLinks = [
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
-
   const handleSeeAll = () => {
     navigation.navigate('Tracking');
   };
@@ -49,29 +45,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <View style={styles.searchHeader}>
-          <TouchableOpacity
-            style={styles.cartButton}
-            activeOpacity={0.9}
-            onPress={() => tabNavigation.navigate('CartTab')}
-          >
-            <View style={styles.cartIconWrapper}>
-              <Text style={styles.cartIcon}>🛒</Text>
-            </View>
-            <View style={styles.cartTextContainer}>
-              <Text style={styles.cartTitle}>Giỏ hàng</Text>
-              <Text style={styles.cartSubtitle}>Xem món đã chọn</Text>
-            </View>
-          </TouchableOpacity>
-          <View style={styles.helperRow}>
-            <Text style={styles.helperText}>Hà Nội</Text>
-            <Text style={styles.dot}>•</Text>
-            <Text style={styles.helperText}>Ưu đãi mới</Text>
-            <Text style={styles.dot}>•</Text>
-            <Text style={styles.helperText}>0đ giao hàng</Text>
-          </View>
-        </View>
-
         <View style={styles.quickLinkRow}>
           {quickLinks.map((item) => (
             <TouchableOpacity key={item.id} style={styles.quickLink} activeOpacity={0.85}>
@@ -132,77 +105,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: spacing.xxl,
-  },
-  searchHeader: {
-    paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
-  },
-  cartButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  locationInfo: {
-    flex: 1,
-  },
-  locationTitle: {
-    color: colors.text,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  cartIconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
-  },
-  cartIconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#FFE8DA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  cartIcon: {
-    fontSize: 20,
-  },
-  cartTextContainer: {
-    flex: 1,
-  },
-  cartTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  cartSubtitle: {
-    color: colors.muted,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  helperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.xs,
-  },
-  helperText: {
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  dot: {
-    marginHorizontal: spacing.xs,
-    color: colors.muted,
+    paddingBottom: spacing.xxl,
   },
   quickLinkRow: {
     flexDirection: 'row',
