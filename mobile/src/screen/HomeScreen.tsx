@@ -137,14 +137,28 @@ const styles = StyleSheet.create({
   cartButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  cartIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     borderRadius: 18,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     shadowColor: '#000',
     shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
   cartIconWrapper: {
@@ -175,7 +189,7 @@ const styles = StyleSheet.create({
   helperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   helperText: {
     color: colors.muted,
