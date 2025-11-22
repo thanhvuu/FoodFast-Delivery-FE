@@ -5,7 +5,7 @@ import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { CustomerHomeStackParamList } from '../navigation/types';
 import StatCard from '../components/StatCard';
 import OrderTimeline, { OrderStep } from '../components/OrderTimeline';
 import InfoCard from '../components/InfoCard';
@@ -19,7 +19,7 @@ const steps: OrderStep[] = [
   { id: 'delivered', title: 'Đã giao hàng', time: '11:10 - 15/04' },
 ];
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Tracking'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Tracking'>;
 
 const TrackingScreen: React.FC<Props> = ({ navigation }) => {
   const activeStep = useMemo(() => steps.find((step) => !step.isActive) ?? steps[steps.length - 1], []);

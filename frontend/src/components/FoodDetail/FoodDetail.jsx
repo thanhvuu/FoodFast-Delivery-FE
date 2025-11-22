@@ -106,11 +106,6 @@ const FoodDetail = () => {
                         Thêm vào giỏ hàng
                     </button>
 
-                    {showAddedMsg && (
-                        <div className="add-to-cart-toast">
-                            Đã thêm vào giỏ hàng!
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -144,6 +139,11 @@ const FoodDetail = () => {
                     loading="lazy"
                 />
             </div>
+            {showAddedMsg && (
+                <div className="add-to-cart-toast">
+                    Đã thêm vào giỏ hàng!
+                </div>
+            )}
         </div>
     )
 }

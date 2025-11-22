@@ -9,7 +9,12 @@ const translations = {
       confirmDeleteProduct: 'Bạn muốn xoá sản phẩm này?',
     },
     navbar: {
+      title: 'FoodFast Admin',
+      subtitle: 'Điều hành chi nhánh của bạn',
+      description: 'Giám sát đơn hàng, cập nhật thực đơn và theo dõi vận hành trong cùng một bảng điều khiển.',
+      languageCardTitle: 'Giao diện hiển thị',
       languageLabel: 'Ngôn ngữ',
+      languageHint: 'Chọn ngôn ngữ để đồng bộ với đội vận hành.',
     },
     sidebar: {
       dashboard: 'Tổng quan',
@@ -18,6 +23,20 @@ const translations = {
       orders: 'Đơn hàng',
       restaurant: 'Thông tin quán',
       tracking: 'Theo dõi drone',
+    },
+    sidebarDescriptions: {
+      dashboard: 'Xem hiệu suất tổng thể',
+      add: 'Đăng món mới lên menu',
+      list: 'Quản lý món đang bán',
+      orders: 'Điều phối đơn giao',
+      restaurant: 'Cập nhật thông tin quán',
+      tracking: 'Theo dõi hành trình giao',
+    },
+    sidebarMeta: {
+      brand: 'FoodFast',
+      subtitle: 'Admin Control',
+      version: 'Phiên bản 1.0.0',
+      copyright: '© FoodFast 2025',
     },
     dashboardPage: {
       title: 'Bảng điều khiển FoodFast',
@@ -76,6 +95,29 @@ const translations = {
           description: 'Tổng doanh thu ước tính trong 6 tháng gần nhất.',
           revenueLabel: 'Doanh thu (ước tính)',
         },
+      },
+      statusInsights: {
+        title: 'Tình trạng xử lý đơn',
+        description: 'Tỉ lệ đơn mới, đang chế biến và đã hoàn tất.',
+        completionLabel: 'Tỷ lệ hoàn tất',
+        labels: {
+          completed: 'Đã hoàn tất',
+          preparing: 'Đang chế biến',
+          new: 'Đơn mới',
+        },
+        countTemplate: '{{count}} đơn · {{percentage}}%',
+      },
+      customerInsights: {
+        title: 'Khách hàng giá trị',
+        description: 'Top khách hàng có tổng giá trị đơn cao nhất.',
+        empty: 'Chưa có dữ liệu khách hàng.',
+      },
+      orderVelocity: {
+        title: 'Nhịp đơn mỗi ngày',
+        description: 'Nhịp độ đơn và doanh thu của 7 ngày gần nhất.',
+        ordersLabel: 'Đơn',
+        revenueLabel: 'Doanh thu',
+        empty: 'Chưa có dữ liệu nhịp đơn.',
       },
     },
     addPage: {
@@ -236,6 +278,7 @@ const translations = {
         default: 'Đơn #',
       },
       legendUpdated: 'Tọa độ hiện tại cập nhật lúc {{time}}',
+      mapUnavailable: 'Bản đồ đang tải, vui lòng xem nhanh các điểm lộ trình bên cạnh.',
       timelineTitle: 'Lộ trình giao hàng',
       empty: 'Không tìm thấy thông tin đơn hàng.',
     },
@@ -268,7 +311,12 @@ const translations = {
       confirmDeleteProduct: 'Do you want to delete this product?',
     },
     navbar: {
+      title: 'FoodFast Admin',
+      subtitle: 'Operate your kitchen smoothly',
+      description: 'Keep an eye on orders, refresh the menu, and monitor deliveries from one control hub.',
+      languageCardTitle: 'Interface language',
       languageLabel: 'Language',
+      languageHint: 'Switch language to match your operations team.',
     },
     sidebar: {
       dashboard: 'Dashboard',
@@ -277,6 +325,20 @@ const translations = {
       orders: 'Orders',
       restaurant: 'Restaurant info',
       tracking: 'Drone tracking',
+    },
+    sidebarDescriptions: {
+      dashboard: 'Monitor overall performance',
+      add: 'Create new dishes for the menu',
+      list: 'Maintain current items',
+      orders: 'Coordinate deliveries',
+      restaurant: 'Update restaurant details',
+      tracking: 'Follow live delivery routes',
+    },
+    sidebarMeta: {
+      brand: 'FoodFast',
+      subtitle: 'Admin Control',
+      version: 'Version 1.0.0',
+      copyright: '© FoodFast 2025',
     },
     dashboardPage: {
       title: 'FoodFast control center',
@@ -335,6 +397,29 @@ const translations = {
           description: 'Estimated revenue for the latest 6 months.',
           revenueLabel: 'Revenue (est.)',
         },
+      },
+      statusInsights: {
+        title: 'Order status mix',
+        description: 'Share of new, preparing, and completed orders.',
+        completionLabel: 'Completion rate',
+        labels: {
+          completed: 'Completed',
+          preparing: 'In kitchen',
+          new: 'New orders',
+        },
+        countTemplate: '{{count}} orders · {{percentage}}%',
+      },
+      customerInsights: {
+        title: 'Top customers',
+        description: 'Customers with the highest order value.',
+        empty: 'No customer data yet.',
+      },
+      orderVelocity: {
+        title: 'Daily order pace',
+        description: 'Order count and revenue across the last 7 days.',
+        ordersLabel: 'Orders',
+        revenueLabel: 'Revenue',
+        empty: 'No pace data available yet.',
       },
     },
     addPage: {
@@ -495,6 +580,7 @@ const translations = {
         default: 'Order #',
       },
       legendUpdated: 'Current co-ordinates updated at {{time}}',
+      mapUnavailable: 'Map tiles are loading — review the delivery stops while we reconnect.',
       timelineTitle: 'Delivery route',
       empty: 'Order information not available.',
     },
@@ -576,4 +662,5 @@ export const AdminLanguageProvider = ({ children }) => {
   return <AdminLanguageContext.Provider value={value}>{children}</AdminLanguageContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAdminLanguage = () => useContext(AdminLanguageContext)

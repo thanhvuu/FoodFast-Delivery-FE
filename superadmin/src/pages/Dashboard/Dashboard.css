@@ -1,0 +1,77 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, rgba(255, 231, 219, 0.8), rgba(255, 210, 188, 0.8));
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #7a3417;
+}
+
+.metric-card span {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(122, 52, 23, 0.6);
+}
+
+.metric-card strong {
+  font-size: 28px;
+}
+
+.metric-card small {
+  color: rgba(122, 52, 23, 0.7);
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.sa-card h3 {
+  margin: 0;
+  color: #7a3417;
+}
+
+.sa-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sa-card li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.sa-card li strong {
+  font-size: 16px;
+}
+
+.sa-card li small {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.sa-card li span {
+  font-weight: 600;
+  color: #ff5a1f;
+}
