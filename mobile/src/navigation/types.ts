@@ -3,10 +3,14 @@ export type CustomerHomeStackParamList = {
   FoodDetail: { id: string } | undefined;
   Contact: undefined;
   Tracking: undefined;
-  Cart: undefined;
-  Checkout: undefined;
   Account: undefined;
   OrderHistory: undefined;
+};
+
+export type CartStackParamList = {
+  Cart: undefined;
+  Checkout: undefined;
+  Tracking: undefined;
 };
 
 export type OrdersStackParamList = {
@@ -23,6 +27,7 @@ export type AccountStackParamList = {
 export type CustomerTabParamList = {
   HomeTab: undefined;
   OrdersTab: undefined;
+  CartTab: undefined;
   NotificationsTab: undefined;
   AccountTab: undefined;
 };

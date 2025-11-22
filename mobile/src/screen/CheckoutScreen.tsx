@@ -8,13 +8,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useCart } from '../context';
-import type { CustomerHomeStackParamList } from '../navigation/types';
+import type { CartStackParamList, CustomerTabParamList } from '../navigation/types';
 
 const DELIVERY_METHODS = [
   {
@@ -35,7 +37,7 @@ const DELIVERY_METHODS = [
 
 type DeliveryMethodKey = (typeof DELIVERY_METHODS)[number]['key'];
 
-type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Checkout'>;
+type Props = NativeStackScreenProps<CartStackParamList, 'Checkout'>;
 
 type CheckoutForm = {
   fullName: string;
@@ -70,6 +72,7 @@ const calculateDeliveryFee = (method: DeliveryMethodKey, subtotal: number) => {
 };
 
 const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
+  const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
   const { items, subtotal, clearCart } = useCart();
   const [form, setForm] = useState<CheckoutForm>(INITIAL_FORM);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethodKey>('drone');
@@ -108,7 +111,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         style: 'cancel',
         onPress: () => {
           clearCart();
-          navigation.navigate('Home');
+          tabNavigation.navigate('HomeTab');
         },
       },
     ]);
@@ -132,7 +135,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>Bạn chưa có món nào trong giỏ.</Text>
           <Text style={styles.emptySubtitle}>Hãy quay lại thực đơn và thêm món trước khi đặt drone nhé!</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.emptyCta} activeOpacity={0.85}>
+          <TouchableOpacity onPress={() => tabNavigation.navigate('HomeTab')} style={styles.emptyCta} activeOpacity={0.85}>
             <Text style={styles.emptyCtaLabel}>Khám phá thực đơn</Text>
           </TouchableOpacity>
         </View>

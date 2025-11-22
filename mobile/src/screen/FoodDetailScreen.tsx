@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { CustomerHomeStackParamList } from '../navigation/types';
+import { CustomerHomeStackParamList, CustomerTabParamList } from '../navigation/types';
 import { featured, popular } from '../data/menu';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
@@ -15,6 +17,7 @@ const allFood = [...featured, ...popular];
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'FoodDetail'>;
 
 const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+  const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
   const selected = useMemo(() => {
     if (!route.params?.id) {
       return allFood[0];
@@ -32,7 +35,7 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     addItem(selected);
     Alert.alert('Thành công', `${selected.name} đã được thêm vào giỏ hàng.`, [
       { text: 'Tiếp tục chọn món' },
-      { text: 'Xem giỏ hàng', onPress: () => navigation.navigate('Cart') },
+      { text: 'Xem giỏ hàng', onPress: () => tabNavigation.navigate('CartTab') },
     ]);
   };
 

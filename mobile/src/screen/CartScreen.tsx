@@ -8,19 +8,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useCart, type CartItem } from '../context';
-import type { CustomerHomeStackParamList } from '../navigation/types';
+import type { CartStackParamList, CustomerTabParamList } from '../navigation/types';
 
 const DELIVERY_FEE = 15000;
 
-type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Cart'>;
+type Props = NativeStackScreenProps<CartStackParamList, 'Cart'>;
 
 const CartScreen: React.FC<Props> = ({ navigation }) => {
+  const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
   const { items, subtotal, updateQuantity, removeItem } = useCart();
 
   const { deliveryFee, total } = useMemo(() => {
@@ -100,7 +103,7 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
             Thêm những món yêu thích để bắt đầu đơn hàng đầu tiên ngay hôm nay.
           </Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Home')}
+            onPress={() => tabNavigation.navigate('HomeTab')}
             style={styles.emptyCta}
             activeOpacity={0.85}
           >
