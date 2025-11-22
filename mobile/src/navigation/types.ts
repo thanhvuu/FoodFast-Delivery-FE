@@ -1,13 +1,28 @@
-export type RootStackParamList = {
-  Auth: undefined;
+export type CustomerHomeStackParamList = {
   Home: undefined;
   FoodDetail: { id: string } | undefined;
   Contact: undefined;
   Tracking: undefined;
   Cart: undefined;
   Checkout: undefined;
+};
+
+export type OrdersStackParamList = {
+  Orders: undefined;
+  Tracking: undefined;
+};
+
+export type AccountStackParamList = {
   Account: undefined;
+  Tracking: undefined;
   OrderHistory: undefined;
+};
+
+export type CustomerTabParamList = {
+  HomeTab: undefined;
+  OrdersTab: undefined;
+  NotificationsTab: undefined;
+  AccountTab: undefined;
 };
 
 export type AdminTabParamList = {

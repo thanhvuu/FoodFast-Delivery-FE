@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useAuth } from '../context';
-import { RootStackParamList } from '../navigation/types';
+import { AccountStackParamList, CustomerHomeStackParamList, OrdersStackParamList } from '../navigation/types';
 import { useCart } from '../context';
 
 export type HeaderBarProps = {
@@ -21,7 +21,11 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   showAuthControls = true,
   showCartButton = true,
 }) => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<
+    NativeStackNavigationProp<
+      CustomerHomeStackParamList & AccountStackParamList & OrdersStackParamList
+    >
+  >();
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);

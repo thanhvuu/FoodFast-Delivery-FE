@@ -5,14 +5,14 @@ import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { RootStackParamList } from '../navigation/types';
+import { CustomerHomeStackParamList } from '../navigation/types';
 import { featured, popular } from '../data/menu';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
 
 const allFood = [...featured, ...popular];
 
-type Props = NativeStackScreenProps<RootStackParamList, 'FoodDetail'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'FoodDetail'>;
 
 const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const selected = useMemo(() => {
