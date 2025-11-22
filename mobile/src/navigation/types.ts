@@ -5,6 +5,8 @@ export type CustomerHomeStackParamList = {
   Tracking: undefined;
   Cart: undefined;
   Checkout: undefined;
+  Account: undefined;
+  OrderHistory: undefined;
 };
 
 export type OrdersStackParamList = {
