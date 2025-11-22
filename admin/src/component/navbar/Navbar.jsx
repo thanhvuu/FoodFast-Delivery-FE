@@ -5,12 +5,22 @@ import { useAdminLanguage } from '../../context/LanguageContext'
 
 const Navbar = () => {
     const { dictionary, language, setLanguage, languageOptions } = useAdminLanguage()
-    const { navbar } = dictionary
+    const { navbar = {} } = dictionary
 
     return (
-        <div className='navbar'>
-            <img className='logo' src={assests.logo} alt="FoodFast logo" />
-            <div className='navbar-actions'>
+        <header className='admin-topbar'>
+            <div className='brand-card'>
+                <div className='brand-logo'>
+                    <img src={assests.logo} alt='FoodFast logo' />
+                </div>
+                <div className='brand-copy'>
+                    <span className='brand-label'>{navbar.title ?? 'FoodFast Admin'}</span>
+                    <strong>{navbar.subtitle ?? 'Điều phối nhà hàng'}</strong>
+                    <p>{navbar.description ?? 'Theo dõi hiệu suất đơn hàng và quản lý thực đơn trong một nơi duy nhất.'}</p>
+                </div>
+            </div>
+            <div className='language-card'>
+                <span className='language-title'>{navbar.languageCardTitle ?? 'Giao diện hiển thị'}</span>
                 <label htmlFor='admin-language-select'>{navbar.languageLabel}</label>
                 <select
                     id='admin-language-select'
@@ -23,8 +33,9 @@ const Navbar = () => {
                         </option>
                     ))}
                 </select>
+                <p className='language-hint'>{navbar.languageHint ?? 'Chọn ngôn ngữ để đồng bộ với đội vận hành.'}</p>
             </div>
-        </div>
+        </header>
     )
 }
 

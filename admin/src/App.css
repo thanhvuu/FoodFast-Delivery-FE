@@ -1,42 +1,43 @@
+:root {
+  color-scheme: light;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --admin-background: linear-gradient(180deg, #fff8f3 0%, #ffe5d6 100%);
+  --admin-text: #7a3417;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.admin-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--admin-background);
+  color: var(--admin-text);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.admin-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.admin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vw, 40px);
+  padding: clamp(24px, 4vw, 48px);
+  padding-bottom: clamp(32px, 6vw, 72px);
+}
+
+@media (max-width: 900px) {
+  .admin-body {
+    flex-direction: column;
   }
-  to {
-    transform: rotate(360deg);
+
+  .admin-content {
+    padding: clamp(20px, 6vw, 32px);
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

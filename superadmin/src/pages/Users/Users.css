@@ -1,0 +1,62 @@
+.users-page .sa-section header {
+  align-items: center;
+}
+
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 22px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255, 120, 60, 0.16);
+}
+
+.user-card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-card h3 {
+  margin: 0;
+  color: #7a3417;
+}
+
+.user-card span {
+  font-size: 13px;
+  color: #ff5a1f;
+  font-weight: 600;
+}
+
+.user-card p {
+  margin: 0;
+  color: rgba(122, 52, 23, 0.75);
+}
+
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.user-actions button {
+  flex: 1 1 auto;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 120, 60, 0.24);
+  background: rgba(255, 120, 60, 0.12);
+  color: #ff5a1f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-actions button:hover {
+  background: rgba(255, 120, 60, 0.2);
+}
