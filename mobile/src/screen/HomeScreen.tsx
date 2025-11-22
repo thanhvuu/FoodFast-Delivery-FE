@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     marginBottom: spacing.md,
     justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   categoryCard: {
     width: '30%',
@@ -266,6 +267,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
     marginTop: spacing.sm,
+  },
+  horizontalList: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   horizontalList: {
     paddingHorizontal: spacing.lg,
