@@ -4,7 +4,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -47,15 +46,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.searchHeader}>
-          <View style={styles.searchBar}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              placeholder="Bạn muốn ăn gì?"
-              placeholderTextColor={colors.muted}
-              style={styles.searchInput}
-            />
-            <Text style={styles.voiceIcon}>🎙️</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.cartButton}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <View style={styles.cartIconWrapper}>
+              <Text style={styles.cartIcon}>🛒</Text>
+            </View>
+            <View style={styles.cartTextContainer}>
+              <Text style={styles.cartTitle}>Giỏ hàng</Text>
+              <Text style={styles.cartSubtitle}>Xem món đã chọn</Text>
+            </View>
+          </TouchableOpacity>
           <View style={styles.helperRow}>
             <Text style={styles.helperText}>Hà Nội</Text>
             <Text style={styles.dot}>•</Text>
@@ -131,30 +134,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
   },
-  searchBar: {
+  cartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: 18,
-    paddingHorizontal: spacing.md,
-    height: 48,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: spacing.sm,
+  cartIconWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FFE8DA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
   },
-  voiceIcon: {
-    fontSize: 18,
+  cartIcon: {
+    fontSize: 20,
   },
-  searchInput: {
+  cartTextContainer: {
     flex: 1,
+  },
+  cartTitle: {
     color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  cartSubtitle: {
+    color: colors.muted,
     fontWeight: '600',
+    marginTop: 2,
   },
   helperRow: {
     flexDirection: 'row',
