@@ -1,11 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { NavigationProp } from '@react-navigation/native';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useAuth } from '../context';
-import { AccountStackParamList, CustomerHomeStackParamList, OrdersStackParamList } from '../navigation/types';
+import {
+  AccountStackParamList,
+  CartStackParamList,
+  CustomerHomeStackParamList,
+  CustomerTabParamList,
+  OrdersStackParamList,
+} from '../navigation/types';
 import { useCart } from '../context';
 
 export type HeaderBarProps = {
@@ -22,8 +28,12 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   showCartButton = true,
 }) => {
   const navigation = useNavigation<
-    NativeStackNavigationProp<
-      CustomerHomeStackParamList & AccountStackParamList & OrdersStackParamList
+    NavigationProp<
+      CustomerHomeStackParamList &
+        AccountStackParamList &
+        OrdersStackParamList &
+        CartStackParamList &
+        CustomerTabParamList & { Auth: undefined }
     >
   >();
   const { user, logout } = useAuth();
@@ -46,7 +56,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
   }, [logout, navigation, user]);
 
   const handleCartPress = useCallback(() => {
-    navigation.navigate('Cart');
+    navigation.navigate('CartTab');
   }, [navigation]);
 
   const handleAccountPress = useCallback(() => {

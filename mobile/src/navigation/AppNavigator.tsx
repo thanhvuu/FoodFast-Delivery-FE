@@ -27,6 +27,7 @@ import colors from '../theme/colors';
 import {
   AccountStackParamList,
   AdminTabParamList,
+  CartStackParamList,
   CustomerHomeStackParamList,
   CustomerTabParamList,
   OrdersStackParamList,
@@ -38,6 +39,7 @@ const AdminTabs = createBottomTabNavigator<AdminTabParamList>();
 const RestaurantTabs = createBottomTabNavigator<RestaurantTabParamList>();
 const CustomerTabs = createBottomTabNavigator<CustomerTabParamList>();
 const OrdersStack = createNativeStackNavigator<OrdersStackParamList>();
+const CartStack = createNativeStackNavigator<CartStackParamList>();
 const AccountStack = createNativeStackNavigator<AccountStackParamList>();
 const AuthStack = createNativeStackNavigator();
 
@@ -103,8 +105,6 @@ const CustomerHomeStackNavigator: React.FC = () => (
   >
     <HomeStack.Screen name="Home" component={HomeScreen} />
     <HomeStack.Screen name="FoodDetail" component={FoodDetailScreen} />
-    <HomeStack.Screen name="Cart" component={CartScreen} />
-    <HomeStack.Screen name="Checkout" component={CheckoutScreen} />
     <HomeStack.Screen name="Contact" component={ContactScreen} />
     <HomeStack.Screen name="Tracking" component={TrackingScreen} />
   </HomeStack.Navigator>
@@ -123,6 +123,14 @@ const AccountStackNavigator: React.FC = () => (
     <AccountStack.Screen name="Tracking" component={TrackingScreen} />
     <AccountStack.Screen name="OrderHistory" component={OrderHistoryScreen} />
   </AccountStack.Navigator>
+);
+
+const CartStackNavigator: React.FC = () => (
+  <CartStack.Navigator screenOptions={{ headerShown: false }}>
+    <CartStack.Screen name="Cart" component={CartScreen} />
+    <CartStack.Screen name="Checkout" component={CheckoutScreen} />
+    <CartStack.Screen name="Tracking" component={TrackingScreen} />
+  </CartStack.Navigator>
 );
 
 const CustomerTabNavigator: React.FC = () => (
@@ -153,6 +161,15 @@ const CustomerTabNavigator: React.FC = () => (
         title: 'Đơn hàng',
         tabBarLabel: 'Đơn hàng',
         tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🧾</Text>,
+      }}
+    />
+    <CustomerTabs.Screen
+      name="CartTab"
+      component={CartStackNavigator}
+      options={{
+        title: 'Giỏ hàng',
+        tabBarLabel: 'Giỏ hàng',
+        tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🛒</Text>,
       }}
     />
     <CustomerTabs.Screen

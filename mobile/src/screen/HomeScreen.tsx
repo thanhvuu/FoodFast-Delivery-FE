@@ -7,13 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionHeader from '../components/SectionHeader';
 import TagPill from '../components/TagPill';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { CustomerHomeStackParamList } from '../navigation/types';
+import { CustomerHomeStackParamList, CustomerTabParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
@@ -30,6 +32,8 @@ const quickLinks = [
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
+
   const handleSeeAll = () => {
     navigation.navigate('Tracking');
   };
@@ -49,7 +53,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity
             style={styles.cartButton}
             activeOpacity={0.9}
-            onPress={() => navigation.navigate('Cart')}
+            onPress={() => tabNavigation.navigate('CartTab')}
           >
             <View style={styles.cartIconWrapper}>
               <Text style={styles.cartIcon}>🛒</Text>
