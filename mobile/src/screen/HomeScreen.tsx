@@ -4,7 +4,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -47,21 +46,24 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.searchHeader}>
-          <View style={styles.searchBar}>
-            <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              placeholder="Bạn muốn ăn gì?"
-              placeholderTextColor={colors.muted}
-              style={styles.searchInput}
-            />
-            <Text style={styles.voiceIcon}>🎙️</Text>
-          </View>
-          <View style={styles.helperRow}>
-            <Text style={styles.helperText}>Hà Nội</Text>
-            <Text style={styles.dot}>•</Text>
-            <Text style={styles.helperText}>Ưu đãi mới</Text>
-            <Text style={styles.dot}>•</Text>
-            <Text style={styles.helperText}>0đ giao hàng</Text>
+          <View style={styles.headerRow}>
+            <View style={styles.locationInfo}>
+              <Text style={styles.locationTitle}>Hà Nội</Text>
+              <View style={styles.helperRow}>
+                <Text style={styles.helperText}>Ưu đãi mới</Text>
+                <Text style={styles.dot}>•</Text>
+                <Text style={styles.helperText}>0đ giao hàng</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.cartIconButton}
+              activeOpacity={0.9}
+              accessibilityRole="button"
+              accessibilityLabel="Giỏ hàng"
+              onPress={() => navigation.navigate('Cart')}
+            >
+              <Text style={styles.cartIcon}>🛒</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -131,35 +133,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
   },
-  searchBar: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  locationInfo: {
+    flex: 1,
+  },
+  locationTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  cartIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: colors.surface,
-    borderRadius: 18,
-    paddingHorizontal: spacing.md,
-    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: spacing.sm,
-  },
-  voiceIcon: {
-    fontSize: 18,
-  },
-  searchInput: {
-    flex: 1,
-    color: colors.text,
-    fontWeight: '600',
+  cartIcon: {
+    fontSize: 20,
   },
   helperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
   },
   helperText: {
     color: colors.muted,
