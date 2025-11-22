@@ -46,24 +46,25 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.searchHeader}>
-          <View style={styles.headerRow}>
-            <View style={styles.locationInfo}>
-              <Text style={styles.locationTitle}>Hà Nội</Text>
-              <View style={styles.helperRow}>
-                <Text style={styles.helperText}>Ưu đãi mới</Text>
-                <Text style={styles.dot}>•</Text>
-                <Text style={styles.helperText}>0đ giao hàng</Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.cartIconButton}
-              activeOpacity={0.9}
-              accessibilityRole="button"
-              accessibilityLabel="Giỏ hàng"
-              onPress={() => navigation.navigate('Cart')}
-            >
+          <TouchableOpacity
+            style={styles.cartButton}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <View style={styles.cartIconWrapper}>
               <Text style={styles.cartIcon}>🛒</Text>
-            </TouchableOpacity>
+            </View>
+            <View style={styles.cartTextContainer}>
+              <Text style={styles.cartTitle}>Giỏ hàng</Text>
+              <Text style={styles.cartSubtitle}>Xem món đã chọn</Text>
+            </View>
+          </TouchableOpacity>
+          <View style={styles.helperRow}>
+            <Text style={styles.helperText}>Hà Nội</Text>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.helperText}>Ưu đãi mới</Text>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.helperText}>0đ giao hàng</Text>
           </View>
         </View>
 
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
   },
-  headerRow: {
+  cartButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -151,16 +152,39 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 14,
     backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 18,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     shadowColor: '#000',
     shadowOpacity: 0.04,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
+  cartIconWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FFE8DA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
   cartIcon: {
     fontSize: 20,
+  },
+  cartTextContainer: {
+    flex: 1,
+  },
+  cartTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  cartSubtitle: {
+    color: colors.muted,
+    fontWeight: '600',
+    marginTop: 2,
   },
   helperRow: {
     flexDirection: 'row',
