@@ -120,9 +120,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
               <Text style={styles.authButtonText}>Đăng nhập</Text>
             </TouchableOpacity>
           )
-        ) : (
-          <View style={styles.sidePlaceholder} />
-        )}
+        ) : null}
       </View>
     </View>
   );
