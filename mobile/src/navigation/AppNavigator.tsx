@@ -14,6 +14,7 @@ import {
   CheckoutScreen,
   AccountScreen,
   OrderHistoryScreen,
+  NotificationScreen,
   AdminDashboardScreen,
   AdminRestaurantsScreen,
   AdminAccountScreen,
@@ -23,13 +24,22 @@ import {
 } from '../screen';
 import { useAuth } from '../context';
 import colors from '../theme/colors';
-import { AdminTabParamList, RestaurantTabParamList, RootStackParamList } from './types';
+import {
+  AccountStackParamList,
+  AdminTabParamList,
+  CustomerHomeStackParamList,
+  CustomerTabParamList,
+  OrdersStackParamList,
+  RestaurantTabParamList,
+} from './types';
 
-export type { RootStackParamList } from './types';
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const HomeStack = createNativeStackNavigator<CustomerHomeStackParamList>();
 const AdminTabs = createBottomTabNavigator<AdminTabParamList>();
 const RestaurantTabs = createBottomTabNavigator<RestaurantTabParamList>();
+const CustomerTabs = createBottomTabNavigator<CustomerTabParamList>();
+const OrdersStack = createNativeStackNavigator<OrdersStackParamList>();
+const AccountStack = createNativeStackNavigator<AccountStackParamList>();
+const AuthStack = createNativeStackNavigator();
 
 const tabBarOptions: BottomTabNavigationOptions = {
   headerShown: false,
@@ -85,31 +95,95 @@ const RestaurantTabNavigator: React.FC = () => (
   </RestaurantTabs.Navigator>
 );
 
-const CustomerStackNavigator: React.FC = () => (
-  <Stack.Navigator
+const CustomerHomeStackNavigator: React.FC = () => (
+  <HomeStack.Navigator
     screenOptions={{
       headerShown: false,
     }}
   >
-    <Stack.Screen name="Home" component={HomeScreen} />
-    <Stack.Screen name="FoodDetail" component={FoodDetailScreen} />
-    <Stack.Screen name="Cart" component={CartScreen} />
-    <Stack.Screen name="Checkout" component={CheckoutScreen} />
-    <Stack.Screen name="Contact" component={ContactScreen} />
-    <Stack.Screen name="Tracking" component={TrackingScreen} />
-    <Stack.Screen name="Account" component={AccountScreen} />
-    <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
-  </Stack.Navigator>
+    <HomeStack.Screen name="Home" component={HomeScreen} />
+    <HomeStack.Screen name="FoodDetail" component={FoodDetailScreen} />
+    <HomeStack.Screen name="Cart" component={CartScreen} />
+    <HomeStack.Screen name="Checkout" component={CheckoutScreen} />
+    <HomeStack.Screen name="Contact" component={ContactScreen} />
+    <HomeStack.Screen name="Tracking" component={TrackingScreen} />
+  </HomeStack.Navigator>
+);
+
+const OrdersStackNavigator: React.FC = () => (
+  <OrdersStack.Navigator screenOptions={{ headerShown: false }}>
+    <OrdersStack.Screen name="Orders" component={OrderHistoryScreen} />
+    <OrdersStack.Screen name="Tracking" component={TrackingScreen} />
+  </OrdersStack.Navigator>
+);
+
+const AccountStackNavigator: React.FC = () => (
+  <AccountStack.Navigator screenOptions={{ headerShown: false }}>
+    <AccountStack.Screen name="Account" component={AccountScreen} />
+    <AccountStack.Screen name="Tracking" component={TrackingScreen} />
+    <AccountStack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+  </AccountStack.Navigator>
+);
+
+const CustomerTabNavigator: React.FC = () => (
+  <CustomerTabs.Navigator
+    screenOptions={{
+      ...tabBarOptions,
+      tabBarStyle: [
+        tabBarOptions.tabBarStyle,
+        {
+          paddingTop: 8,
+        },
+      ],
+    }}
+  >
+    <CustomerTabs.Screen
+      name="HomeTab"
+      component={CustomerHomeStackNavigator}
+      options={{
+        title: 'Home',
+        tabBarLabel: 'Home',
+        tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🏠</Text>,
+      }}
+    />
+    <CustomerTabs.Screen
+      name="OrdersTab"
+      component={OrdersStackNavigator}
+      options={{
+        title: 'Đơn hàng',
+        tabBarLabel: 'Đơn hàng',
+        tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🧾</Text>,
+      }}
+    />
+    <CustomerTabs.Screen
+      name="NotificationsTab"
+      component={NotificationScreen}
+      options={{
+        title: 'Thông báo',
+        tabBarLabel: 'Thông báo',
+        tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>🔔</Text>,
+      }}
+    />
+    <CustomerTabs.Screen
+      name="AccountTab"
+      component={AccountStackNavigator}
+      options={{
+        title: 'Tôi',
+        tabBarLabel: 'Tôi',
+        tabBarIcon: ({ color }) => <Text style={[styles.tabIcon, { color }]}>👤</Text>,
+      }}
+    />
+  </CustomerTabs.Navigator>
 );
 
 const AuthStackNavigator: React.FC = () => (
-  <Stack.Navigator
+  <AuthStack.Navigator
     screenOptions={{
       headerShown: false,
     }}
   >
-    <Stack.Screen name="Auth" component={AuthScreen} />
-  </Stack.Navigator>
+    <AuthStack.Screen name="Auth" component={AuthScreen} />
+  </AuthStack.Navigator>
 );
 
 const AppNavigator: React.FC = () => {
@@ -134,7 +208,7 @@ const AppNavigator: React.FC = () => {
         ) : user.role === 'restaurant' ? (
           <RestaurantTabNavigator />
         ) : (
-          <CustomerStackNavigator />
+          <CustomerTabNavigator />
         )
       ) : (
         <AuthStackNavigator />
@@ -153,6 +227,9 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     color: colors.muted,
+  },
+  tabIcon: {
+    fontSize: 18,
   },
 });
 

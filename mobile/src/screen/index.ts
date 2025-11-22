@@ -7,6 +7,7 @@ export { default as ContactScreen } from './ContactScreen';
 export { default as TrackingScreen } from './TrackingScreen';
 export { default as AccountScreen } from './AccountScreen';
 export { default as OrderHistoryScreen } from './OrderHistoryScreen';
+export { default as NotificationScreen } from './NotificationScreen';
 export { default as AdminDashboardScreen } from './AdminDashboardScreen';
 export { default as AdminRestaurantsScreen } from './AdminRestaurantsScreen';
 export { default as AdminAccountScreen } from './AdminAccountScreen';

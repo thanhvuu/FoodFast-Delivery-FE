@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -11,24 +12,27 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import SectionHeader from '../components/SectionHeader';
 import TagPill from '../components/TagPill';
-import AppFooter from '../components/AppFooter';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { CustomerHomeStackParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
 
 const heroImage =
-  'https://images.unsplash.com/photo-1604908176997-1251882fa4a9?auto=format&fit=crop&w=1200&q=80';
+  'https://images.unsplash.com/photo-1601924579534-811e171ad6a5?auto=format&fit=crop&w=1200&q=80';
 
-const accentBadge = 'https://images.unsplash.com/photo-1580915411961-d6e5ca8d4866?auto=format&fit=crop&w=1200&q=80';
+const quickLinks = [
+  { id: 'nearby', label: 'Gần tôi' },
+  { id: 'favorite', label: 'Món yêu thích' },
+  { id: 'freeship', label: 'Freeship 0đ' },
+];
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleSeeAll = () => {
-    navigation.navigate('Contact');
+    navigation.navigate('Tracking');
   };
 
   const handlePressRestaurant = (item: RestaurantShowcase) => {
@@ -42,47 +46,30 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScreenContainer>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.deliveryLabel}>Giao đến:</Text>
-            <View style={styles.deliveryRow}>
-              <Text style={styles.deliveryAddress}>669 Hoàn Kiếm, Hà Nội</Text>
-              <Text style={styles.deliveryChevron}>⌄</Text>
-            </View>
+        <View style={styles.searchHeader}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchIcon}>🔍</Text>
+            <TextInput
+              placeholder="Bạn muốn ăn gì?"
+              placeholderTextColor={colors.muted}
+              style={styles.searchInput}
+            />
+            <Text style={styles.voiceIcon}>🎙️</Text>
           </View>
-          <TouchableOpacity
-            style={styles.phoneButton}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Contact')}
-          >
-            <Text style={styles.phoneIcon}>📞</Text>
-          </TouchableOpacity>
+          <View style={styles.helperRow}>
+            <Text style={styles.helperText}>Hà Nội</Text>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.helperText}>Ưu đãi mới</Text>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.helperText}>0đ giao hàng</Text>
+          </View>
         </View>
 
-        <ImageBackground source={{ uri: heroImage }} style={styles.hero} imageStyle={styles.heroImage}>
-          <View style={styles.heroOverlay}>
-            <Text style={styles.heroTitle}>Deal Hot Hôm Nay Tại Hà Nội</Text>
-            <View style={styles.heroFooter}>
-              <TouchableOpacity
-                style={styles.ctaButton}
-                activeOpacity={0.9}
-                onPress={() => navigation.navigate('Tracking')}
-              >
-                <Text style={styles.ctaLabel}>Đặt ngay</Text>
-              </TouchableOpacity>
-              <ImageBackground source={{ uri: accentBadge }} style={styles.accentImage} imageStyle={styles.accentImageStyle} />
-            </View>
-          </View>
-        </ImageBackground>
-
-        <View style={styles.grid}>
-          {shortcuts.map((item) => (
-            <View key={item.id} style={styles.gridItem}>
-              <TouchableOpacity style={[styles.shortcutCard, { backgroundColor: item.background }]}> 
-                <Text style={[styles.shortcutIcon, { color: item.color }]}>{item.icon}</Text>
-              </TouchableOpacity>
-              <Text style={styles.shortcutLabel}>{item.label}</Text>
-            </View>
+        <View style={styles.quickLinkRow}>
+          {quickLinks.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.quickLink} activeOpacity={0.85}>
+              <Text style={styles.quickLinkLabel}>{item.label}</Text>
+            </TouchableOpacity>
           ))}
         </View>
 
@@ -91,6 +78,27 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <TagPill key={filter} label={filter} />
           ))}
         </ScrollView>
+
+        <ImageBackground source={{ uri: heroImage }} style={styles.hero} imageStyle={styles.heroImage}>
+          <View style={styles.heroOverlay}>
+            <Text style={styles.heroLabel}>Deal Hot Hôm Nay Từ 0đ!</Text>
+            <Text style={styles.heroSub}>Giao nhanh - Ưu đãi mọi khung giờ</Text>
+            <TouchableOpacity style={styles.heroButton} activeOpacity={0.9} onPress={handleSeeAll}>
+              <Text style={styles.heroButtonText}>Xem ngay</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+
+        <View style={styles.categoryGrid}>
+          {shortcuts.slice(0, 6).map((item) => (
+            <TouchableOpacity key={item.id} style={styles.categoryCard} activeOpacity={0.85}>
+              <View style={[styles.categoryIcon, { backgroundColor: item.background }]}>
+                <Text style={[styles.categoryEmoji, { color: item.color }]}>{item.icon}</Text>
+              </View>
+              <Text style={styles.categoryLabel}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <SectionHeader
           title="Top Quán Rating 5* tuần này"
@@ -110,8 +118,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <RestaurantCard key={item.id} item={item} onPress={handlePressRestaurant} />
           ))}
         </ScrollView>
-
-        <AppFooter />
       </ScrollView>
     </ScreenContainer>
   );
@@ -121,43 +127,66 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: spacing.xxl,
   },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  searchHeader: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingTop: spacing.lg,
   },
-  deliveryLabel: {
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    paddingHorizontal: spacing.md,
+    height: 48,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  searchIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
+  },
+  voiceIcon: {
+    fontSize: 18,
+  },
+  searchInput: {
+    flex: 1,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  helperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  helperText: {
     color: colors.muted,
     fontSize: 13,
+    fontWeight: '600',
   },
-  deliveryRow: {
+  dot: {
+    marginHorizontal: spacing.xs,
+    color: colors.muted,
+  },
+  quickLinkRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.lg,
   },
-  deliveryAddress: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.text,
+  quickLink: {
+    backgroundColor: '#FFF4ED',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 14,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: '#FFD7BF',
   },
-  deliveryChevron: {
-    marginLeft: spacing.xs,
-    fontSize: 18,
+  quickLinkLabel: {
     color: colors.primary,
-  },
-  phoneButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FFE8DA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  phoneIcon: {
-    fontSize: 18,
-    color: colors.primary,
+    fontWeight: '700',
   },
   hero: {
     marginHorizontal: spacing.lg,
@@ -169,72 +198,79 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   heroOverlay: {
-    backgroundColor: 'rgba(0,0,0,0.25)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     padding: spacing.lg,
+    flex: 1,
+    justifyContent: 'flex-end',
   },
-  heroTitle: {
+  heroLabel: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    lineHeight: 26,
-    width: '70%',
   },
-  heroFooter: {
+  heroSub: {
+    color: '#fff',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  heroButton: {
     marginTop: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  ctaButton: {
     backgroundColor: '#FFE8DA',
-    paddingVertical: spacing.sm,
+    alignSelf: 'flex-start',
     paddingHorizontal: spacing.lg,
-    borderRadius: 18,
+    paddingVertical: spacing.sm,
+    borderRadius: 16,
   },
-  ctaLabel: {
+  heroButtonText: {
     color: colors.primary,
     fontWeight: '800',
   },
-  accentImage: {
-    width: 96,
-    height: 64,
-    borderRadius: 12,
-  },
-  accentImageStyle: {
-    borderRadius: 12,
-  },
-  grid: {
+  categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  gridItem: {
+  categoryCard: {
     width: '30%',
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    paddingVertical: spacing.md,
     alignItems: 'center',
     marginBottom: spacing.md,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
-  shortcutCard: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
+  categoryIcon: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  shortcutIcon: {
-    fontSize: 26,
+  categoryEmoji: {
+    fontSize: 22,
   },
-  shortcutLabel: {
-    marginTop: spacing.xs,
+  categoryLabel: {
+    marginTop: spacing.sm,
     fontWeight: '700',
     color: colors.text,
     textAlign: 'center',
-    fontSize: 13,
   },
   filterRow: {
     paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
+    marginTop: spacing.sm,
+  },
+  horizontalList: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   horizontalList: {
     paddingHorizontal: spacing.lg,
