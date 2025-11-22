@@ -37,12 +37,21 @@ const normaliseItem = item => ({
 
 const transformOrder = order => {
   const items = Array.isArray(order?.items) ? order.items.map(normaliseItem) : []
-  const status = order?.adminStatus ?? order?.status
+  const normaliseStatus = value => {
+    if (!value) return 'new'
+    if (['new', 'preparing', 'completed'].includes(value)) return value
+    if (value === 'complete' || value === 'conplete') return 'completed'
+    if (value === 'delivered') return 'completed'
+    if (value === 'pending' || value === 'new_order') return 'new'
+    if (value === 'in_progress') return 'preparing'
+    return 'new'
+  }
+  const status = normaliseStatus(order?.adminStatus ?? order?.status)
   return {
     id: order?.id ?? `order-${Math.random().toString(36).slice(2, 9)}`,
     customer: order?.customer ?? 'Customer',
     address: order?.address ?? '',
-    status: status === 'delivered' ? 'delivered' : 'pending',
+    status,
     trackingStatus: order?.trackingStatus,
     paid: Boolean(order?.paid),
     deliveryFee: digitsOnly(order?.deliveryFee),
@@ -78,10 +87,19 @@ const sortByRecency = (a, b) => {
   return parseDate(b.createdAt) - parseDate(a.createdAt)
 }
 
+const toValidDate = value => {
+  const timestamp = Date.parse(value)
+  if (!Number.isFinite(timestamp)) {
+    return null
+  }
+  return new Date(timestamp)
+}
+
 const Dashboard = ({ products = [] }) => {
   const { dictionary, formatCurrency } = useAdminLanguage()
   const t = dictionary.dashboardPage
   const ordersTranslations = dictionary.ordersPage
+  const locale = dictionary.common?.currencyLocale ?? 'vi-VN'
 
   const staticOrders = useMemo(() => order_list.map(transformOrder), [])
 
@@ -91,6 +109,16 @@ const Dashboard = ({ products = [] }) => {
   }
 
   const [orders, setOrders] = useState(loadOrders)
+
+  const dailyFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short' }),
+    [locale]
+  )
+
+  const monthlyFormatter = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: 'short', year: 'numeric' }),
+    [locale]
+  )
 
   useEffect(() => {
     const sync = () => setOrders(loadOrders())
@@ -108,8 +136,8 @@ const Dashboard = ({ products = [] }) => {
 
   const metrics = useMemo(() => {
     const totalOrders = orders.length
-    const deliveredOrders = orders.filter(order => order.status === 'delivered')
-    const pendingOrders = totalOrders - deliveredOrders.length
+    const completedOrders = orders.filter(order => order.status === 'completed')
+    const pendingOrders = totalOrders - completedOrders.length
 
     const totalRevenue = orders.reduce((sum, order) => sum + calculateOrderTotal(order), 0)
 
@@ -133,14 +161,44 @@ const Dashboard = ({ products = [] }) => {
     return {
       totalProducts: products.length,
       totalOrders,
-      deliveredOrders: deliveredOrders.length,
+      deliveredOrders: completedOrders.length,
       pendingOrders,
-      deliveredRate: totalOrders ? Math.round((deliveredOrders.length / totalOrders) * 100) : 0,
+      deliveredRate: totalOrders ? Math.round((completedOrders.length / totalOrders) * 100) : 0,
       totalRevenue,
       methodBreakdown,
       averageEta,
     }
   }, [orders, products.length])
+
+  const statusSummary = useMemo(() => {
+    const keys = ['new', 'preparing', 'completed']
+    const counts = keys.reduce((acc, key) => ({ ...acc, [key]: 0 }), {})
+    orders.forEach(order => {
+      const key = keys.includes(order.status) ? order.status : 'new'
+      counts[key] = (counts[key] || 0) + 1
+    })
+    const total = keys.reduce((sum, key) => sum + (counts[key] || 0), 0)
+    const percentages = keys.reduce((acc, key) => {
+      acc[key] = total ? Math.round(((counts[key] || 0) / total) * 100) : 0
+      return acc
+    }, {})
+    return { counts, percentages, total }
+  }, [orders])
+
+  const customerInsights = useMemo(() => {
+    const totals = new Map()
+    orders.forEach(order => {
+      const amount = calculateOrderTotal(order)
+      const name = order.customer ?? 'Customer'
+      totals.set(name, (totals.get(name) || 0) + amount)
+    })
+    const list = Array.from(totals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, total]) => ({ name, total }))
+    const max = list.length ? list[0].total : 0
+    return { list, max }
+  }, [orders])
 
   const topProducts = useMemo(() => {
     const counter = new Map()
@@ -165,6 +223,93 @@ const Dashboard = ({ products = [] }) => {
   const methodLabels = t.methodBreakdown.labels
 
   const formatMethodLabel = method => methodLabels[method] ?? methodLabels.default ?? method
+
+  const analytics = useMemo(() => {
+    const base = { daily: [], monthly: [], maxDailyOrders: 0, maxMonthlyRevenue: 0 }
+    if (!orders.length) {
+      return base
+    }
+
+    const validOrders = orders
+      .map(order => ({ order, date: toValidDate(order.createdAt) }))
+      .filter(entry => entry.date)
+
+    if (!validOrders.length) {
+      return base
+    }
+
+    const byDay = new Map()
+    validOrders.forEach(({ order, date }) => {
+      const dayKey = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+      const current = byDay.get(dayKey) || { date, orders: 0, revenue: 0 }
+      current.orders += 1
+      current.revenue += calculateOrderTotal(order)
+      byDay.set(dayKey, current)
+    })
+
+    const daily = Array.from(byDay.values())
+      .sort((a, b) => a.date - b.date)
+      .slice(-7)
+      .map(entry => ({
+        label: dailyFormatter.format(entry.date),
+        orders: entry.orders,
+        revenue: entry.revenue,
+      }))
+
+    const maxDailyOrders = daily.reduce((max, item) => Math.max(max, item.orders), 0)
+
+    const byMonth = new Map()
+    validOrders.forEach(({ order, date }) => {
+      const monthDate = new Date(date.getFullYear(), date.getMonth(), 1)
+      const monthKey = monthDate.getTime()
+      const current = byMonth.get(monthKey) || { date: monthDate, orders: 0, revenue: 0 }
+      current.orders += 1
+      current.revenue += calculateOrderTotal(order)
+      byMonth.set(monthKey, current)
+    })
+
+    const monthly = Array.from(byMonth.values())
+      .sort((a, b) => a.date - b.date)
+      .slice(-6)
+      .map(entry => ({
+        label: monthlyFormatter.format(entry.date),
+        orders: entry.orders,
+        revenue: entry.revenue,
+      }))
+
+    const maxMonthlyRevenue = monthly.reduce((max, item) => Math.max(max, item.revenue), 0)
+
+    return { daily, monthly, maxDailyOrders, maxMonthlyRevenue }
+  }, [orders, dailyFormatter, monthlyFormatter])
+
+  const dailyVelocity = useMemo(() => {
+    const series = analytics.daily ?? []
+    const maxRevenue = series.reduce((max, item) => Math.max(max, item.revenue), 0)
+    return { series, maxRevenue }
+  }, [analytics.daily])
+
+  const statusTexts = {
+    title: 'Tình trạng xử lý đơn',
+    description: 'Theo dõi tiến độ xử lý đơn hiện tại.',
+    completionLabel: 'Tỷ lệ hoàn tất',
+    labels: {},
+    countTemplate: '{{count}} · {{percentage}}%',
+    ...(t.statusInsights ?? {}),
+  }
+  const customerTexts = {
+    title: 'Khách hàng giá trị',
+    description: 'Những khách có tổng giá trị đơn cao nhất.',
+    empty: 'Chưa có dữ liệu khách hàng.',
+    ...(t.customerInsights ?? {}),
+  }
+  const velocityTexts = {
+    title: 'Nhịp đơn theo ngày',
+    description: 'So sánh số lượng đơn và doanh thu từng ngày.',
+    empty: 'Chưa có dữ liệu nhịp đơn.',
+    ...(t.orderVelocity ?? {}),
+  }
+  const completionRate = metrics.deliveredRate
+  const radialGradient = `conic-gradient(#ff7a45 0% ${completionRate}%, rgba(255, 122, 69, 0.16) ${completionRate}% 100%)`
 
   return (
     <div className='dashboard-page'>
@@ -206,6 +351,176 @@ const Dashboard = ({ products = [] }) => {
             {metrics.averageEta ? `${metrics.averageEta}′` : t.metrics.averageEtaFallback}
           </strong>
           <small>{t.metrics.averageEtaHint}</small>
+        </article>
+      </section>
+
+      <section className='revenue-analytics'>
+        <article className='chart-card'>
+          <div className='chart-heading'>
+            <div>
+              <h2>{t.revenueAnalytics.daily.title}</h2>
+              <p className='section-description'>{t.revenueAnalytics.daily.description}</p>
+            </div>
+            <span className='chart-legend'>{t.revenueAnalytics.daily.ordersLabel}</span>
+          </div>
+          {analytics.daily.length ? (
+            <div className='bar-chart'>
+              {analytics.daily.map(item => {
+                const height = analytics.maxDailyOrders
+                  ? Math.max(8, (item.orders / analytics.maxDailyOrders) * 100)
+                  : 0
+                return (
+                  <div key={item.label} className='bar-item'>
+                    <div className='bar' style={{ height: `${height}%` }}>
+                      <span>{item.orders}</span>
+                    </div>
+                    <strong>{item.label}</strong>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{t.revenueAnalytics.empty}</p>
+          )}
+        </article>
+
+        <article className='chart-card'>
+          <div className='chart-heading'>
+            <div>
+              <h2>{t.revenueAnalytics.monthly.title}</h2>
+              <p className='section-description'>{t.revenueAnalytics.monthly.description}</p>
+            </div>
+            <span className='chart-legend'>{t.revenueAnalytics.monthly.revenueLabel}</span>
+          </div>
+          {analytics.monthly.length ? (
+            <div className='lineup-chart'>
+              {analytics.monthly.map(item => {
+                const width = analytics.maxMonthlyRevenue
+                  ? Math.max(12, (item.revenue / analytics.maxMonthlyRevenue) * 100)
+                  : 0
+                return (
+                  <div key={item.label} className='bar-item horizontal'>
+                    <div className='bar horizontal' style={{ width: `${width}%` }}>
+                      <span>{formatCurrency(item.revenue)}</span>
+                    </div>
+                    <strong>{item.label}</strong>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{t.revenueAnalytics.empty}</p>
+          )}
+        </article>
+      </section>
+
+      <section className='dashboard-insights'>
+        <article className='insight-card status-insight'>
+          <div className='insight-heading'>
+            <h2>{statusTexts.title}</h2>
+            <p className='section-description'>{statusTexts.description}</p>
+          </div>
+          <div className='status-content'>
+            <div className='radial-chart' style={{ background: radialGradient }}>
+              <strong>{completionRate}%</strong>
+              <span>{statusTexts.completionLabel}</span>
+            </div>
+            <ul className='status-legend'>
+              {['completed', 'preparing', 'new'].map(statusKey => {
+                const count = statusSummary.counts[statusKey] ?? 0
+                const percentage = statusSummary.percentages[statusKey] ?? 0
+                const statusLabel = ordersTranslations.statuses?.[statusKey]
+                  ?? statusTexts.labels?.[statusKey]
+                  ?? statusKey
+                const detail = typeof statusTexts.countTemplate === 'string'
+                  ? statusTexts.countTemplate
+                    .replace('{{count}}', count)
+                    .replace('{{percentage}}', percentage)
+                  : `${count} · ${percentage}%`
+                return (
+                  <li key={statusKey}>
+                    <span className={`legend-dot legend-${statusKey}`} aria-hidden='true' />
+                    <div className='legend-copy'>
+                      <span>{statusLabel}</span>
+                      <small>{detail}</small>
+                    </div>
+                    <span className='legend-percentage'>{percentage}%</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </article>
+
+        <article className='insight-card customers-insight'>
+          <div className='insight-heading'>
+            <h2>{customerTexts.title}</h2>
+            <p className='section-description'>{customerTexts.description}</p>
+          </div>
+          {customerInsights.list.length ? (
+            <ul className='customer-list'>
+              {customerInsights.list.map(customer => {
+                const ratio = customerInsights.max
+                  ? Math.max(10, Math.round((customer.total / customerInsights.max) * 100))
+                  : 0
+                return (
+                  <li key={customer.name}>
+                    <div className='customer-copy'>
+                      <strong>{customer.name}</strong>
+                      <span>{formatCurrency(customer.total)}</span>
+                    </div>
+                    <div className='customer-progress'>
+                      <div style={{ width: `${ratio}%` }} />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className='empty-copy'>{customerTexts.empty}</p>
+          )}
+        </article>
+
+        <article className='insight-card velocity-insight'>
+          <div className='insight-heading'>
+            <h2>{velocityTexts.title}</h2>
+            <p className='section-description'>{velocityTexts.description}</p>
+          </div>
+          {dailyVelocity.series.length ? (
+            <div className='spark-chart'>
+              {dailyVelocity.series.map(item => {
+                const ordersHeight = analytics.maxDailyOrders
+                  ? Math.max(8, Math.round((item.orders / analytics.maxDailyOrders) * 100))
+                  : 0
+                const revenueHeight = dailyVelocity.maxRevenue
+                  ? Math.max(6, Math.round((item.revenue / dailyVelocity.maxRevenue) * 100))
+                  : 0
+                return (
+                  <div key={item.label} className='spark-column'>
+                    <div className='spark-bars'>
+                      <div
+                        className='spark-orders'
+                        style={{ height: `${ordersHeight}%` }}
+                        title={`${velocityTexts.ordersLabel ?? t.revenueAnalytics.daily.ordersLabel}: ${item.orders}`}
+                      />
+                      <div
+                        className='spark-revenue'
+                        style={{ height: `${revenueHeight}%` }}
+                        title={`${velocityTexts.revenueLabel ?? t.revenueAnalytics.monthly.revenueLabel}: ${formatCurrency(item.revenue)}`}
+                      />
+                    </div>
+                    <span className='spark-label'>{item.label}</span>
+                    <div className='spark-values'>
+                      <strong>{item.orders}</strong>
+                      <small>{formatCurrency(item.revenue)}</small>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className='empty-copy'>{velocityTexts.empty ?? t.revenueAnalytics.empty}</p>
+          )}
         </article>
       </section>
 
@@ -276,16 +591,20 @@ const Dashboard = ({ products = [] }) => {
             <tbody>
               {recentOrders.map(order => {
                 const method = formatMethodLabel(order.deliveryMethod ?? 'drone')
-                const statusLabel = order.status === 'delivered'
-                  ? ordersTranslations.statuses.delivered
-                  : ordersTranslations.statuses.pending
+                const statusKey = order.status ?? 'new'
+                const statusLabel = ordersTranslations.statuses?.[statusKey] ?? statusKey
+                const statusClass = statusKey === 'completed'
+                  ? 'completed'
+                  : statusKey === 'preparing'
+                    ? 'preparing'
+                    : 'new'
                 return (
                   <tr key={order.id}>
                     <td>{order.id.toUpperCase()}</td>
                     <td>{order.customer}</td>
                     <td>{method}</td>
                     <td>
-                      <span className={`status-chip ${order.status === 'delivered' ? 'delivered' : 'pending'}`}>
+                      <span className={`status-chip ${statusClass}`}>
                         {statusLabel}
                       </span>
                     </td>

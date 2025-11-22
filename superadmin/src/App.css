@@ -1,0 +1,121 @@
+:root {
+  color-scheme: light;
+  --sa-background: linear-gradient(180deg, #fff8f3 0%, #ffe5d6 100%);
+  --sa-text: #7a3417;
+}
+
+.superadmin-app {
+  min-height: 100vh;
+  display: flex;
+  background: var(--sa-background);
+  color: var(--sa-text);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.sa-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sa-content {
+  flex: 1;
+  padding: 0 clamp(24px, 4vw, 48px) 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sa-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sa-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  padding: clamp(24px, 3vw, 36px);
+  box-shadow: 0 24px 50px rgba(255, 122, 69, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sa-section > header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sa-section h2 {
+  margin: 0 0 8px;
+  color: #7a3417;
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.sa-section p {
+  margin: 0;
+  color: rgba(122, 52, 23, 0.7);
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+.section-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.section-actions button,
+.sa-section > header > button {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 14px 28px rgba(255, 90, 31, 0.16);
+}
+
+.section-actions .primary,
+.sa-section > header > button.primary {
+  background: linear-gradient(135deg, #ff7a45, #ff5a1f);
+  color: #fff;
+}
+
+.section-actions .ghost,
+.sa-section > header > button.ghost {
+  background: transparent;
+  border: 1px dashed rgba(255, 120, 60, 0.4);
+  color: #ff5a1f;
+  box-shadow: none;
+}
+
+.sa-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255, 120, 60, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+button {
+  font-family: inherit;
+}
+
+@media (max-width: 900px) {
+  .superadmin-app {
+    flex-direction: column;
+  }
+
+  .sa-section {
+    border-radius: 22px;
+  }
+
+  .section-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

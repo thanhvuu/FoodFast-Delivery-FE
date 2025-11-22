@@ -7,18 +7,18 @@ import {
   Text,
   TouchableOpacity,
   View,
- from 'react-native';
+} from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ScreenContainer from '../components/ScreenContainer';
 import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
-import { useCart, type CartItem } from '../context/CartContext';
-import type { RootStackParamList } from '../navigation/AppNavigator';
+import { useCart, type CartItem } from '../context';
+import type { CustomerHomeStackParamList } from '../navigation/types';
 
 const DELIVERY_FEE = 15000;
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Cart'>;
+type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Cart'>;
 
 const CartScreen: React.FC<Props> = ({ navigation }) => {
   const { items, subtotal, updateQuantity, removeItem } = useCart();

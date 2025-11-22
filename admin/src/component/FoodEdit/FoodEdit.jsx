@@ -4,12 +4,13 @@ import { useAdminLanguage } from '../../context/LanguageContext'
 
 const FoodEdit = ({ food, onSave, onClose }) => {
     // Bản sao state để edit live
-    const [editData, setEditData] = useState(food || {})
+    const [editData, setEditData] = useState(food ? { status: 'available', ...food } : {})
     const { dictionary } = useAdminLanguage()
     const t = dictionary.foodEdit
+    const statusOptions = t.statusOptions || []
 
     useEffect(() => {
-        setEditData(food)
+        setEditData(food ? { status: 'available', ...food } : {})
     }, [food])
 
     if (!food) return null // Không truyền food thì không hiện (ẩn popup)
@@ -67,6 +68,20 @@ const FoodEdit = ({ food, onSave, onClose }) => {
                         onChange={handleChange}
                         required
                     />
+                </label>
+                <label>
+                    {t.fields.status}
+                    <select
+                        name="status"
+                        value={editData.status || 'available'}
+                        onChange={handleChange}
+                    >
+                        {statusOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
                 </label>
                 <label>
                     {t.fields.description}

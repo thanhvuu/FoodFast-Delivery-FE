@@ -100,4 +100,3 @@ export const useCart = (): CartContextValue => {
   }
   return context;
 };
-
