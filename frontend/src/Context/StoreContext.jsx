@@ -1,10 +1,27 @@
-import { createContext, useMemo, useState } from 'react'
-import { food_list } from '../assets/assets'
+import { createContext, useEffect, useMemo, useState } from 'react'
+import { food_list as fallbackFoodList } from '../assets/assets'
+import { fetchProducts } from '../services/api'
 
 export const StoreContext = createContext(null)
 
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({})
+  const [food_list, setFoodList] = useState(fallbackFoodList)
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts()
+        if (Array.isArray(data) && data.length) {
+          setFoodList(data)
+        }
+      } catch (error) {
+        console.error('Không thể tải dữ liệu sản phẩm', error)
+      }
+    }
+
+    loadProducts()
+  }, [])
 
   const addToCart = (itemId) => {
     setCartItems((prev) => ({

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { order_list } from '../../assets/assest'
+import { fetchOrders, updateOrder } from '../../services/api'
 import './Orders.css'
 import { useAdminLanguage } from '../../context/LanguageContext'
 
@@ -15,6 +16,16 @@ const readStoredOrders = () => {
         return Array.isArray(parsed) ? parsed : []
     } catch (error) {
         console.error(error)
+        return []
+    }
+}
+
+const fetchApiOrders = async () => {
+    try {
+        const apiOrders = await fetchOrders()
+        return Array.isArray(apiOrders) ? apiOrders : []
+    } catch (error) {
+        console.error('Không thể tải danh sách đơn từ API', error)
         return []
     }
 }
@@ -98,15 +109,23 @@ const Orders = () => {
     const t = dictionary.ordersPage
 
     const staticOrders = useMemo(() => order_list.map(transformOrder), [])
-    const loadOrders = () => {
-        const storedOrders = readStoredOrders().map(transformOrder)
-        return mergeOrders(staticOrders, storedOrders)
+    const loadOrders = async () => {
+        const [storedOrders, apiOrders] = await Promise.all([
+            Promise.resolve(readStoredOrders()),
+            fetchApiOrders(),
+        ])
+        const normalisedApiOrders = apiOrders.map(transformOrder)
+        const normalisedStored = storedOrders.map(transformOrder)
+        return mergeOrders(staticOrders, mergeOrders(normalisedStored, normalisedApiOrders))
     }
 
-    const [orders, setOrders] = useState(loadOrders)
+    const [orders, setOrders] = useState(staticOrders)
 
     useEffect(() => {
-        const syncOrders = () => setOrders(loadOrders())
+        const syncOrders = async () => {
+            const merged = await loadOrders()
+            setOrders(merged)
+        }
         syncOrders()
         window.addEventListener('storage', syncOrders)
         window.addEventListener('foodfast-orders-update', syncOrders)
@@ -143,6 +162,10 @@ const Orders = () => {
                     status: persistedStatus,
                     trackingStatus: nextTrackingStatus ?? current.trackingStatus,
                 }))
+                updateOrder(id, {
+                    status: persistedStatus,
+                    trackingStatus: nextTrackingStatus,
+                }).catch(error => console.error('Không thể cập nhật đơn hàng', error))
                 return {
                     ...order,
                     status: nextStatus,
