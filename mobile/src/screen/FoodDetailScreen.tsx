@@ -11,12 +11,13 @@ import { CustomerHomeStackParamList, CustomerTabParamList } from '../navigation/
 import { featured, popular } from '../data/menu';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
-
-const allFood = [...featured, ...popular];
+import useProducts from '../hooks/useProducts';
 
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'FoodDetail'>;
 
 const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { products, reload } = useProducts();
+  const allFood = useMemo(() => (products?.length ? products : [...featured, ...popular]), [products]);
   const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
   const selected = useMemo(() => {
     if (!route.params?.id) {
@@ -43,6 +44,11 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     <ScreenContainer>
       <HeaderBar title="Chi tiết món" onBackPress={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.refreshRow}>
+          <TouchableOpacity style={styles.reloadButton} onPress={reload} activeOpacity={0.85}>
+            <Text style={styles.reloadLabel}>Làm mới món</Text>
+          </TouchableOpacity>
+        </View>
         <Image source={{ uri: selected.image }} style={styles.heroImage} />
         <View style={styles.card}>
           <View style={styles.rowBetween}>
@@ -90,6 +96,21 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   content: {
     paddingBottom: spacing.xxl,
+  },
+  refreshRow: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    alignItems: 'flex-end',
+  },
+  reloadButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: '#EEF6FF',
+    borderRadius: 12,
+  },
+  reloadLabel: {
+    color: colors.primary,
+    fontWeight: '700',
   },
   heroImage: {
     width: '90%',
