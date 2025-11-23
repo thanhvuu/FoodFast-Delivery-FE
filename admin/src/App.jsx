@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 import Sidebar from './component/Sidebar/Sidebar'
 import Navbar from './component/navbar/Navbar'
@@ -10,14 +10,36 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
 import { food_list } from './assets/assest'
+import { createProduct, fetchProducts } from './services/api'
 
 const App = () => {
   // State quản lý toàn bộ sản phẩm
   const [products, setProducts] = useState(food_list)
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts()
+        if (Array.isArray(data) && data.length) {
+          setProducts(data)
+        }
+      } catch (error) {
+        console.error('Không thể tải danh sách sản phẩm từ API', error)
+      }
+    }
+
+    loadProducts()
+  }, [])
+
   // Hàm thêm sản phẩm, truyền xuống Add
-  const addProduct = (product) => {
-    setProducts([...products, product])
+  const addProduct = async (product) => {
+    try {
+      const created = await createProduct(product)
+      setProducts([...products, created])
+      return created
+    } catch (error) {
+      console.error('Không thể thêm sản phẩm', error)
+    }
   }
 
   // Hàm xoá cập nhật chung (nếu muốn truyền xuống List)

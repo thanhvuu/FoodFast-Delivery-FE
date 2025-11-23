@@ -57,7 +57,7 @@ const Add = ({ onAddProduct }) => {
         setImagePreview(previewUrl)
     }
 
-    const handleSubmit = event => {
+    const handleSubmit = async event => {
         event.preventDefault()
         if (!onAddProduct) return
 
@@ -80,8 +80,13 @@ const Add = ({ onAddProduct }) => {
             },
         }
 
-        onAddProduct(newProduct)
-        setLastSavedId(newProduct._id)
+        try {
+            const created = await onAddProduct(newProduct)
+            setLastSavedId(created?._id || newProduct._id)
+        } catch (error) {
+            console.error('Lỗi khi thêm sản phẩm', error)
+            return
+        }
         setFormData({
             name: '',
             description: '',

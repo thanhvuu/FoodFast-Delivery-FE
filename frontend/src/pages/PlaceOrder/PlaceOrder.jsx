@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState } from 'react'
 import './PlaceOrder.css'
 import { StoreContext } from '../../Context/StoreContext'
 import { useNavigate } from 'react-router-dom'
+import { createOrder } from '../../services/api'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
@@ -208,6 +209,26 @@ const PlaceOrder = () => {
             paymentMethod,
             route: generateRoute(deliveryMethod, createdAt, fullAddress),
             createdAt: createdAt.toISOString(),
+        }
+
+        try {
+            await createOrder({
+                userId: user?.id || 'guest',
+                items: newOrder.items.map(item => ({
+                    productId: item.id,
+                    quantity: item.quantity,
+                    price: item.price,
+                })),
+                total: grandTotal,
+                deliveryFee,
+                status: 'pending',
+                placedAt: createdAt.toISOString(),
+                address: fullAddress,
+                customer: newOrder.customer,
+                paymentMethod,
+            })
+        } catch (error) {
+            console.error('Không thể lưu đơn hàng lên API', error)
         }
 
         const existingOrders = readStoredOrders()
