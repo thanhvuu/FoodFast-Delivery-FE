@@ -1,0 +1,17 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "FoodFast mock backend using json-server",
+  "main": "index.js",
+  "scripts": {
+    "start": "json-server --watch dtb.json --host 0.0.0.0 --port 4000",
+    "dev": "json-server --watch dtb.json --port 4000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "json-server": "^1.0.0-beta.3"
+  }
+}
