@@ -17,6 +17,8 @@ import { CustomerHomeStackParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
+import { allFoods, normalizeCategory } from '../data/menu';
+import useProducts from '../hooks/useProducts';
 
 const heroImage =
   'https://images.unsplash.com/photo-1601924579534-811e171ad6a5?auto=format&fit=crop&w=1200&q=80';
@@ -30,6 +32,10 @@ const quickLinks = [
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const { products } = useProducts();
+  const [selectedFilter, setSelectedFilter] = React.useState<string | undefined>(undefined);
+  const menu = React.useMemo(() => (products?.length ? products : allFoods), [products]);
+
   const handleSeeAll = () => {
     navigation.navigate('Tracking');
   };
@@ -40,6 +46,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } else {
       navigation.navigate('FoodDetail', { id: 'chicken' });
     }
+  };
+
+  const handleSelectCategory = (label: string) => {
+    setSelectedFilter(label);
+    const normalized = normalizeCategory(label);
+    const match = menu.find((item) => normalizeCategory(item.category) === normalized);
+    navigation.navigate('FoodDetail', { id: match?.id, category: label });
   };
 
   return (
@@ -55,7 +68,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
           {discoveryFilters.map((filter) => (
-            <TagPill key={filter} label={filter} />
+            <TagPill
+              key={filter}
+              label={filter}
+              isActive={selectedFilter === filter}
+              onPress={() => handleSelectCategory(filter)}
+            />
           ))}
         </ScrollView>
 
@@ -71,7 +89,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.categoryGrid}>
           {shortcuts.slice(0, 6).map((item) => (
-            <TouchableOpacity key={item.id} style={styles.categoryCard} activeOpacity={0.85}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.categoryCard}
+              activeOpacity={0.85}
+              onPress={() => handleSelectCategory(item.label)}
+            >
               <View style={[styles.categoryIcon, { backgroundColor: item.background }]}>
                 <Text style={[styles.categoryEmoji, { color: item.color }]}>{item.icon}</Text>
               </View>

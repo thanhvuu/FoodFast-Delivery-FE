@@ -47,7 +47,7 @@ const menuImageMap = {
   'menu6.jpeg': menu_6,
 }
 
-const foodImageMap = {
+export const foodImageMap = {
   'food_1.jpg': food_1,
   'food_2.jpg': food_2,
   'food_3.webp': food_3,
@@ -72,3 +72,10 @@ export const food_list = (dtbData.food_list || []).map((item) => ({
   image: foodImageMap[item.image] || item.image,
 }))
 
+export const resolveFoodImage = (image) => {
+  if (!image) return ''
+  const img = image.toString()
+  if (img.startsWith('http') || img.startsWith('data:')) return img
+  const key = img.split('/').pop()
+  return foodImageMap[key] || img
+}

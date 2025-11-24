@@ -1,6 +1,6 @@
 export type CustomerHomeStackParamList = {
   Home: undefined;
-  FoodDetail: { id: string } | undefined;
+  FoodDetail: { id?: string; category?: string } | undefined;
   Contact: undefined;
   Tracking: undefined;
   Account: undefined;
