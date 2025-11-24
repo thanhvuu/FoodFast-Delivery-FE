@@ -18,8 +18,11 @@ const Add = ({ onAddProduct }) => {
         category: defaultCategory,
         price: '',
         status: 'available',
+        restaurantName: '',
+        restaurantAddress: '',
     })
     const [imagePreview, setImagePreview] = useState('')
+    const [imageFile, setImageFile] = useState(null)
     const [lastSavedId, setLastSavedId] = useState(null)
 
     useEffect(() => {
@@ -55,6 +58,7 @@ const Add = ({ onAddProduct }) => {
             URL.revokeObjectURL(imagePreview)
         }
         setImagePreview(previewUrl)
+        setImageFile(file)
     }
 
     const handleSubmit = async event => {
@@ -66,6 +70,24 @@ const Add = ({ onAddProduct }) => {
             return
         }
 
+        const toBase64 = (file) =>
+            new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(reader.result)
+                reader.onerror = reject
+                reader.readAsDataURL(file)
+            })
+
+        let imageToSave = imagePreview || assests.upload_area
+        if (imageFile) {
+            try {
+                imageToSave = await toBase64(imageFile)
+            } catch (err) {
+                console.error('Không thể đọc ảnh tải lên, dùng ảnh mặc định', err)
+                imageToSave = assests.upload_area
+            }
+        }
+
         const newProduct = {
             _id: `prod-${Date.now()}`,
             name: trimmedName,
@@ -73,10 +95,10 @@ const Add = ({ onAddProduct }) => {
             category: formData.category,
             price: Number(formData.price) || 0,
             status: formData.status,
-            image: imagePreview || assests.upload_area,
+            image: imageToSave,
             restaurant: {
-                name: '',
-                address: '',
+                name: formData.restaurantName.trim(),
+                address: formData.restaurantAddress.trim(),
             },
         }
 
@@ -93,11 +115,14 @@ const Add = ({ onAddProduct }) => {
             category: defaultCategory,
             price: '',
             status: 'available',
+            restaurantName: '',
+            restaurantAddress: '',
         })
         if (imagePreview) {
             URL.revokeObjectURL(imagePreview)
         }
         setImagePreview('')
+        setImageFile(null)
     }
 
     return (
@@ -136,6 +161,26 @@ const Add = ({ onAddProduct }) => {
                         value={formData.description}
                         onChange={handleChange}
                     ></textarea>
+                </div>
+                <div className="add-restaurant flex-col">
+                    <p>{t.restaurantNameLabel}</p>
+                    <input
+                        type="text"
+                        name="restaurantName"
+                        value={formData.restaurantName}
+                        onChange={handleChange}
+                        placeholder={t.restaurantNamePlaceholder}
+                    />
+                </div>
+                <div className="add-restaurant flex-col">
+                    <p>{t.restaurantAddressLabel}</p>
+                    <input
+                        type="text"
+                        name="restaurantAddress"
+                        value={formData.restaurantAddress}
+                        onChange={handleChange}
+                        placeholder={t.restaurantAddressPlaceholder}
+                    />
                 </div>
                 <div className="add-category-price">
                     <div className="add-category flex-col">

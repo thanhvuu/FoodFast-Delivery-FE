@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './FoodItem.css'
 import { StoreContext } from '../../Context/StoreContext'
@@ -9,6 +9,7 @@ const FoodItem = ({ id, name, price, description, image }) => {
   const navigate = useNavigate()
   const { cartItems, addToCart, removeFromCart } = useContext(StoreContext)
   const { dictionary } = useLanguage()
+  const [imgSrc, setImgSrc] = useState(image || assets.header_img)
 
   const itemTranslations = dictionary.foodItems[id] || {}
   const displayName = itemTranslations.name || name
@@ -30,7 +31,12 @@ const FoodItem = ({ id, name, price, description, image }) => {
   return (
     <div className="food-item">
       <div className="food-item-img-container" onClick={() => navigate(`/food/${id}`)}>
-        <img className="food-item-img" src={image} alt={displayName} />
+        <img
+          className="food-item-img"
+          src={imgSrc}
+          alt={displayName}
+          onError={() => setImgSrc(assets.header_img)}
+        />
 
 
         {!cartItems[id] ? (

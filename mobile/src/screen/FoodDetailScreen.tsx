@@ -8,7 +8,7 @@ import HeaderBar from '../components/HeaderBar';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { CustomerHomeStackParamList, CustomerTabParamList } from '../navigation/types';
-import { featured, popular } from '../data/menu';
+import { allFoods, featured, popular, normalizeCategory } from '../data/menu';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
 import useProducts from '../hooks/useProducts';
@@ -17,14 +17,20 @@ type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'FoodDetail'>;
 
 const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const { products, reload } = useProducts();
-  const allFood = useMemo(() => (products?.length ? products : [...featured, ...popular]), [products]);
+  const allFood = useMemo(() => (products?.length ? products : allFoods), [products]);
   const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
   const selected = useMemo(() => {
-    if (!route.params?.id) {
-      return allFood[0];
+    const params = route.params;
+    if (params?.id) {
+      return allFood.find((item) => item.id === params.id) ?? allFood[0];
     }
-    return allFood.find((item) => item.id === route.params?.id) ?? allFood[0];
-  }, [route.params?.id]);
+    if (params?.category) {
+      const normalized = normalizeCategory(params.category);
+      const match = allFood.find((item) => normalizeCategory(item.category) === normalized);
+      if (match) return match;
+    }
+    return allFood[0];
+  }, [route.params?.id, route.params?.category, allFood]);
 
   const recommendations = useMemo(
     () => allFood.filter((item) => item.id !== selected.id).slice(0, 3),

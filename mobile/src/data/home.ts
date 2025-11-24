@@ -21,18 +21,15 @@ export type RestaurantShowcase = {
 };
 
 export const shortcuts: ShortcutAction[] = [
-  { id: 'hot-deal', label: 'Hot Deal', icon: '🔥', background: '#FFF2E8', color: '#FF7A00' },
-  { id: 'quan-ngon', label: 'Quán Ngon', icon: '🍜', background: '#EBF4FF', color: '#1E7FFF' },
-  { id: 'tich-diem', label: 'Tích Điểm', icon: '🎁', background: '#FFEFF7', color: '#FF5E8D' },
-  { id: 'ngon-xiu', label: 'Ngon Xỉu', icon: '🤤', background: '#F0FFF4', color: '#26C281' },
-  { id: 'bua-trua', label: 'Bữa Trưa', icon: '🍱', background: '#FFF8E1', color: '#F59E0B' },
-  { id: 'snack-ngon', label: 'Snack Ngon', icon: '🍟', background: '#F5F3FF', color: '#8B5CF6' },
-  { id: 'giam-50k', label: 'Giảm 50k', icon: '💸', background: '#EAF8FF', color: '#0EA5E9' },
-  { id: '99k-off', label: '99k Off', icon: '🎉', background: '#FFF0F4', color: '#F43F5E' },
-  { id: 'no-bung', label: 'No Bụng', icon: '🍚', background: '#ECFDF3', color: '#22C55E' },
+  { id: 'fast-food', label: 'Fast Food', icon: '🍔', background: '#FFF2E8', color: '#FF7A00' },
+  { id: 'snacks', label: 'Đồ ăn vặt', icon: '🍟', background: '#F5F3FF', color: '#8B5CF6' },
+  { id: 'desserts', label: 'Đồ ngọt', icon: '🧁', background: '#FFEFF7', color: '#FF5E8D' },
+  { id: 'soups', label: 'Món nước', icon: '🍜', background: '#EBF4FF', color: '#1E7FFF' },
+  { id: 'dry-dish', label: 'Món khô', icon: '🍛', background: '#FFF8E1', color: '#F59E0B' },
+  { id: 'beverages', label: 'Thức uống', icon: '🧋', background: '#EAF8FF', color: '#0EA5E9' },
 ];
 
-export const discoveryFilters = ['Bữa trưa', 'Snack ngon', 'Món ăn Hà Nội', 'Giao cực nhanh'];
+export const discoveryFilters = ['Fast Food', 'Đồ ăn vặt', 'Đồ ngọt', 'Món nước', 'Món khô', 'Thức uống'];
 
 export const topRatedRestaurants: RestaurantShowcase[] = [
   {
