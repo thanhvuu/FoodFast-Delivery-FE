@@ -12,9 +12,24 @@ const StoreContextProvider = (props) => {
     const loadProducts = async () => {
       try {
         const data = await fetchProducts()
-        if (Array.isArray(data) && data.length) {
-          setFoodList(data)
-        }
+        if (!Array.isArray(data) || !data.length) return
+
+        const normalizedProducts = data.map((item, index) => ({
+          ...item,
+          _id: item._id || item.id?.toString() || `product-${index}`,
+          name: item.name || fallbackFoodList[index % fallbackFoodList.length]?.name || 'Món ăn',
+          description:
+            item.description ||
+            fallbackFoodList[index % fallbackFoodList.length]?.description ||
+            'Món ăn thơm ngon từ FoodFast',
+          price: Number.isFinite(Number(item.price))
+            ? Number(item.price)
+            : fallbackFoodList[index % fallbackFoodList.length]?.price || 0,
+          image: item.image || fallbackFoodList[index % fallbackFoodList.length]?.image,
+          category: item.category || fallbackFoodList[index % fallbackFoodList.length]?.category || 'other',
+        }))
+
+        setFoodList(normalizedProducts)
       } catch (error) {
         console.error('Không thể tải dữ liệu sản phẩm', error)
       }
