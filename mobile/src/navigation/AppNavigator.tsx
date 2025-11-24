@@ -6,6 +6,7 @@ import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import {
   HomeScreen,
+  CategoryScreen,
   FoodDetailScreen,
   ContactScreen,
   TrackingScreen,
@@ -104,6 +105,7 @@ const CustomerHomeStackNavigator: React.FC = () => (
     }}
   >
     <HomeStack.Screen name="Home" component={HomeScreen} />
+    <HomeStack.Screen name="CategoryListing" component={CategoryScreen} />
     <HomeStack.Screen name="FoodDetail" component={FoodDetailScreen} />
     <HomeStack.Screen name="Contact" component={ContactScreen} />
     <HomeStack.Screen name="Tracking" component={TrackingScreen} />

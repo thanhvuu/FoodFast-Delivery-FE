@@ -17,8 +17,6 @@ import { CustomerHomeStackParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
-import { allFoods, normalizeCategory } from '../data/menu';
-import useProducts from '../hooks/useProducts';
 
 const heroImage =
   'https://images.unsplash.com/photo-1601924579534-811e171ad6a5?auto=format&fit=crop&w=1200&q=80';
@@ -32,9 +30,7 @@ const quickLinks = [
 type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const { products } = useProducts();
   const [selectedFilter, setSelectedFilter] = React.useState<string | undefined>(undefined);
-  const menu = React.useMemo(() => (products?.length ? products : allFoods), [products]);
 
   const handleSeeAll = () => {
     navigation.navigate('Tracking');
@@ -50,9 +46,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSelectCategory = (label: string) => {
     setSelectedFilter(label);
-    const normalized = normalizeCategory(label);
-    const match = menu.find((item) => normalizeCategory(item.category) === normalized);
-    navigation.navigate('FoodDetail', { id: match?.id, category: label });
+    navigation.navigate('CategoryListing', { category: label });
   };
 
   return (
