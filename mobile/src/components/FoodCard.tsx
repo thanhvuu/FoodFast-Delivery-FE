@@ -12,6 +12,13 @@ export type FoodCardProps = {
 };
 
 const FoodCard: React.FC<FoodCardProps> = ({ item, onPress, variant = 'grid' }: FoodCardProps) => {
+  const priceNumber = typeof item.price === 'number' ? item.price : Number(item.price ?? 0);
+  const ratingNumber = typeof item.rating === 'number' ? item.rating : Number(item.rating ?? 0);
+  const votesNumber = typeof item.votes === 'number' ? item.votes : Number(item.votes ?? 0);
+  const ratingLabel = Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : '0.0';
+  const votesLabel = Number.isFinite(votesNumber) ? votesNumber : 0;
+  const priceLabel = Number.isFinite(priceNumber) ? priceNumber.toLocaleString('vi-VN') : '0';
+
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -27,10 +34,10 @@ const FoodCard: React.FC<FoodCardProps> = ({ item, onPress, variant = 'grid' }: 
           {item.description}
         </Text>
         <View style={styles.footer}>
-          <Text style={styles.price}>{item.price.toLocaleString('vi-VN')}₫</Text>
+          <Text style={styles.price}>{priceLabel}₫</Text>
           <View style={styles.ratingWrapper}>
-            <Text style={styles.rating}>★ {item.rating.toFixed(1)}</Text>
-            <Text style={styles.votes}>({item.votes})</Text>
+            <Text style={styles.rating}>★ {ratingLabel}</Text>
+            <Text style={styles.votes}>({votesLabel})</Text>
           </View>
         </View>
       </View>
