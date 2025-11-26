@@ -2,6 +2,7 @@ import React, { createContext, PropsWithChildren, useCallback, useContext, useEf
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_USER_STORAGE_KEY } from '../constants/api';
 import { readUsersFromFile, saveUsersToFile, StoredUserRecord } from '../utils/userFileStore';
+import { getApiBaseUrl } from '../utils/api';
 
 export type UserRole = 'customer' | 'admin' | 'restaurant';
 
@@ -98,6 +99,36 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
     loadStoredUser();
   }, []);
 
+  const fetchUsersFromApi = useCallback(async (): Promise<StoredUserRecord[]> => {
+    const baseUrl = getApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/users`);
+      if (!res.ok) throw new Error(`API trả về mã ${res.status}`);
+      const data = await res.json();
+      return Array.isArray(data) ? (data as StoredUserRecord[]) : [];
+    } catch (err) {
+      console.warn('Không thể tải users từ API, dùng fallback local', err);
+      return [];
+    }
+  }, []);
+
+  const createUserApi = useCallback(async (payload: StoredUserRecord): Promise<StoredUserRecord | null> => {
+    const baseUrl = getApiBaseUrl();
+    try {
+      const res = await fetch(`${baseUrl}/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`API trả về mã ${res.status}`);
+      const data = await res.json();
+      return data as StoredUserRecord;
+    } catch (err) {
+      console.warn('Không thể tạo user trên API, dùng local fallback', err);
+      return null;
+    }
+  }, []);
+
   const login = useCallback(async (email: string, password: string) => {
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !password) {
@@ -110,6 +141,18 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     if (matchedPreset) {
       const { password: _password, ...sanitized } = matchedPreset;
+      const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
+      setUser(sanitizedUser);
+      await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
+      return sanitizedUser;
+    }
+
+    const apiUsers = await fetchUsersFromApi();
+    const matchedApi = apiUsers.find(
+      (item) => item.email?.toLowerCase() === trimmedEmail && item.password === password
+    );
+    if (matchedApi) {
+      const { password: _password, ...sanitized } = matchedApi;
       const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
       setUser(sanitizedUser);
       await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
@@ -130,7 +173,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
     setUser(sanitizedUser);
     await AsyncStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(sanitizedUser));
     return sanitizedUser;
-  }, []);
+  }, [fetchUsersFromApi]);
 
   const register = useCallback(async ({ username, email, password }: RegisterPayload) => {
     const trimmedEmail = email.trim().toLowerCase();
@@ -139,11 +182,17 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       throw new Error('Vui lòng nhập đầy đủ và chính xác thông tin');
     }
 
-    const users = await readUsersFromFile();
-    const existed = users.some((item) => item.email?.toLowerCase() === trimmedEmail);
-
-    if (existed) {
+    // kiểm tra trùng email trên API
+    const apiUsers = await fetchUsersFromApi();
+    const existedApi = apiUsers.some((item) => item.email?.toLowerCase() === trimmedEmail);
+    if (existedApi) {
       throw new Error('Email đã tồn tại');
+    }
+
+    const fileUsers = await readUsersFromFile();
+    const existedFile = fileUsers.some((item) => item.email?.toLowerCase() === trimmedEmail);
+    if (existedFile) {
+      throw new Error('Email đã tồn tại (local)');
     }
 
     const newUser: StoredUserRecord = {
@@ -154,14 +203,16 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       role: 'customer',
     };
 
-    const nextUsers = [...users, newUser];
+    const created = await createUserApi(newUser);
+    const mergedUser = created ?? newUser;
 
+    const nextUsers = [...fileUsers, mergedUser];
     await saveUsersToFile(nextUsers);
 
-    const { password: _password, ...sanitized } = newUser;
+    const { password: _password, ...sanitized } = mergedUser;
     const sanitizedUser: StoredUser = ensureRole(sanitized) as StoredUser;
     return sanitizedUser;
-  }, []);
+  }, [createUserApi, fetchUsersFromApi]);
 
   const logout = useCallback(async () => {
     setUser(null);

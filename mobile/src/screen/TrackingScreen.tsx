@@ -68,6 +68,8 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
   const orderId = route.params?.orderId;
   const [droneProgress, setDroneProgress] = useState(0);
   const [nearArrival, setNearArrival] = useState(false);
+  const [deliveredNotice, setDeliveredNotice] = useState(false);
+  const [waitRemaining, setWaitRemaining] = useState(120); // giây chờ ở trạng thái pending
   const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,10 +98,18 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
     return `${total.toLocaleString('vi-VN')}₫`;
   }, [activeOrder]);
 
+  const derivedStatus = useMemo(() => {
+    const base = (activeOrder?.trackingStatus ?? activeOrder?.status ?? '').toLowerCase();
+    if (base === 'completed' || base === 'delivered' || base === 'cancelled') return base;
+    if (droneProgress >= 100) return 'delivered';
+    if (droneProgress >= 80) return 'ready-for-pickup';
+    if (droneProgress >= 50) return 'delivering';
+    if (droneProgress > 0) return 'preparing';
+    return 'pending';
+  }, [activeOrder?.status, activeOrder?.trackingStatus, droneProgress]);
+
   const statusText = useMemo(() => {
-    const status = activeOrder?.trackingStatus ?? activeOrder?.status;
-    if (!status) return 'Chưa rõ trạng thái';
-    switch (status) {
+    switch (derivedStatus) {
       case 'pending':
         return 'Pending';
       case 'preparing':
@@ -115,41 +125,95 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
       case 'cancelled':
         return 'Cancelled';
       default:
-        return status;
+        return derivedStatus;
     }
-  }, [activeOrder?.status, activeOrder?.trackingStatus]);
+  }, [derivedStatus]);
 
-  const canCancel = activeOrder?.status === 'pending';
+  const canCancel = derivedStatus === 'pending';
+  const canComplete =
+    activeOrder && deliveredNotice && derivedStatus !== 'completed' && derivedStatus !== 'cancelled';
+  const isArriving =
+    derivedStatus === 'delivering' ||
+    derivedStatus === 'on-the-way' ||
+    derivedStatus === 'ready-for-pickup' ||
+    deliveredNotice;
+
+  const handleCompletePress = async () => {
+    if (!activeOrder?.id) return;
+    const updated = await updateStatus(activeOrder.id, 'completed');
+    if (updated) {
+      Alert.alert('Đã giao hàng', 'Đơn hàng đã được đánh dấu hoàn tất.');
+    }
+  };
 
   const alertedRef = useRef(false);
+  const waitIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
       setDroneProgress(0);
       setNearArrival(false);
+      setDeliveredNotice(false);
+      setWaitRemaining(120);
       setOtp('');
       setOtpStatus('idle');
       alertedRef.current = false;
       if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = setInterval(() => {
-        setDroneProgress((prev) => {
-          if (prev >= 100) {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            return 100;
-          }
-          const next = prev + 5;
-          if (next >= 80 && !alertedRef.current) {
-            alertedRef.current = true;
-            setNearArrival(true);
-            Alert.alert('Drone sắp đến', 'Drone cách điểm giao ~200m, vui lòng chuẩn bị nhận hàng.');
+      if (waitIntervalRef.current) clearInterval(waitIntervalRef.current);
+      startedRef.current = false;
+
+      const startFlying = () => {
+        if (startedRef.current) return;
+        startedRef.current = true;
+        intervalRef.current = setInterval(() => {
+          setDroneProgress((prev) => {
+            if (prev >= 100) {
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              return 100;
+            }
+            const next = prev + 3; // chậm hơn để giữ pending/preparing lâu hơn
+            if (next >= 80 && !alertedRef.current) {
+              alertedRef.current = true;
+              setNearArrival(true);
+              Alert.alert('Drone sắp đến', 'Drone cách điểm giao ~200m, vui lòng chuẩn bị nhận hàng.');
+            }
+            if (next >= 100 && !deliveredNotice) {
+              setDeliveredNotice(true);
+              Alert.alert('Đơn đã giao', 'Đơn hàng đã được giao tới. Vui lòng xác nhận hoàn tất.');
+            }
+            return next;
+          });
+        }, 2500);
+      };
+
+      waitIntervalRef.current = setInterval(() => {
+        setWaitRemaining((prev) => {
+          const next = Math.max(prev - 1, 0);
+          if (next === 0) {
+            if (waitIntervalRef.current) {
+              clearInterval(waitIntervalRef.current);
+              waitIntervalRef.current = null;
+            }
+            startFlying();
           }
           return next;
         });
-      }, 2000);
+      }, 1000);
+
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
+        if (waitIntervalRef.current) clearInterval(waitIntervalRef.current);
       };
-    }, []),
+    }, [deliveredNotice]),
   );
+
+  const handleStartNow = useCallback(() => {
+    if (waitIntervalRef.current) {
+      clearInterval(waitIntervalRef.current);
+      waitIntervalRef.current = null;
+    }
+    setWaitRemaining(0); // trigger startFlying via effect
+  }, []);
 
   const handleOtpSubmit = async () => {
     const sanitized = otp.trim();
@@ -207,13 +271,47 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
           </View>
         </View>
         {canCancel ? (
-          <TouchableOpacity style={styles.cancelButton} activeOpacity={0.85} onPress={() => cancelOrder(activeOrder?.id ?? '')}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            activeOpacity={0.85}
+            onPress={() => cancelOrder(activeOrder?.id ?? '')}
+          >
             <Text style={styles.cancelButtonLabel}>Hủy đơn hàng</Text>
+          </TouchableOpacity>
+        ) : null}
+        {isArriving && canComplete ? (
+          <View style={styles.arrivedCard}>
+            <Text style={styles.arrivedTitle}>Đơn đã giao tới</Text>
+            <Text style={styles.arrivedSubtitle}>Vui lòng xác nhận đã nhận hàng.</Text>
+            <TouchableOpacity
+              style={styles.completeButton}
+              activeOpacity={0.85}
+              onPress={handleCompletePress}
+            >
+              <Text style={styles.completeButtonLabel}>Hoàn tất đơn</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+        {!isArriving && canComplete && deliveredNotice ? (
+          <TouchableOpacity
+            style={styles.completeButton}
+            activeOpacity={0.85}
+            onPress={handleCompletePress}
+          >
+            <Text style={styles.completeButtonLabel}>Hoàn tất đơn</Text>
           </TouchableOpacity>
         ) : null}
 
         <View style={styles.progressCard}>
           <Text style={styles.progressTitle}>Tiến trình drone</Text>
+          {waitRemaining > 0 ? (
+            <View style={styles.waitRow}>
+              <Text style={styles.waitText}>Đang chuẩn bị, drone cất cánh sau {waitRemaining}s</Text>
+              <TouchableOpacity style={styles.waitButton} activeOpacity={0.85} onPress={handleStartNow}>
+                <Text style={styles.waitButtonLabel}>Bay ngay</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${Math.min(droneProgress, 100)}%` }]} />
           </View>
@@ -301,6 +399,34 @@ const styles = StyleSheet.create({
     color: '#D62828',
     fontWeight: '700',
   },
+  completeButton: {
+    backgroundColor: '#ECFDF3',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 14,
+    alignSelf: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  completeButtonLabel: {
+    color: '#15803D',
+    fontWeight: '700',
+  },
+  arrivedCard: {
+    backgroundColor: '#FFF8F1',
+    borderRadius: 16,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    gap: spacing.xs,
+  },
+  arrivedTitle: {
+    fontWeight: '800',
+    color: colors.text,
+  },
+  arrivedSubtitle: {
+    color: colors.muted,
+  },
   timelineCard: {
     marginTop: spacing.xl,
     backgroundColor: colors.surface,
@@ -359,6 +485,31 @@ const styles = StyleSheet.create({
   progressLabel: {
     marginTop: spacing.xs,
     color: colors.muted,
+  },
+  waitRow: {
+    backgroundColor: '#f5f7fb',
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  waitText: {
+    flex: 1,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  waitButton: {
+    marginLeft: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+  },
+  waitButtonLabel: {
+    color: '#fff',
+    fontWeight: '700',
   },
   nearArrival: {
     marginTop: spacing.sm,
