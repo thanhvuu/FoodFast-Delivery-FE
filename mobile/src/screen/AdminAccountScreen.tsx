@@ -130,8 +130,9 @@ const styles = StyleSheet.create({
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.md,
+    paddingVertical: spacing.xs,
   },
   settingLabel: {
     fontWeight: '700',
@@ -145,7 +146,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 20,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
   },
   dangerButton: {
     backgroundColor: '#D62828',

@@ -146,6 +146,26 @@
   background: #ffe4e6;
 }
 
+.complete-btn {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #16a34a;
+  background: #ecfdf3;
+  color: #15803d;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.complete-btn:hover {
+  background: #d1fae5;
+}
+
+.arrived-card {
+  border: 1px solid #f97316;
+  background: #fff8f1;
+}
+
 .summary-progress {
   display: flex;
   flex-direction: column;

@@ -152,10 +152,12 @@ const OrderTracking = () => {
   const estimatedMinutes = selectedOrder?.estimatedMinutes
   const [progress, setProgress] = useState(0)
   const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [hideArrivedCard, setHideArrivedCard] = useState(false)
 
   useEffect(() => {
     setProgress(0)
     setLastUpdated(new Date())
+    setHideArrivedCard(false)
   }, [selectedOrderId])
 
   useEffect(() => {
@@ -203,10 +205,30 @@ const OrderTracking = () => {
   }, [currentPoint, nextPoint, segmentProgress])
 
   const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
+  const deliveredNotified = React.useRef(false)
+  useEffect(() => {
+    const status = (selectedOrder?.status ?? '').toLowerCase()
+    if (completion >= 100 && !deliveredNotified.current && status !== 'completed' && status !== 'cancelled') {
+      deliveredNotified.current = true
+      alert(trackingPage.arrivedSuccess || 'Đơn hàng đã được giao tới.')
+    }
+    if (completion < 100) {
+      deliveredNotified.current = false
+    }
+  }, [completion, selectedOrder?.status, trackingPage.arrivedSuccess])
 
   const summaryLabels = trackingPage.summaryLabels
 
-  const orderStatus = (selectedOrder?.trackingStatus ?? selectedOrder?.status ?? '').toLowerCase()
+  const baseStatus = (selectedOrder?.trackingStatus ?? selectedOrder?.status ?? '').toLowerCase()
+  const derivedStatus = (() => {
+    if (baseStatus === 'completed' || baseStatus === 'delivered' || baseStatus === 'cancelled') return baseStatus
+    if (completion >= 100) return 'delivered'
+    if (completion >= 80) return 'ready-for-pickup'
+    if (completion >= 50) return 'delivering'
+    if (completion > 0) return 'preparing'
+    return 'pending'
+  })()
+  const orderStatus = derivedStatus
   const statusLabel =
     orderStatus === 'completed' || orderStatus === 'delivered'
       ? 'Completed'
@@ -236,10 +258,28 @@ const OrderTracking = () => {
     ? legendTemplate.replace('{{code}}', selectedOrder?.code ?? '')
     : `Order #${selectedOrder?.code ?? ''}`
 
-  const canCancel = (selectedOrder?.status ?? '').toLowerCase() === 'pending'
+  const normalizedStatus = derivedStatus
+  const normalizedTracking = derivedStatus
+  const hasLaunched =
+    ['delivering', 'on-the-way', 'intransit', 'ready-for-pickup', 'ready for pickup', 'completed', 'delivered', 'cancelled'].includes(
+      normalizedTracking || normalizedStatus,
+    )
+  const canCancel = normalizedStatus === 'pending' && !hasLaunched
+  const canComplete = normalizedStatus !== 'completed' && normalizedStatus !== 'cancelled' && completion >= 100 && !hideArrivedCard
+  const arrivedNotice = completion >= 100
+
+  useEffect(() => {
+    if (normalizedStatus === 'completed' || normalizedStatus === 'cancelled') {
+      setHideArrivedCard(true)
+    }
+  }, [normalizedStatus])
 
   const handleCancel = async () => {
     if (!selectedOrder?.id) return
+    if (!canCancel) {
+      alert(trackingPage.cancelBlocked || 'Đơn đã rời bếp, không thể hủy.');
+      return;
+    }
     const localFallback = () => {
       const updated = { ...selectedOrder, status: 'cancelled', trackingStatus: 'cancelled' }
       const mergedOrders = toUniqueOrders([
@@ -271,6 +311,43 @@ const OrderTracking = () => {
       console.error(error)
       localFallback()
       alert(trackingPage.cancelError || 'Không thể hủy đơn lúc này, đã lưu trạng thái hủy cục bộ.')
+    }
+  }
+
+  const handleComplete = async () => {
+    if (!selectedOrder?.id) return
+    const localComplete = () => {
+      const updated = { ...selectedOrder, status: 'completed', trackingStatus: 'delivered' }
+      const mergedOrders = toUniqueOrders([
+        updated,
+        ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+      ])
+      writeStoredOrders(mergedOrders)
+      setSelectedOrderId(updated.id)
+      window.alert(trackingPage.completeSuccess || 'Đơn hàng đã được giao.')
+    }
+    try {
+      if (selectedOrder.id.startsWith('local-')) {
+        localComplete()
+        return
+      }
+      const updated = await updateOrderStatus(selectedOrder.id, 'completed')
+      if (!updated) {
+        localComplete()
+        return
+      }
+      const mergedOrders = toUniqueOrders([
+        { ...updated, trackingStatus: updated.trackingStatus ?? 'delivered' },
+        ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+      ])
+      writeStoredOrders(mergedOrders)
+      setSelectedOrderId(updated.id)
+      window.alert(trackingPage.completeSuccess || 'Đơn hàng đã được giao.')
+      setHideArrivedCard(true)
+    } catch (error) {
+      console.error(error)
+      localComplete()
+      alert(trackingPage.completeError || 'Không thể hoàn tất đơn lúc này, đã lưu cục bộ.')
     }
   }
 
@@ -336,14 +413,14 @@ const OrderTracking = () => {
               <span className='summary-label'>{summaryLabels.status}</span>
               <span
                 className={`status-pill ${
-                  selectedOrder.status === 'delivered'
+                  orderStatus === 'delivered' || orderStatus === 'completed'
                     ? 'delivered'
-                    : selectedOrder.status === 'cancelled'
+                    : orderStatus === 'cancelled'
                       ? 'cancelled'
                       : 'in-transit'
                 }`}
               >
-                {selectedOrder.status === 'cancelled' ? 'Cancelled' : statusLabel}
+                {orderStatus === 'cancelled' ? 'Cancelled' : statusLabel}
               </span>
               {canCancel ? (
                 <button className='cancel-btn' onClick={handleCancel}>
@@ -351,6 +428,23 @@ const OrderTracking = () => {
                 </button>
               ) : null}
             </article>
+            {arrivedNotice && canComplete ? (
+              <article className='summary-card arrived-card'>
+                <span className='summary-label'>{trackingPage.arrivedTitle || 'Đơn đã giao tới'}</span>
+                <p className='summary-muted'>{trackingPage.arrivedSubtitle || 'Vui lòng xác nhận đã nhận hàng.'}</p>
+                <button className='complete-btn' onClick={handleComplete}>
+                  {trackingPage.completeLabel || 'Đánh dấu hoàn tất'}
+                </button>
+              </article>
+            ) : null}
+            {!arrivedNotice && canComplete ? (
+              <article className='summary-card'>
+                <span className='summary-label'>{trackingPage.completeTitle || 'Kết thúc đơn'}</span>
+                <button className='complete-btn' onClick={handleComplete}>
+                  {trackingPage.completeLabel || 'Đánh dấu hoàn tất'}
+                </button>
+              </article>
+            ) : null}
             <article className='summary-card'>
               <span className='summary-label'>{summaryLabels.payment}</span>
               <span className={`status-pill ${selectedOrder.paid ? 'delivered' : 'in-transit'}`}>
