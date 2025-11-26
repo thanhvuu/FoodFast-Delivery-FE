@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './ModalLogin.css'
 
-const API_BASE_URL = (import.meta.env?.VITE_AUTH_API_BASE_URL || '/api').replace(/\/$/, '')
+// Mặc định dùng json-server backend tại port 4000 nếu không cấu hình proxy
+const API_BASE_URL = (import.meta.env?.VITE_AUTH_API_BASE_URL || 'http://localhost:4000').replace(/\/$/, '')
 const USERS_API_URL = `${API_BASE_URL}/users`
 
 export default function ModalLogin({ open, onClose, onLoginSuccess }) {
@@ -54,7 +55,13 @@ export default function ModalLogin({ open, onClose, onLoginSuccess }) {
             resetForm()
             if (onLoginSuccess) onLoginSuccess()
             if (onClose) onClose()
-            navigate('/')
+            if (matched.role === 'superadmin') {
+              navigate('/super-admin')
+            } else if (matched.role === 'admin') {
+              navigate('/admin')
+            } else {
+              navigate('/')
+            }
           }, 400)
         } else {
           setError('Thông tin đăng nhập không chính xác')

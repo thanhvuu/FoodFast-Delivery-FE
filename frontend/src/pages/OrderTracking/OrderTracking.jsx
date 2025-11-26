@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
 import OrsDeliveryMap from './OrsDeliveryMap'
+import { updateOrderStatus } from '../../services/api'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
@@ -16,6 +17,16 @@ const readStoredOrders = () => {
   } catch (error) {
     console.error(error)
     return []
+  }
+}
+
+const writeStoredOrders = orders => {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders))
+    window.dispatchEvent(new Event('foodfast-orders-update'))
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -195,10 +206,21 @@ const OrderTracking = () => {
 
   const summaryLabels = trackingPage.summaryLabels
 
-  const orderStatus = selectedOrder?.trackingStatus ?? selectedOrder?.status
-  const statusLabel = orderStatus === 'delivered'
-    ? summaryLabels.delivered
-    : summaryLabels.inTransit
+  const orderStatus = (selectedOrder?.trackingStatus ?? selectedOrder?.status ?? '').toLowerCase()
+  const statusLabel =
+    orderStatus === 'completed' || orderStatus === 'delivered'
+      ? 'Completed'
+      : orderStatus === 'pending'
+        ? 'Pending'
+        : orderStatus === 'preparing'
+          ? 'Preparing'
+          : orderStatus === 'ready for pickup' || orderStatus === 'ready-for-pickup'
+            ? 'Ready for Pickup'
+            : orderStatus === 'delivering' || orderStatus === 'on-the-way'
+              ? 'Delivering'
+              : orderStatus === 'cancelled'
+                ? 'Cancelled'
+                : summaryLabels.inTransit
 
   const paymentLabel = selectedOrder?.paid ? summaryLabels.paid : summaryLabels.unpaid
 
@@ -213,6 +235,44 @@ const OrderTracking = () => {
   const legendLabel = legendTemplate
     ? legendTemplate.replace('{{code}}', selectedOrder?.code ?? '')
     : `Order #${selectedOrder?.code ?? ''}`
+
+  const canCancel = (selectedOrder?.status ?? '').toLowerCase() === 'pending'
+
+  const handleCancel = async () => {
+    if (!selectedOrder?.id) return
+    const localFallback = () => {
+      const updated = { ...selectedOrder, status: 'cancelled', trackingStatus: 'cancelled' }
+      const mergedOrders = toUniqueOrders([
+        updated,
+        ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+      ])
+      writeStoredOrders(mergedOrders)
+      setSelectedOrderId(updated.id)
+    }
+
+    try {
+      // Nếu là đơn local hoặc chưa đồng bộ backend, chỉ cập nhật local
+      if (selectedOrder.id.startsWith('local-')) {
+        localFallback()
+        return
+      }
+      const updated = await updateOrderStatus(selectedOrder.id, 'cancelled')
+      if (!updated) {
+        localFallback()
+        return
+      }
+      const mergedOrders = toUniqueOrders([
+        updated,
+        ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+      ])
+      writeStoredOrders(mergedOrders)
+      setSelectedOrderId(updated.id)
+    } catch (error) {
+      console.error(error)
+      localFallback()
+      alert(trackingPage.cancelError || 'Không thể hủy đơn lúc này, đã lưu trạng thái hủy cục bộ.')
+    }
+  }
 
   return (
     <main className='order-tracking-page'>
@@ -276,11 +336,20 @@ const OrderTracking = () => {
               <span className='summary-label'>{summaryLabels.status}</span>
               <span
                 className={`status-pill ${
-                  selectedOrder.status === 'delivered' ? 'delivered' : 'in-transit'
+                  selectedOrder.status === 'delivered'
+                    ? 'delivered'
+                    : selectedOrder.status === 'cancelled'
+                      ? 'cancelled'
+                      : 'in-transit'
                 }`}
               >
-                {statusLabel}
+                {selectedOrder.status === 'cancelled' ? 'Cancelled' : statusLabel}
               </span>
+              {canCancel ? (
+                <button className='cancel-btn' onClick={handleCancel}>
+                  {trackingPage.cancelLabel || 'Hủy đơn'}
+                </button>
+              ) : null}
             </article>
             <article className='summary-card'>
               <span className='summary-label'>{summaryLabels.payment}</span>

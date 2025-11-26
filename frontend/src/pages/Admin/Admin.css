@@ -1,0 +1,30 @@
+.admin-page {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 24px;
+}
+
+.admin-page header h1 {
+  margin-bottom: 8px;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.admin-card {
+  background: #fff8f4;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.admin-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #f97316;
+  font-weight: 700;
+}

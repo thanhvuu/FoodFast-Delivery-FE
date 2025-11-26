@@ -1,37 +1,54 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import shadows from '../theme/shadows';
+import useOrders from '../hooks/useOrders';
+import type { CustomerHomeStackParamList } from '../navigation/types';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const ORDERS = [
-  {
-    id: 'FF-20240901',
-    date: '12/09/2024',
-    status: 'Hoàn thành',
-    statusColor: colors.success,
-    total: '185.000đ',
-    items: ['Bún bò Huế đặc biệt', 'Nước sâm bí đao'],
-  },
-  {
-    id: 'FF-20240817',
-    date: '28/08/2024',
-    status: 'Đang giao',
-    statusColor: colors.primary,
-    total: '132.000đ',
-    items: ['Cơm gà xối mỡ', 'Trà chanh mật ong'],
-  },
-  {
-    id: 'FF-20240802',
-    date: '05/08/2024',
-    status: 'Đã hủy',
-    statusColor: '#D62828',
-    total: '96.000đ',
-    items: ['Bánh mì đặc biệt', 'Cà phê sữa đá'],
-  },
-];
+const statusColor = (status?: string) => {
+  if (!status) return colors.muted;
+  if (status === 'delivered') return colors.success;
+  if (status === 'on-the-way' || status === 'preparing') return colors.primary;
+  if (status === 'pending') return colors.accent;
+  return colors.text;
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return 'Chưa rõ ngày';
+  const date = new Date(value);
+  if (!Number.isFinite(date.valueOf())) return 'Chưa rõ ngày';
+  return date.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+};
 
 const OrderHistoryScreen: React.FC = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<CustomerHomeStackParamList>>();
+  const { orders, reload, cancelOrder } = useOrders();
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload]),
+  );
+
+  if (!orders.length) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Đơn hàng</Text>
+          <Text style={styles.subtitle}>Bạn chưa có đơn nào. Hãy đặt món để theo dõi lịch sử.</Text>
+        </View>
+        <View style={styles.emptyState}>
+          <TouchableOpacity style={styles.trackButton} onPress={() => navigation.navigate('Home')} activeOpacity={0.9}>
+            <Text style={styles.trackButtonLabel}>Mua món ngay</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -39,24 +56,46 @@ const OrderHistoryScreen: React.FC = () => {
         <Text style={styles.subtitle}>Theo dõi và xem lại các đơn đã đặt</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        {ORDERS.map((order) => (
+        {orders.map((order) => {
+          const canCancel = order.status === 'pending';
+          return (
           <View key={order.id} style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.orderId}>{order.id}</Text>
-              <Text style={[styles.orderStatus, { color: order.statusColor }]}>{order.status}</Text>
+              <Text style={[styles.orderStatus, { color: statusColor(order.trackingStatus ?? order.status) }]}>
+                {order.trackingStatus ?? order.status}
+              </Text>
             </View>
-            <Text style={styles.metaText}>Ngày đặt: {order.date}</Text>
+            <Text style={styles.metaText}>Ngày đặt: {formatDate(order.placedAt)}</Text>
             <View style={styles.divider} />
             <View style={styles.itemList}>
               {order.items.map((item) => (
-                <Text key={item} style={styles.itemText}>
-                  • {item}
+                <Text key={`${order.id}-${item.productId}`} style={styles.itemText}>
+                  • {item.quantity}x {item.productId}
                 </Text>
               ))}
             </View>
-            <Text style={styles.totalLabel}>Tổng cộng: <Text style={styles.totalValue}>{order.total}</Text></Text>
+            <Text style={styles.totalLabel}>
+              Tổng cộng: <Text style={styles.totalValue}>{order.total.toLocaleString('vi-VN')}₫</Text>
+            </Text>
+            <TouchableOpacity
+              style={styles.trackButton}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('Tracking', { orderId: order.id })}
+            >
+              <Text style={styles.trackButtonLabel}>Theo dõi đơn này</Text>
+            </TouchableOpacity>
+            {canCancel ? (
+              <TouchableOpacity
+                style={[styles.trackButton, styles.cancelButton]}
+                activeOpacity={0.85}
+                onPress={() => cancelOrder(order.id)}
+              >
+                <Text style={[styles.trackButtonLabel, styles.cancelButtonLabel]}>Hủy đơn</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
-        ))}
+        )})}
         <Text style={styles.helperText}>
           Bạn có thể đặt lại món yêu thích từ danh sách này hoặc theo dõi đơn đang giao trong mục "Theo dõi đơn hàng".
         </Text>
@@ -97,6 +136,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     ...shadows.card,
   },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -133,6 +178,24 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     color: colors.primary,
+  },
+  trackButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  trackButtonLabel: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  cancelButton: {
+    backgroundColor: '#FFE8E6',
+    marginTop: spacing.sm,
+  },
+  cancelButtonLabel: {
+    color: '#D62828',
   },
   helperText: {
     color: colors.muted,
