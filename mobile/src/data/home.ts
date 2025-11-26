@@ -43,7 +43,7 @@ export const topRatedRestaurants: RestaurantShowcase[] = [
     tags: 'Bún riêu - Bún - Phở',
     priceInfo: 'Giảm 30%',
     highlight: 'Món chỉ từ 19k',
-    foodId: 'pasta',
+    foodId: 'banh-thuy',
   },
   {
     id: 'banh-cuon-phu-ly',
@@ -56,7 +56,7 @@ export const topRatedRestaurants: RestaurantShowcase[] = [
     tags: 'Đồ ăn gia đình',
     priceInfo: 'Giao chỉ 14k',
     highlight: 'Ưu đãi đồng giá',
-    foodId: 'salad',
+    foodId: 'banh-cuon-phu-ly',
   },
   {
     id: 'bonchon-chicken',
@@ -69,7 +69,7 @@ export const topRatedRestaurants: RestaurantShowcase[] = [
     tags: 'Gà rán - Mì Ý - Cơm',
     priceInfo: 'Món chỉ từ 19k',
     highlight: 'Khai trương giảm 40%',
-    foodId: 'chicken',
+    foodId: 'bonchon-chicken',
   },
 ];
 
@@ -85,7 +85,7 @@ export const newRestaurants: RestaurantShowcase[] = [
     tags: 'Ăn vặt - Đồ ăn nhanh',
     priceInfo: 'Giảm 15%',
     highlight: 'Giao cực nhanh',
-    foodId: 'taco',
+    foodId: 'banh-trang-kep',
   },
   {
     id: 'pho-ha-noi',
@@ -98,7 +98,7 @@ export const newRestaurants: RestaurantShowcase[] = [
     tags: 'Phở - Bún - Miến',
     priceInfo: 'Tặng topping',
     highlight: 'Chỉ từ 25k',
-    foodId: 'pizza',
+    foodId: 'pho-ha-noi',
   },
   {
     id: 'com-tam-sai-gon',
@@ -111,6 +111,6 @@ export const newRestaurants: RestaurantShowcase[] = [
     tags: 'Cơm - Sườn - Đặc sản',
     priceInfo: 'Freeship 3km',
     highlight: 'Suất lớn no bụng',
-    foodId: 'sushi',
+    foodId: 'com-tam-sai-gon',
   },
 ];
