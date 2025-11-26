@@ -10,6 +10,7 @@ import Footer from './components/Footer/Footer'
 import FoodDetail from './components/FoodDetail/FoodDetail'
 import OrderTracking from './pages/OrderTracking/OrderTracking'
 import SuperAdmin from './pages/SuperAdmin/SuperAdmin'
+import Admin from './pages/Admin/Admin'
 import './App.css'
 
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
         <Route path='/tracking' element={<OrderTracking />} />
         <Route path="/food/:id" element={<FoodDetail />} />
         <Route path='/super-admin' element={<SuperAdmin />} />
+        <Route path='/admin' element={<Admin />} />
       </Routes>
       {!isSuperAdminRoute && <Footer />}
     </div>

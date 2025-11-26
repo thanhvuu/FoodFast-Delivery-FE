@@ -2,6 +2,12 @@ import { userSegments } from '../../data/managementData'
 import './Users.css'
 
 function Users() {
+  const manualActions = [
+    { label: 'Thêm tài khoản mới', hint: 'Tạo nhanh user/staff/merchant', tone: 'primary' },
+    { label: 'Chỉnh sửa thông tin', hint: 'Cập nhật email/số điện thoại/địa chỉ', tone: 'ghost' },
+    { label: 'Khoá tài khoản', hint: 'Tạm khóa khi phát hiện bất thường', tone: 'danger' },
+  ]
+
   return (
     <div className="sa-page users-page">
       <section className="sa-section">
@@ -12,6 +18,17 @@ function Users() {
           </div>
           <button type="button" className="primary">Thêm chính sách</button>
         </header>
+        <div className="manual-actions">
+          {manualActions.map(action => (
+            <div key={action.label} className={`manual-chip ${action.tone}`}>
+              <div>
+                <strong>{action.label}</strong>
+                <small>{action.hint}</small>
+              </div>
+              <button type="button">Thực hiện</button>
+            </div>
+          ))}
+        </div>
         <div className="user-grid">
           {userSegments.map(segment => (
             <article key={segment.role} className="user-card">

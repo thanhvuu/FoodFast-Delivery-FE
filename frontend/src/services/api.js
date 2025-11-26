@@ -23,3 +23,14 @@ export const createOrder = async (payload) => {
   })
   return handleResponse(response)
 }
+
+export const updateOrderStatus = async (id, status) => {
+  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status, trackingStatus: status }),
+  })
+  return handleResponse(response)
+}

@@ -56,6 +56,15 @@ const AdminAccountScreen: React.FC = () => {
               <Text style={styles.settingButtonLabel}>Thiết lập</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.settingRow}>
+            <View>
+              <Text style={styles.settingLabel}>Khóa / mở khóa tài khoản</Text>
+              <Text style={styles.settingDescription}>Đóng băng tài khoản người dùng / cửa hàng khi có nghi vấn.</Text>
+            </View>
+            <TouchableOpacity style={[styles.settingButton, styles.dangerButton]} activeOpacity={0.85}>
+              <Text style={styles.settingButtonLabel}>Khoá nhanh</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.card}>
@@ -137,6 +146,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: 20,
+  },
+  dangerButton: {
+    backgroundColor: '#D62828',
   },
   settingButtonLabel: {
     color: '#fff',

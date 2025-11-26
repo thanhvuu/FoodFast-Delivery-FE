@@ -125,6 +125,27 @@
   color: #1d4ed8;
 }
 
+.status-pill.cancelled {
+  background: rgba(248, 113, 113, 0.15);
+  color: #b91c1c;
+}
+
+.cancel-btn {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #ef4444;
+  background: #fff5f5;
+  color: #b91c1c;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #ffe4e6;
+}
+
 .summary-progress {
   display: flex;
   flex-direction: column;

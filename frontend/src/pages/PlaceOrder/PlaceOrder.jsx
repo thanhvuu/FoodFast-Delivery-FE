@@ -117,7 +117,7 @@ const readStoredOrders = () => {
 const PlaceOrder = () => {
     const { cartItems, cartTotal, food_list, setCartItems } = useContext(StoreContext);
     const [deliveryMethod, setDeliveryMethod] = useState('drone');
-    const [paymentMethod, setPaymentMethod] = useState('atm');
+    const [paymentMethod, setPaymentMethod] = useState('online');
     const [orderPlaced, setOrderPlaced] = useState(false);
     const navigate = useNavigate();
 
@@ -247,7 +247,7 @@ const PlaceOrder = () => {
             estimatedArrival: selectedDeliveryOption.etaRange,
             estimatedMinutes: selectedDeliveryOption.estimatedMinutes,
             status: 'pending',
-            trackingStatus: 'inTransit',
+            trackingStatus: 'pending',
             paid: true,
             paymentMethod,
             route: generateRoute(deliveryMethod, createdAt, fullAddress),
@@ -269,7 +269,7 @@ const PlaceOrder = () => {
                 placedAt: createdAt.toISOString(),
                 address: fullAddress,
                 customer: newOrder.customer,
-                paymentMethod,
+                paymentMethod: 'online',
             });
         } catch (error) {
             console.error('Không thể lưu đơn hàng lên API', error);

@@ -19,24 +19,32 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const { products, reload } = useProducts();
   const allFood = useMemo(() => (products?.length ? products : allFoods), [products]);
   const tabNavigation = useNavigation<BottomTabNavigationProp<CustomerTabParamList>>();
+  const fallbackFood = allFoods[0] ?? featured[0] ?? popular[0];
   const selected = useMemo(() => {
     const params = route.params;
     if (params?.id) {
-      return allFood.find((item) => item.id === params.id) ?? allFood[0];
+      return allFood.find((item) => item.id === params.id) ?? allFood[0] ?? fallbackFood;
     }
     if (params?.category) {
       const normalized = normalizeCategory(params.category);
       const match = allFood.find((item) => normalizeCategory(item.category) === normalized);
       if (match) return match;
     }
-    return allFood[0];
-  }, [route.params?.id, route.params?.category, allFood]);
+    return allFood[0] ?? fallbackFood;
+  }, [route.params?.id, route.params?.category, allFood, fallbackFood]);
 
   const recommendations = useMemo(
     () => allFood.filter((item) => item.id !== selected.id).slice(0, 3),
     [selected.id],
   );
   const { addItem } = useCart();
+
+  const priceNumber = typeof selected.price === 'number' ? selected.price : Number(selected.price ?? 0);
+  const ratingNumber = typeof selected.rating === 'number' ? selected.rating : Number(selected.rating ?? 0);
+  const votesNumber = typeof selected.votes === 'number' ? selected.votes : Number(selected.votes ?? 0);
+  const ratingLabel = Number.isFinite(ratingNumber) ? ratingNumber.toFixed(1) : '0.0';
+  const votesLabel = Number.isFinite(votesNumber) ? votesNumber : 0;
+  const priceLabel = Number.isFinite(priceNumber) ? priceNumber.toLocaleString('vi-VN') : '0';
 
   const handleAddToCart = () => {
     addItem(selected);
@@ -63,12 +71,12 @@ const FoodDetailScreen: React.FC<Props> = ({ route, navigation }) => {
               <Text style={styles.title}>{selected.name}</Text>
             </View>
             <View style={styles.pricePill}>
-              <Text style={styles.price}>{selected.price.toLocaleString('vi-VN')}₫</Text>
+              <Text style={styles.price}>{priceLabel}₫</Text>
             </View>
           </View>
           <View style={styles.ratingRow}>
-            <Text style={styles.rating}>★ {selected.rating.toFixed(1)}</Text>
-            <Text style={styles.votes}>({selected.votes} đánh giá)</Text>
+            <Text style={styles.rating}>★ {ratingLabel}</Text>
+            <Text style={styles.votes}>({votesLabel} đánh giá)</Text>
           </View>
           <Text style={styles.description}>{selected.description}</Text>
           <View style={styles.metaBlock}>

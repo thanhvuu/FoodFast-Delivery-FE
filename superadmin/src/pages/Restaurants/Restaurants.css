@@ -58,3 +58,26 @@
   background: rgba(248, 113, 113, 0.2);
   color: #b91c1c;
 }
+
+.add-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.add-form input {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.add-form button {
+  background: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

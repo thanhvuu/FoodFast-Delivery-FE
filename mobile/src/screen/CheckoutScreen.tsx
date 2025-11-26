@@ -17,6 +17,7 @@ import colors from '../theme/colors';
 import spacing from '../theme/spacing';
 import { useCart } from '../context';
 import type { CartStackParamList, CustomerTabParamList } from '../navigation/types';
+import useOrders from '../hooks/useOrders';
 
 const DELIVERY_METHODS = [
   {
@@ -76,6 +77,8 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
   const { items, subtotal, clearCart } = useCart();
   const [form, setForm] = useState<CheckoutForm>(INITIAL_FORM);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethodKey>('drone');
+  const [paymentMethod] = useState<'online' | 'cod'>('online');
+  const { placeOrder, isPlacing, error: orderError } = useOrders();
 
   const deliveryFee = useMemo(() => calculateDeliveryFee(deliveryMethod, subtotal), [deliveryMethod, subtotal]);
   const total = useMemo(() => subtotal + deliveryFee, [subtotal, deliveryFee]);
@@ -84,7 +87,7 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!items.length) {
       Alert.alert('Giỏ hàng trống', 'Hãy chọn món trước khi đặt drone nhé.');
       return;
@@ -95,19 +98,39 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    const orderCode = `FF-${Math.floor(1000 + Math.random() * 9000)}`;
-    const summary = `Đơn ${orderCode}\nTổng thanh toán: ${total.toLocaleString('vi-VN')}₫`;
+    const order = await placeOrder({
+      cartItems: items,
+      subtotal,
+      deliveryFee,
+      total,
+      deliveryMethod,
+      // luôn thanh toán online như yêu cầu
+      // (paymentMethod lưu trong hook là 'online')
+      customer: {
+        name: form.fullName.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        note: form.note.trim(),
+      },
+    });
 
-    Alert.alert('Đặt drone thành công', summary, [
+    if (!order) {
+      Alert.alert('Đặt hàng thất bại', 'Vui lòng thử lại sau ít phút.');
+      return;
+    }
+
+    const summary = `Đơn ${order.id}\nTổng thanh toán: ${order.total.toLocaleString('vi-VN')}₫`;
+
+    Alert.alert('Đặt hàng thành công', summary, [
       {
-        text: 'Theo dõi lộ trình',
+        text: 'Theo dõi đơn',
         onPress: () => {
           clearCart();
-          navigation.navigate('Tracking');
+          navigation.navigate('Tracking', { orderId: order.id });
         },
       },
       {
-        text: 'Quay lại trang chủ',
+        text: 'Về trang chủ',
         style: 'cancel',
         onPress: () => {
           clearCart();
@@ -254,8 +277,16 @@ const CheckoutScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.summaryTotalLabel}>Tổng cộng</Text>
             <Text style={styles.summaryTotalValue}>{total.toLocaleString('vi-VN')}₫</Text>
           </View>
-          <TouchableOpacity style={styles.submitButton} onPress={handlePlaceOrder} activeOpacity={0.9}>
-            <Text style={styles.submitButtonLabel}>Đặt drone ngay</Text>
+          {orderError ? <Text style={styles.errorText}>{orderError}</Text> : null}
+          <TouchableOpacity
+            style={[styles.submitButton, isPlacing && styles.submitButtonDisabled]}
+            onPress={handlePlaceOrder}
+            activeOpacity={0.9}
+            disabled={isPlacing}
+          >
+            <Text style={styles.submitButtonLabel}>
+              {isPlacing ? 'Đang đặt...' : 'Đặt drone ngay'}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -466,12 +497,20 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.primary,
   },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
   submitButton: {
     marginTop: spacing.lg,
     backgroundColor: colors.primary,
     paddingVertical: spacing.md,
     borderRadius: 28,
     alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
   },
   submitButtonLabel: {
     color: '#fff',

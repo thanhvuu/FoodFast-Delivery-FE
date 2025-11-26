@@ -3,7 +3,7 @@ export type CustomerHomeStackParamList = {
   CategoryListing: { category: string } | undefined;
   FoodDetail: { id?: string; category?: string } | undefined;
   Contact: undefined;
-  Tracking: undefined;
+  Tracking: { orderId?: string } | undefined;
   Account: undefined;
   OrderHistory: undefined;
 };
@@ -11,17 +11,17 @@ export type CustomerHomeStackParamList = {
 export type CartStackParamList = {
   Cart: undefined;
   Checkout: undefined;
-  Tracking: undefined;
+  Tracking: { orderId?: string } | undefined;
 };
 
 export type OrdersStackParamList = {
   Orders: undefined;
-  Tracking: undefined;
+  Tracking: { orderId?: string } | undefined;
 };
 
 export type AccountStackParamList = {
   Account: undefined;
-  Tracking: undefined;
+  Tracking: { orderId?: string } | undefined;
   OrderHistory: undefined;
 };
 

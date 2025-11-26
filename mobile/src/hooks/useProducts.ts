@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FoodItem } from '../data/menu';
 import { featured, popular } from '../data/menu';
+import { getApiBaseUrl } from '../utils/api';
 
 const fallbackMenu = [...featured, ...popular];
-const DEFAULT_BASE_URL = 'http://localhost:4000';
-
-const getBaseUrl = () => process.env.EXPO_PUBLIC_API_BASE_URL ?? DEFAULT_BASE_URL;
 
 export type UseProductsResult = {
   products: FoodItem[];
@@ -18,7 +16,7 @@ export const useProducts = (): UseProductsResult => {
   const [products, setProducts] = useState<FoodItem[]>(fallbackMenu);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
-  const baseUrl = useMemo(getBaseUrl, []);
+  const baseUrl = useMemo(getApiBaseUrl, []);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);

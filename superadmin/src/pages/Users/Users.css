@@ -8,6 +8,47 @@
   gap: 20px;
 }
 
+.manual-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.manual-chip {
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.manual-chip.primary {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.manual-chip.danger {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.manual-chip button {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.manual-chip small {
+  color: #475569;
+}
+
 .user-card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 22px;
