@@ -1,4 +1,7 @@
 import * as FileSystem from 'expo-file-system';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const FALLBACK_KEY = 'foodfast-users-cache';
 
 export type StoredUserRecord = {
   id: string;
@@ -15,13 +18,11 @@ export type StoredUserRecord = {
 
 const DB_FILE_NAME = 'dbmb.json';
 
-const resolveDatabasePath = (): string => {
+const resolveDatabasePath = (): string | null => {
   const baseDirectory = FileSystem.documentDirectory ?? FileSystem.cacheDirectory;
-
   if (!baseDirectory) {
-    throw new Error('Không thể xác định vị trí lưu trữ dữ liệu người dùng');
+    return null;
   }
-
   return `${baseDirectory}${DB_FILE_NAME}`;
 };
 
@@ -37,6 +38,19 @@ const ensureDatabaseExists = async (path: string): Promise<void> => {
 
 export const readUsersFromFile = async (): Promise<StoredUserRecord[]> => {
   const path = resolveDatabasePath();
+  if (!path) {
+    // fallback AsyncStorage
+    const cached = await AsyncStorage.getItem(FALLBACK_KEY);
+    if (!cached) return [];
+    try {
+      const parsed = JSON.parse(cached);
+      return Array.isArray(parsed) ? (parsed as StoredUserRecord[]) : [];
+    } catch (error) {
+      console.warn('Không thể đọc dữ liệu người dùng (AsyncStorage)', error);
+      return [];
+    }
+  }
+
   await ensureDatabaseExists(path);
 
   try {
@@ -47,21 +61,36 @@ export const readUsersFromFile = async (): Promise<StoredUserRecord[]> => {
     const data = content ? JSON.parse(content) : [];
     return Array.isArray(data) ? (data as StoredUserRecord[]) : [];
   } catch (error) {
-    console.warn('Không thể đọc dữ liệu người dùng từ file', error);
-    return [];
+    console.warn('Không thể đọc dữ liệu người dùng từ file, fallback AsyncStorage', error);
+    const cached = await AsyncStorage.getItem(FALLBACK_KEY);
+    if (!cached) return [];
+    try {
+      const parsed = JSON.parse(cached);
+      return Array.isArray(parsed) ? (parsed as StoredUserRecord[]) : [];
+    } catch (err) {
+      return [];
+    }
   }
 };
 
 export const saveUsersToFile = async (users: StoredUserRecord[]): Promise<void> => {
+  const payload = JSON.stringify(users, null, 2);
   const path = resolveDatabasePath();
+
+  if (!path) {
+    await AsyncStorage.setItem(FALLBACK_KEY, payload);
+    return;
+  }
+
   await ensureDatabaseExists(path);
 
   try {
-    await FileSystem.writeAsStringAsync(path, JSON.stringify(users, null, 2), {
+    await FileSystem.writeAsStringAsync(path, payload, {
       encoding: FileSystem.EncodingType.UTF8,
     });
+    await AsyncStorage.setItem(FALLBACK_KEY, payload); // lưu song song để fallback
   } catch (error) {
-    console.warn('Không thể lưu dữ liệu người dùng vào file', error);
-    throw new Error('Không thể lưu dữ liệu người dùng');
+    console.warn('Không thể lưu dữ liệu người dùng vào file, lưu tạm AsyncStorage', error);
+    await AsyncStorage.setItem(FALLBACK_KEY, payload);
   }
 };

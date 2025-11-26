@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FoodItem } from '../data/menu';
-import { featured, popular } from '../data/menu';
+import { allFoods } from '../data/menu';
 import { getApiBaseUrl } from '../utils/api';
 
-const fallbackMenu = [...featured, ...popular];
+const fallbackMenu = allFoods;
 
 export type UseProductsResult = {
   products: FoodItem[];
