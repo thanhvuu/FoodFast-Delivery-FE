@@ -11,10 +11,12 @@ const List = ({ products = [], onDelete, onUpdate }) => {
     const enhancedProducts = useMemo(() => products.map(item => ({
         status: 'available',
         ...item,
+        productId: item._id ?? item.id,
     })), [products])
 
     // Xoá sản phẩm
     const handleDelete = (id) => {
+        if (!id) return
         if (window.confirm(t.confirmDelete)) {
             onDelete?.(id)
         }
@@ -59,7 +61,7 @@ const List = ({ products = [], onDelete, onUpdate }) => {
                 </thead>
                 <tbody>
                     {enhancedProducts.map(item => (
-                        <tr key={item._id}>
+                        <tr key={item.productId}>
                             <td>
                                 <img src={item.image} alt={item.name} className='prod-img' />
                             </td>
@@ -78,7 +80,7 @@ const List = ({ products = [], onDelete, onUpdate }) => {
                             </td>
                             <td>
                                 <button className="edit-btn" onClick={() => handleEdit(item)}>{t.edit}</button>
-                                <button className="delete-btn" onClick={() => handleDelete(item._id)}>{t.delete}</button>
+                                <button className="delete-btn" onClick={() => handleDelete(item.productId)}>{t.delete}</button>
                                 <button
                                     className="status-toggle-btn"
                                     onClick={() => handleToggleStatus(item)}
