@@ -12,6 +12,8 @@ import { Routes, Route } from 'react-router-dom'
 import { food_list } from './assets/assest'
 import { createProduct, fetchProducts } from './services/api'
 
+const getProductId = product => product?._id ?? product?.id ?? product?.productId
+
 const App = () => {
   // State quản lý toàn bộ sản phẩm
   const [products, setProducts] = useState(food_list)
@@ -35,7 +37,7 @@ const App = () => {
   const addProduct = async (product) => {
     try {
       const created = await createProduct(product)
-      setProducts([...products, created])
+      setProducts(prev => [...prev, created])
       return created
     } catch (error) {
       console.error('Không thể thêm sản phẩm', error)
@@ -44,13 +46,17 @@ const App = () => {
 
   // Hàm xoá cập nhật chung (nếu muốn truyền xuống List)
   const deleteProduct = (id) => {
-    setProducts(products.filter(item => item._id !== id))
+    if (!id) return
+    setProducts(prev => prev.filter(item => getProductId(item) !== id))
   }
 
   // Hàm cập nhật sản phẩm (edit)
   const updateProduct = (updatedProduct) => {
-    setProducts(products.map(item =>
-      item._id === updatedProduct._id ? updatedProduct : item
+    const updatedId = getProductId(updatedProduct)
+    if (!updatedId) return
+
+    setProducts(prev => prev.map(item =>
+      getProductId(item) === updatedId ? { ...item, ...updatedProduct } : item
     ))
   }
 
