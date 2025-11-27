@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiBaseUrl, safeNumber } from '../utils/api';
 import type { CartItem } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export type StoredOrder = {
   id: string;
-  items: Array<{ productId: string; quantity: number; price: number }>;
+  items: Array<{ productId: string; quantity: number; price: number; name?: string }>;
   subtotal: number;
   deliveryFee: number;
   total: number;
@@ -14,6 +15,7 @@ export type StoredOrder = {
   deliveryMethod: 'drone' | 'motorbike';
   customerName: string;
   customerPhone: string;
+  customerEmail?: string;
   address: string;
   note?: string;
   placedAt: string;
@@ -60,19 +62,53 @@ export const useOrders = () => {
   const [isPlacing, setIsPlacing] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const baseUrl = useMemo(getApiBaseUrl, []);
+  const { user } = useAuth();
+
+  const mergeOrders = useCallback((local: StoredOrder[], remote: StoredOrder[]) => {
+    const unique = new Map<string, StoredOrder>();
+    [...local, ...remote].forEach((order) => {
+      const normalized: StoredOrder = {
+        ...order,
+        trackingStatus: order?.trackingStatus ?? order?.status,
+        placedAt: order?.placedAt ?? (order as any)?.createdAt ?? order.placedAt,
+      };
+      if (normalized.id) {
+        unique.set(normalized.id, normalized);
+      }
+    });
+    return Array.from(unique.values());
+  }, []);
+
+  const fetchRemoteOrders = useCallback(async () => {
+    if (!user?.email) return [] as StoredOrder[];
+    const response = await fetch(
+      `${baseUrl}/orders?customerEmail=${encodeURIComponent(user.email)}`,
+    );
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || `API trả về mã ${response.status}`);
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) return [] as StoredOrder[];
+    return data as StoredOrder[];
+  }, [baseUrl, user?.email]);
 
   const reload = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await readStoredOrders();
-      setOrders(orderSort(data));
+      const [localOrders, remoteOrders] = await Promise.all([
+        readStoredOrders(),
+        fetchRemoteOrders(),
+      ]);
+      const merged = mergeOrders(localOrders, remoteOrders);
+      setOrders(orderSort(merged));
       setError(undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải đơn hàng');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchRemoteOrders, mergeOrders]);
 
   useEffect(() => {
     reload();
@@ -98,7 +134,8 @@ export const useOrders = () => {
             productId: item.id,
             quantity: safeNumber(item.quantity, 1),
             price: safeNumber(item.price, 0),
-          })),
+            name: item.name,
+          } as any)),
           subtotal: safeNumber(input.subtotal, 0),
           deliveryFee: safeNumber(input.deliveryFee, 0),
           total: safeNumber(input.total, 0),
@@ -107,19 +144,20 @@ export const useOrders = () => {
           deliveryMethod: input.deliveryMethod,
           customerName: input.customer.name,
           customerPhone: input.customer.phone,
+          customerEmail: user?.email,
           address: input.customer.address,
           note: input.customer.note,
           placedAt: new Date().toISOString(),
           estimatedArrival: input.deliveryMethod === 'drone' ? '15 - 20 phút' : '25 - 35 phút',
           paymentMethod: 'online',
-        };
+        } as StoredOrder;
 
         const response = await fetch(`${baseUrl}/orders`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, createdAt: payload.placedAt }),
         });
 
         if (!response.ok) {
@@ -131,8 +169,8 @@ export const useOrders = () => {
         const merged: StoredOrder = {
           ...payload,
           ...data,
-          id: data?.id ?? payload.id,
-          placedAt: data?.placedAt ?? payload.placedAt,
+          id: (data as StoredOrder)?.id ?? payload.id,
+          placedAt: (data as StoredOrder)?.placedAt ?? payload.placedAt,
         };
         await upsertOrder(merged);
         return merged;
@@ -144,7 +182,7 @@ export const useOrders = () => {
         setIsPlacing(false);
       }
     },
-    [baseUrl, upsertOrder],
+    [baseUrl, upsertOrder, user?.email],
   );
 
   const updateStatus = useCallback(

@@ -258,18 +258,30 @@ const PlaceOrder = () => {
         try {
             await createOrder({
                 userId: user?.id || 'guest',
+                code,
+                customer: newOrder.customer,
+                customerEmail: newOrder.customerEmail,
+                customerPhone: newOrder.customerPhone,
+                address: fullAddress,
                 items: newOrder.items.map((item) => ({
                     productId: item.id,
+                    name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                 })),
+                subtotal: cartTotal,
                 total: grandTotal,
                 deliveryFee,
                 status: 'pending',
+                trackingStatus: 'pending',
+                deliveryMethod,
+                estimatedArrival: newOrder.estimatedArrival,
+                estimatedMinutes: newOrder.estimatedMinutes,
+                paymentMethod,
+                paid: true,
+                route: newOrder.route,
                 placedAt: createdAt.toISOString(),
-                address: fullAddress,
-                customer: newOrder.customer,
-                paymentMethod: 'online',
+                createdAt: createdAt.toISOString(),
             });
         } catch (error) {
             console.error('Không thể lưu đơn hàng lên API', error);

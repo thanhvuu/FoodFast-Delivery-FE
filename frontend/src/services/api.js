@@ -24,6 +24,13 @@ export const createOrder = async (payload) => {
   return handleResponse(response)
 }
 
+export const fetchOrders = async (params = {}) => {
+  const searchParams = new URLSearchParams(params)
+  const query = searchParams.toString()
+  const response = await fetch(`${API_BASE_URL}/orders${query ? `?${query}` : ''}`)
+  return handleResponse(response)
+}
+
 export const updateOrderStatus = async (id, status) => {
   const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
     method: 'PATCH',
