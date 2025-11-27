@@ -572,6 +572,150 @@
       "address": "190 Cách mạng tháng tám, tna hoa, HCM",
       "customer": "vv",
       "paymentMethod": "online"
+    },
+    {
+      "id": "ff-1026",
+      "code": "FF-1026",
+      "userId": "3c99",
+      "customer": "Trần Tuấn Khanh",
+      "customerEmail": "vu191@gmail.com",
+      "customerPhone": "0825358779",
+      "address": "101 Nguyễn Công Trứ, Quận 1, TP.HCM",
+      "items": [
+        {
+          "productId": "pizza",
+          "name": "Pizza phô mai",
+          "quantity": 1,
+          "price": 89000
+        },
+        {
+          "productId": "chicken",
+          "name": "Gà rán",
+          "quantity": 1,
+          "price": 50000
+        }
+      ],
+      "subtotal": 139000,
+      "deliveryFee": 20000,
+      "total": 159000,
+      "status": "inTransit",
+      "trackingStatus": "inTransit",
+      "deliveryMethod": "drone",
+      "estimatedArrival": "10 - 15 phút",
+      "estimatedMinutes": 14,
+      "paid": true,
+      "paymentMethod": "online",
+      "route": [
+        {
+          "id": "pickup",
+          "title": "Nhận món tại nhà hàng",
+          "eta": "15:35",
+          "position": { "x": 10, "y": 70 },
+          "description": "Drone đã nhận đơn tại KFC Nguyễn Trãi và đang kiểm tra cảm biến.",
+          "coords": { "lat": 10.762622, "lng": 106.660172 }
+        },
+        {
+          "id": "takeoff",
+          "title": "Drone cất cánh",
+          "eta": "15:37",
+          "position": { "x": 25, "y": 55 },
+          "description": "Thiết bị bay rời bãi đáp và tăng độ cao lên 60m.",
+          "coords": { "lat": 10.764752, "lng": 106.670419 }
+        },
+        {
+          "id": "enroute",
+          "title": "Đang trên đường giao",
+          "eta": "15:42",
+          "position": { "x": 50, "y": 45 },
+          "description": "Drone đang di chuyển qua Quận 1 với vận tốc ổn định 40 km/h.",
+          "coords": { "lat": 10.770421, "lng": 106.68394 }
+        },
+        {
+          "id": "arriving",
+          "title": "Chuẩn bị hạ cánh",
+          "eta": "15:45",
+          "position": { "x": 75, "y": 40 },
+          "description": "Drone đang tiếp cận điểm giao và giảm tốc độ.",
+          "coords": { "lat": 10.776866, "lng": 106.688123 }
+        },
+        {
+          "id": "delivered",
+          "title": "Hoàn tất giao hàng",
+          "eta": "15:48",
+          "position": { "x": 88, "y": 65 },
+          "description": "Đơn hàng được giao thành công cho khách Trần Tuấn Khanh.",
+          "coords": { "lat": 10.780497, "lng": 106.700195 }
+        }
+      ],
+      "placedAt": "2025-11-26T15:30:00.000Z",
+      "createdAt": "2025-11-26T15:30:00.000Z"
+    },
+    {
+      "id": "ff-2042",
+      "code": "FF-2042",
+      "userId": "user-1",
+      "customer": "User One",
+      "customerEmail": "user1@gmail.com",
+      "customerPhone": "0909000900",
+      "address": "212 Lý Chính Thắng, Quận 3, TP.HCM",
+      "items": [
+        { "productId": "burger", "name": "Hamburger", "quantity": 1, "price": 45000 },
+        { "productId": "sushi", "name": "Sushi", "quantity": 1, "price": 129000 }
+      ],
+      "subtotal": 174000,
+      "deliveryFee": 15000,
+      "total": 189000,
+      "status": "preparing",
+      "trackingStatus": "awaitingPickup",
+      "deliveryMethod": "motorbike",
+      "estimatedArrival": "25 - 35 phút",
+      "estimatedMinutes": 28,
+      "paid": false,
+      "paymentMethod": "cod",
+      "route": [
+        {
+          "id": "restaurant",
+          "title": "Tài xế nhận đơn",
+          "eta": "09:10",
+          "position": { "x": 12, "y": 65 },
+          "description": "Shipper đang chờ lấy món tại bếp.",
+          "coords": { "lat": 10.777708, "lng": 106.69992 }
+        },
+        {
+          "id": "pickup",
+          "title": "Rời nhà hàng",
+          "eta": "09:15",
+          "position": { "x": 32, "y": 52 },
+          "description": "Đơn được cất vào túi giữ nhiệt, chuẩn bị di chuyển.",
+          "coords": { "lat": 10.78421, "lng": 106.70325 }
+        },
+        {
+          "id": "bridge",
+          "title": "Đang trên đường giao",
+          "eta": "09:25",
+          "position": { "x": 58, "y": 45 },
+          "description": "Shipper chạy qua cầu Ông Lãnh, tránh khu vực đông xe.",
+          "coords": { "lat": 10.77025, "lng": 106.70172 }
+        },
+        {
+          "id": "arriving",
+          "title": "Sắp tới nơi",
+          "eta": "09:32",
+          "position": { "x": 78, "y": 48 },
+          "description": "Tài xế đang gọi cho khách để xác nhận toà nhà.",
+          "coords": { "lat": 10.76781, "lng": 106.70395 }
+        },
+        {
+          "id": "delivered",
+          "title": "Hoàn tất giao",
+          "eta": "09:35",
+          "position": { "x": 90, "y": 62 },
+          "description": "Đơn giao thành công, chờ khách xác nhận thanh toán COD.",
+          "coords": { "lat": 10.76522, "lng": 106.70488 }
+        }
+      ],
+      "placedAt": "2025-11-26T09:00:00.000Z",
+      "createdAt": "2025-11-26T09:00:00.000Z"
     }
   ],
   "users": [

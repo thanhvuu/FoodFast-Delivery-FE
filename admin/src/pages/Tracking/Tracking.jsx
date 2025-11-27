@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import './Tracking.css'
 import { order_list } from '../../assets/assest'
+import { fetchOrders } from '../../services/api'
 import { useAdminLanguage } from '../../context/LanguageContext'
 import OrsDeliveryMap from './OrsDeliveryMap'
 import 'leaflet/dist/leaflet.css'
@@ -14,12 +15,45 @@ const byRecency = (a, b) => {
     return parseDate(b?.createdAt) - parseDate(a?.createdAt)
 }
 
+const normalizeOrder = order => ({
+    ...order,
+    status: order?.status ?? order?.trackingStatus ?? 'new',
+    trackingStatus: order?.trackingStatus ?? order?.status ?? 'new',
+    createdAt: order?.createdAt ?? order?.placedAt,
+    route: Array.isArray(order?.route) ? order.route : [],
+    code: order?.code ?? order?.id,
+    deliveryMethod: order?.deliveryMethod ?? 'drone',
+})
+
+const mergeOrders = (base, dynamic) => {
+    const unique = new Map()
+    base.forEach(order => unique.set(order.id, order))
+    dynamic.forEach(order => unique.set(order.id, order))
+    return Array.from(unique.values()).sort(byRecency)
+}
+
 const Tracking = () => {
     const { dictionary } = useAdminLanguage()
     const t = dictionary.trackingPage
 
-    const orders = useMemo(() => [...order_list].sort(byRecency), [])
+    const [orders, setOrders] = useState(() => order_list.map(normalizeOrder).sort(byRecency))
     const [selectedOrderId, setSelectedOrderId] = useState(() => orders[0]?.id ?? '')
+
+    useEffect(() => {
+        const loadOrders = async () => {
+            try {
+                const apiOrders = await fetchOrders()
+                const normalized = Array.isArray(apiOrders)
+                    ? apiOrders.map(normalizeOrder)
+                    : []
+                setOrders(prev => mergeOrders(prev, normalized))
+            } catch (error) {
+                console.error('Không thể tải đơn hàng cho admin tracking', error)
+            }
+        }
+
+        loadOrders()
+    }, [])
 
     useEffect(() => {
         if (!orders.length) return

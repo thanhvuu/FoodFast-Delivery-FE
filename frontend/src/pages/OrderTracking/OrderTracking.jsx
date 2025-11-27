@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import './OrderTracking.css'
 import { useLanguage } from '../../Context/LanguageContext'
 import OrsDeliveryMap from './OrsDeliveryMap'
-import { updateOrderStatus } from '../../services/api'
+import { fetchOrders, updateOrderStatus } from '../../services/api'
 
 const ORDERS_STORAGE_KEY = 'foodfast-orders'
 
@@ -55,6 +55,8 @@ const OrderTracking = () => {
   const { trackingPage } = dictionary
 
   const [storedOrders, setStoredOrders] = useState(() => readStoredOrders())
+  const [apiOrders, setApiOrders] = useState([])
+  const [isLoadingApi, setIsLoadingApi] = useState(false)
 
   const [user, setUser] = useState(() => {
     if (typeof window === 'undefined') return null
@@ -111,10 +113,51 @@ const OrderTracking = () => {
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    const loadOrders = async () => {
+      if (!user?.email) {
+        setApiOrders([])
+        return
+      }
+      setIsLoadingApi(true)
+      try {
+        const result = await fetchOrders({ customerEmail: user.email })
+        if (!cancelled) {
+          setApiOrders(Array.isArray(result) ? result : [])
+        }
+      } catch (error) {
+        console.error('Không thể tải đơn hàng từ API', error)
+        if (!cancelled) {
+          setApiOrders([])
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingApi(false)
+        }
+      }
+    }
+
+    loadOrders()
+    return () => {
+      cancelled = true
+    }
+  }, [user?.email])
+
+  const normalizeOrder = order => ({
+    ...order,
+    trackingStatus: order?.trackingStatus ?? order?.status,
+    createdAt: order?.createdAt ?? order?.placedAt,
+  })
+
   const allOrders = useMemo(() => {
-    const merged = toUniqueOrders([...trackingPage.orders, ...storedOrders])
+    const merged = toUniqueOrders([
+      ...trackingPage.orders.map(normalizeOrder),
+      ...storedOrders.map(normalizeOrder),
+      ...apiOrders.map(normalizeOrder),
+    ])
     return merged.sort(byRecency)
-  }, [storedOrders, trackingPage.orders])
+  }, [apiOrders, storedOrders, trackingPage.orders])
 
   const availableOrders = useMemo(() => {
     if (!user?.email) return []
@@ -374,11 +417,14 @@ const OrderTracking = () => {
             ) : (
               availableOrders.map(order => (
                 <option key={order.id} value={order.id}>
-                  {order.code} — {order.customer}
+                  {(order.code ?? order.id)?.toUpperCase()} — {order.customer}
                 </option>
               ))
             )}
           </select>
+          {isLoadingApi ? (
+            <small className='summary-muted'>Đang đồng bộ đơn hàng theo tài khoản của bạn...</small>
+          ) : null}
         </div>
       </section>
 
