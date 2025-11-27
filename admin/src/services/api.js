@@ -13,6 +13,13 @@ export const fetchProducts = async () => {
   return handleResponse(response)
 }
 
+export const deleteProduct = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    method: 'DELETE',
+  })
+  return handleResponse(response)
+}
+
 export const createProduct = async (payload) => {
   const response = await fetch(`${API_BASE_URL}/products`, {
     method: 'POST',

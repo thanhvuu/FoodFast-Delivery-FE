@@ -15,10 +15,10 @@ const List = ({ products = [], onDelete, onUpdate }) => {
     })), [products])
 
     // Xoá sản phẩm
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (!id) return
         if (window.confirm(t.confirmDelete)) {
-            onDelete?.(id)
+            await onDelete?.(id)
         }
     }
 
