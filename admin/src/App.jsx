@@ -10,7 +10,7 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
 import { food_list } from './assets/assest'
-import { createProduct, fetchProducts } from './services/api'
+import { createProduct, deleteProduct as deleteProductApi, fetchProducts } from './services/api'
 
 const getProductId = product => product?._id ?? product?.id ?? product?.productId
 
@@ -45,9 +45,15 @@ const App = () => {
   }
 
   // Hàm xoá cập nhật chung (nếu muốn truyền xuống List)
-  const deleteProduct = (id) => {
+  const deleteProduct = async (id) => {
     if (!id) return
-    setProducts(prev => prev.filter(item => getProductId(item) !== id))
+    try {
+      await deleteProductApi(id)
+      setProducts(prev => prev.filter(item => getProductId(item) !== id))
+    } catch (error) {
+      console.error('Không thể xoá sản phẩm', error)
+      alert('Không thể xoá sản phẩm. Vui lòng thử lại.')
+    }
   }
 
   // Hàm cập nhật sản phẩm (edit)
