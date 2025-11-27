@@ -4,17 +4,13 @@ import { allFoods } from '../data/menu';
 import { getApiBaseUrl } from '../utils/api';
 
 const fallbackMenu = allFoods;
+const fallbackById = new Map(fallbackMenu.map((item) => [item.id, item]));
 
-const mergeProducts = (remote: FoodItem[]): FoodItem[] => {
-  const map = new Map<string, FoodItem>();
-  remote.forEach((item) => map.set(item.id, item));
-  fallbackMenu.forEach((item) => {
-    if (!map.has(item.id)) {
-      map.set(item.id, item);
-    }
+const mergeWithFallback = (remote: FoodItem[]): FoodItem[] =>
+  remote.map((item) => {
+    const backup = fallbackById.get(item.id);
+    return backup ? { ...backup, ...item } : item;
   });
-  return Array.from(map.values());
-};
 
 export type UseProductsResult = {
   products: FoodItem[];
@@ -24,7 +20,7 @@ export type UseProductsResult = {
 };
 
 export const useProducts = (): UseProductsResult => {
-  const [products, setProducts] = useState<FoodItem[]>(fallbackMenu);
+  const [products, setProducts] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const baseUrl = useMemo(getApiBaseUrl, []);
@@ -38,12 +34,13 @@ export const useProducts = (): UseProductsResult => {
         throw new Error(`API trả về mã ${response.status}`);
       }
       const data: FoodItem[] = await response.json();
-      if (Array.isArray(data) && data.length) {
-        setProducts(mergeProducts(data));
+      if (Array.isArray(data)) {
+        setProducts(data.length ? mergeWithFallback(data) : []);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Không thể tải dữ liệu sản phẩm';
       setError(message);
+      setProducts(fallbackMenu);
     } finally {
       setIsLoading(false);
     }
