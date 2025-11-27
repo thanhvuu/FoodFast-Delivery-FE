@@ -17,6 +17,7 @@ const CategoryScreen: React.FC<
 > = ({ route, navigation }) => {
   const initialCategory = route.params?.category ?? discoveryFilters[0];
   const [activeCategory, setActiveCategory] = React.useState(initialCategory);
+  const [priceSort, setPriceSort] = React.useState<'none' | 'asc' | 'desc'>('none');
   const { products } = useProducts();
   const menu = React.useMemo(() => (products?.length ? products : allFoods), [products]);
 
@@ -30,6 +31,24 @@ const CategoryScreen: React.FC<
     const normalized = normalizeCategory(activeCategory);
     return menu.filter((item) => normalizeCategory(item.category) === normalized);
   }, [activeCategory, menu]);
+
+  const sortedFoods = React.useMemo(() => {
+    const items = [...filteredFoods];
+
+    if (priceSort === 'asc') {
+      return items.sort((a, b) => a.price - b.price);
+    }
+
+    if (priceSort === 'desc') {
+      return items.sort((a, b) => b.price - a.price);
+    }
+
+    return items;
+  }, [filteredFoods, priceSort]);
+
+  const handleSelectSort = (value: 'asc' | 'desc') => {
+    setPriceSort((current) => (current === value ? 'none' : value));
+  };
 
   return (
     <ScreenContainer>
@@ -46,11 +65,27 @@ const CategoryScreen: React.FC<
           ))}
         </ScrollView>
 
+        <View style={styles.sortRow}>
+          <Text style={styles.sortLabel}>Sắp xếp giá</Text>
+          <View style={styles.sortButtons}>
+            <TagPill
+              label="Tăng dần"
+              isActive={priceSort === 'asc'}
+              onPress={() => handleSelectSort('asc')}
+            />
+            <TagPill
+              label="Giảm dần"
+              isActive={priceSort === 'desc'}
+              onPress={() => handleSelectSort('desc')}
+            />
+          </View>
+        </View>
+
         <View style={styles.listWrapper}>
-          {filteredFoods.length === 0 ? (
+          {sortedFoods.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có món nào trong danh mục này.</Text>
           ) : (
-            filteredFoods.map((item) => (
+            sortedFoods.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>
                 <FoodCard
                   item={item}
@@ -74,6 +109,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
     marginTop: spacing.sm,
+  },
+  sortRow: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sortLabel: {
+    fontWeight: '700',
+    color: colors.text,
+    marginRight: spacing.sm,
+  },
+  sortButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   listWrapper: {
     paddingHorizontal: spacing.lg,

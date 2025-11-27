@@ -1,9 +1,37 @@
 .food-display {
   margin-top: 30px;
 }
+.food-display__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 .food-display h2 {
   font-size: max(2vw, 24px);
   font-weight: 600;
+}
+.food-display__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #555;
+}
+
+.food-display__sort select {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.food-display__sort select:focus {
+  outline: 2px solid #ff6347;
+  outline-offset: 1px;
 }
 .food-display-list{
     display: grid;

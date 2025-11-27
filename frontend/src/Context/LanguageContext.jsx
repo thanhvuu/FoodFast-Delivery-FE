@@ -47,6 +47,12 @@ const translationData = {
     },
     foodDisplay: {
       title: 'Những món ăn gần bạn',
+      sort: {
+        label: 'Sắp xếp theo',
+        default: 'Mặc định',
+        lowToHigh: 'Giá thấp đến cao',
+        highToLow: 'Giá cao đến thấp',
+      },
     },
     footer: {
       description:
@@ -330,6 +336,12 @@ const translationData = {
     },
     foodDisplay: {
       title: 'Popular dishes near you',
+      sort: {
+        label: 'Sort by',
+        default: 'Default',
+        lowToHigh: 'Price: Low to High',
+        highToLow: 'Price: High to Low',
+      },
     },
     footer: {
       description:
