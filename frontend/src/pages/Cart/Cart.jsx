@@ -7,7 +7,7 @@ import { useLanguage } from '../../Context/LanguageContext'
 const Cart = () => {
   const { cartItems, food_list, addToCart, removeFromCart, setCartItems, cartTotal } = useContext(StoreContext)
   const { dictionary } = useLanguage()
-  const { cart: cartText, common, foodItems } = dictionary
+  const { cart: cartText, common = {}, foodItems = {} } = dictionary
 
   const formatCurrency = useMemo(
     () =>
