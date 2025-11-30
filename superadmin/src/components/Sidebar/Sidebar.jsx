@@ -6,6 +6,7 @@ const navItems = [
   { id: 'restaurants', label: 'Quản lý nhà hàng', icon: '🍽️', description: 'Duyệt / khoá' },
   { id: 'orders', label: 'Quản lý đơn hàng', icon: '📦', description: 'Theo dõi & can thiệp' },
   { id: 'operations', label: 'Vận hành & Ưu đãi', icon: '🛵', description: 'Phí ship, mã giảm, khu vực' },
+  { id: 'tracking', label: 'Theo dõi drone', icon: '🚁', description: 'Lộ trình giao & cảnh báo' },
 ]
 
 function Sidebar({ activeView, onSelect }) {

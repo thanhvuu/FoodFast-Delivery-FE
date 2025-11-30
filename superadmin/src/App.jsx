@@ -6,6 +6,7 @@ import Users from './pages/Users/Users'
 import Restaurants from './pages/Restaurants/Restaurants'
 import Orders from './pages/Orders/Orders'
 import Operations from './pages/Operations/Operations'
+import Tracking from './pages/Tracking/Tracking'
 import './App.css'
 
 const viewComponents = {
@@ -14,6 +15,7 @@ const viewComponents = {
   restaurants: Restaurants,
   orders: Orders,
   operations: Operations,
+  tracking: Tracking,
 }
 
 function App() {

@@ -9,7 +9,6 @@ const NAV_ITEMS = [
     { key: 'list', to: '/list', icon: '📋' },
     { key: 'orders', to: '/orders', icon: '📦' },
     { key: 'restaurant', to: '/restaurant', icon: '🍽️' },
-    { key: 'tracking', to: '/tracking', icon: '🛩️' },
 ]
 
 const Sidebar = () => {

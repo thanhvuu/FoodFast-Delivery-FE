@@ -5,7 +5,6 @@ import Navbar from './component/navbar/Navbar'
 import Add from './pages/Add/Add'
 import List from './pages/List/List'
 import Orders from './pages/Orders/Orders'
-import Tracking from './pages/Tracking/Tracking'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
@@ -93,7 +92,6 @@ const App = () => {
             />
             <Route path="/orders" element={<Orders />} />
             <Route path="/restaurant" element={<Restaurant />} />
-            <Route path="/tracking" element={<Tracking />} />
           </Routes>
         </main>
       </div>
