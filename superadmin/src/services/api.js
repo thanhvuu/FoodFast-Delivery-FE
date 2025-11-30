@@ -45,6 +45,15 @@ export const updateUser = async (id, payload) => {
   return handleResponse(response)
 }
 
+export const changeUserPassword = async (id, password) => {
+  const response = await fetch(`${API_BASE_URL}/users/${id}/password`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  return handleResponse(response)
+}
+
 export const deleteUser = async (id) => {
   const response = await fetch(`${API_BASE_URL}/users/${id}`, {
     method: 'DELETE',
