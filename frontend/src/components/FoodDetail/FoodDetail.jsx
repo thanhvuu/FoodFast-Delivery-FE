@@ -18,15 +18,6 @@ const FoodDetail = () => {
         setTimeout(() => setShowAddedMsg(false), 1600);
     };
 
-    const food = food_list.find(item => item._id === id)
-    if (!food) return <p>Not found</p>
-
-    const translations = dictionary.foodItems[id] || {}
-    const displayName = translations.name || food.name
-    const displayDescription = translations.description || food.description
-    const restaurant = food.restaurant || { name: 'Tên quán mẫu', address: 'Địa chỉ mẫu 123' }
-    const estimatedTime = food.estimatedTime || '25 - 35 phút'
-
     const priceFormatter = useMemo(() =>
         new Intl.NumberFormat(dictionary.common.currencyLocale, {
             style: 'currency',
@@ -36,10 +27,22 @@ const FoodDetail = () => {
         [dictionary.common.currencyLocale]
     )
 
+    const food = food_list.find(item => item._id === id)
+
+    const translations = dictionary.foodItems[id] || {}
+    const displayName = translations.name || food?.name
+    const displayDescription = translations.description || food?.description
+    const restaurant = food?.restaurant || { name: 'Tên quán mẫu', address: 'Địa chỉ mẫu 123' }
+    const estimatedTime = food?.estimatedTime || '25 - 35 phút'
+
     const similarItems = useMemo(() =>
-        food_list.filter(item => item.category === food.category && item._id !== food._id).slice(0, 3),
-        [food_list, food]
+        food_list
+            .filter(item => item.category === food?.category && item._id !== food?._id)
+            .slice(0, 3),
+        [food_list, food?.category, food?._id]
     )
+
+    if (!food) return <p>Not found</p>
 
     return (
         <div className="food-detail-page">

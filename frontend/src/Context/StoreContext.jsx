@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useMemo, useState } from 'react'
 import { food_list as fallbackFoodList, resolveFoodImage } from '../assets/assets'
 import { fetchProducts } from '../services/api'

@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { readFileSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { resolve } from 'node:path'
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const DB_PATH = resolve(__dirname, 'db.json')
 
 const createUsersMiddleware = (logError) => {
