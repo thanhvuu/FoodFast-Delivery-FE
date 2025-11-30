@@ -9,7 +9,8 @@ export type FoodItem = {
   description: string;
 };
 
-export const normalizeCategory = (value: string) => {
+export const normalizeCategory = (value?: string) => {
+  if (!value) return ''
   const key = value.toLowerCase()
   if (['đồ ăn nhanh', 'món chính', 'fast food', 'món mexico'].includes(key)) return 'Fast Food'
   if (['đồ ăn vặt', 'ăn vặt', 'snack', 'ăn kèm'].includes(key)) return 'Đồ ăn vặt'

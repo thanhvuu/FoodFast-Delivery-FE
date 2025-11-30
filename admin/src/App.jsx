@@ -12,7 +12,7 @@ import { Routes, Route } from 'react-router-dom'
 import { food_list } from './assets/assest'
 import { createProduct, deleteProduct as deleteProductApi, fetchProducts, updateProduct as updateProductApi } from './services/api'
 
-const getProductId = product => product?._id ?? product?.id ?? product?.productId
+const getProductId = product => product?.id ?? product?.productId ?? product?._id
 
 const App = () => {
   // State quản lý toàn bộ sản phẩm

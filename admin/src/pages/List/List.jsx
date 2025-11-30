@@ -11,7 +11,7 @@ const List = ({ products = [], onDelete, onUpdate }) => {
     const enhancedProducts = useMemo(() => products.map(item => ({
         status: 'available',
         ...item,
-        productId: item._id ?? item.id,
+       productId: item.id ?? item.productId ?? item._id,
     })), [products])
 
     // Xoá sản phẩm

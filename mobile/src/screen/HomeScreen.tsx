@@ -33,7 +33,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = React.useState<string | undefined>(undefined);
 
   const handleSeeAll = () => {
-    navigation.navigate('Tracking');
+    navigation.navigate('CategoryListing');
   };
 
   const handlePressRestaurant = (item: RestaurantShowcase) => {
