@@ -10,7 +10,7 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
 import { food_list } from './assets/assest'
-import { createProduct, deleteProduct as deleteProductApi, fetchProducts } from './services/api'
+import { createProduct, deleteProduct as deleteProductApi, fetchProducts, updateProduct as updateProductApi } from './services/api'
 
 const getProductId = product => product?._id ?? product?.id ?? product?.productId
 
@@ -61,9 +61,20 @@ const App = () => {
     const updatedId = getProductId(updatedProduct)
     if (!updatedId) return
 
-    setProducts(prev => prev.map(item =>
-      getProductId(item) === updatedId ? { ...item, ...updatedProduct } : item
-    ))
+    updateProductApi(updatedId, updatedProduct)
+      .then(response => {
+        const mergedProduct = response && typeof response === 'object'
+          ? { ...updatedProduct, ...response }
+          : updatedProduct
+
+        setProducts(prev => prev.map(item =>
+          getProductId(item) === updatedId ? { ...item, ...mergedProduct } : item
+        ))
+      })
+      .catch(error => {
+        console.error('Không thể cập nhật sản phẩm', error)
+        alert('Không thể cập nhật sản phẩm. Vui lòng thử lại.')
+      })
   }
 
   return (
