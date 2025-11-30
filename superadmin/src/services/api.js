@@ -28,3 +28,26 @@ export const fetchRestaurants = async () => {
   const response = await fetch(`${API_BASE_URL}/restaurants`)
   return handleResponse(response)
 }
+
+export const fetchUsers = async (params = {}) => {
+  const searchParams = new URLSearchParams(params)
+  const query = searchParams.toString()
+  const response = await fetch(`${API_BASE_URL}/users${query ? `?${query}` : ''}`)
+  return handleResponse(response)
+}
+
+export const updateUser = async (id, payload) => {
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  return handleResponse(response)
+}
+
+export const deleteUser = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: 'DELETE',
+  })
+  return handleResponse(response)
+}

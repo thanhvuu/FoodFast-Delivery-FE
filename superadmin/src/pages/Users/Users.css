@@ -2,102 +2,261 @@
   align-items: center;
 }
 
-.user-grid {
+.users-page header .hint {
+  display: block;
+  color: #b93815;
+  margin-top: 6px;
+}
+
+.sync-badge {
+  background: linear-gradient(135deg, #fff1eb, #ffe0d2);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 120, 60, 0.3);
+  text-align: right;
+  min-width: 160px;
+}
+
+.sync-badge span {
+  display: inline-block;
+  font-weight: 700;
+  color: #c2410c;
+}
+
+.sync-badge span.live::after {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 6px;
+  background: #22c55e;
+  border-radius: 999px;
+  box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.22);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.segment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.manual-actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
-.manual-chip {
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  border-radius: 12px;
-  padding: 12px;
+.segment-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(255, 120, 60, 0.14);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.segment-card header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
 }
 
-.manual-chip.primary {
-  border-color: #2563eb;
-  background: rgba(37, 99, 235, 0.05);
-}
-
-.manual-chip.danger {
-  border-color: #dc2626;
-  background: rgba(220, 38, 38, 0.06);
-}
-
-.manual-chip button {
-  border: none;
-  background: #2563eb;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
+.segment-card span {
+  color: #c2410c;
   font-weight: 700;
 }
 
-.manual-chip small {
+.segment-card p {
+  margin: 0;
   color: #475569;
 }
 
-.user-card {
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 22px;
-  padding: 20px;
+.segment-actions {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: inset 0 0 0 1px rgba(255, 120, 60, 0.16);
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.user-card header {
+.segment-actions button {
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 120, 60, 0.2);
+  background: rgba(255, 120, 60, 0.12);
+  color: #b93815;
+  font-weight: 700;
+}
+
+.user-management {
+  display: grid;
+  grid-template-columns: minmax(520px, 1fr) 340px;
+  gap: 14px;
+  align-items: start;
+}
+
+.user-filters {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.user-filters input,
+.user-filters select {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.user-table {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.user-table header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.user-card h3 {
-  margin: 0;
-  color: #7a3417;
+.user-table .total-count {
+  background: rgba(249, 115, 22, 0.12);
+  color: #c2410c;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 700;
 }
 
-.user-card span {
-  font-size: 13px;
-  color: #ff5a1f;
-  font-weight: 600;
+.table-head,
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
 }
 
-.user-card p {
-  margin: 0;
-  color: rgba(122, 52, 23, 0.75);
+.table-head {
+  margin: 10px 0 8px;
+  color: #475569;
+  font-weight: 700;
 }
 
-.user-actions {
+.table-body {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.user-actions button {
-  flex: 1 1 auto;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 120, 60, 0.24);
-  background: rgba(255, 120, 60, 0.12);
-  color: #ff5a1f;
-  font-weight: 600;
+.table-row {
+  background: #fff7ed;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
   cursor: pointer;
 }
 
-.user-actions button:hover {
-  background: rgba(255, 120, 60, 0.2);
+.table-row.active {
+  border-color: #c2410c;
+  box-shadow: 0 0 0 4px rgba(255, 120, 60, 0.18);
+}
+
+.table-row strong { color: #0f172a; }
+.table-row small { color: #475569; display: block; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.status {
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.status.active { background: #ecfdf3; color: #15803d; }
+.status.locked { background: #fee2e2; color: #b91c1c; }
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.row-actions button {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.row-actions button.danger {
+  border-color: rgba(185, 28, 28, 0.2);
+  color: #b91c1c;
+}
+
+.user-editor {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-editor header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.user-editor input,
+.user-editor select {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #f8fafc;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  .user-management { grid-template-columns: 1fr; }
+  .input-grid { grid-template-columns: 1fr; }
+  .table-head, .table-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .row-actions { flex-wrap: wrap; }
 }

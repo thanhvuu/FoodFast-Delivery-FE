@@ -1,0 +1,522 @@
+[
+  {
+    "id": "order-1",
+    "userId": "customer-1",
+    "items": [
+      {
+        "productId": "chicken",
+        "quantity": 2
+      },
+      {
+        "productId": "pizza",
+        "quantity": 1
+      }
+    ],
+    "status": "completed",
+    "total": 189000,
+    "placedAt": "2024-07-01T09:15:00Z",
+    "trackingStatus": "completed"
+  },
+  {
+    "id": "order-2",
+    "userId": "customer-2",
+    "items": [
+      {
+        "productId": "sushi",
+        "quantity": 1
+      }
+    ],
+    "status": "completed",
+    "total": 129000,
+    "placedAt": "2024-07-02T12:30:00Z"
+  },
+  {
+    "id": "31e1",
+    "userId": 1761173325934,
+    "items": [
+      {
+        "productId": "prod-1763971185415",
+        "quantity": 1,
+        "price": 40000
+      }
+    ],
+    "total": 85000,
+    "deliveryFee": 45000,
+    "status": "preparing",
+    "placedAt": "2025-11-24T08:00:22.247Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "Trần Tuấn Khanh",
+    "paymentMethod": "atm",
+    "trackingStatus": "inTransit"
+  },
+  {
+    "id": "88fa",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "total": 134000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T12:51:36.928Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "Trần Tuấn Khanh",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "a0b1",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "fried-shrimp",
+        "quantity": 1,
+        "price": 59000
+      },
+      {
+        "productId": "chicken",
+        "quantity": 1,
+        "price": 50000
+      },
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "total": 233000,
+    "deliveryFee": 35000,
+    "status": "pending",
+    "placedAt": "2025-11-26T13:47:13.524Z",
+    "address": "280 Tân kỳ tân quý, quận tân phú, hcm",
+    "customer": "ádf",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "7d27",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "burger",
+        "quantity": 1,
+        "price": 45000
+      }
+    ],
+    "total": 90000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T14:02:38.730Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "Trần Tuấn Khanh",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "aaac",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      },
+      {
+        "productId": "chicken",
+        "quantity": 1,
+        "price": 50000
+      }
+    ],
+    "total": 184000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T14:09:27.049Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "kkk",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "3266",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "sushi",
+        "quantity": 1,
+        "price": 129000
+      },
+      {
+        "productId": "dessert",
+        "quantity": 1,
+        "price": 45000
+      }
+    ],
+    "total": 209000,
+    "deliveryFee": 35000,
+    "status": "pending",
+    "placedAt": "2025-11-26T14:16:18.735Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "kkk",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "0054",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "total": 134000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T14:17:20.251Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "kkk",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "06eb",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "total": 134000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T14:22:40.152Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "kkk",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "order-1764169097197",
+    "items": [
+      {
+        "productId": "chicken",
+        "quantity": 1,
+        "price": 50000
+      },
+      {
+        "productId": "burger",
+        "quantity": 1,
+        "price": 45000
+      }
+    ],
+    "subtotal": 95000,
+    "deliveryFee": 45000,
+    "total": 140000,
+    "status": "cancelled",
+    "trackingStatus": "cancelled",
+    "deliveryMethod": "drone",
+    "customerName": "khanhcrs",
+    "customerPhone": "13265",
+    "address": "22",
+    "note": "10",
+    "placedAt": "2025-11-26T14:58:17.197Z",
+    "estimatedArrival": "15 - 20 phút",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "order-1764169220762",
+    "items": [
+      {
+        "productId": "burger",
+        "quantity": 1,
+        "price": 45000
+      }
+    ],
+    "subtotal": 45000,
+    "deliveryFee": 45000,
+    "total": 90000,
+    "status": "cancelled",
+    "trackingStatus": "cancelled",
+    "deliveryMethod": "drone",
+    "customerName": "Trần Tuấn",
+    "customerPhone": "0825358779",
+    "address": "123 Cách Mạng Tháng Tám phường Tân Hòa",
+    "note": "10h",
+    "placedAt": "2025-11-26T15:00:20.762Z",
+    "estimatedArrival": "15 - 20 phút",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "order-1764169765221",
+    "items": [
+      {
+        "productId": "banh-thuy",
+        "quantity": 1,
+        "price": 19000
+      }
+    ],
+    "subtotal": 19000,
+    "deliveryFee": 45000,
+    "total": 64000,
+    "status": "completed",
+    "trackingStatus": "completed",
+    "deliveryMethod": "drone",
+    "customerName": "nàynoj",
+    "customerPhone": "968",
+    "address": "2 Pasteur Quận 3",
+    "note": "10",
+    "placedAt": "2025-11-26T15:09:25.222Z",
+    "estimatedArrival": "15 - 20 phút",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "3619",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "pizza",
+        "quantity": 1,
+        "price": 89000
+      }
+    ],
+    "total": 134000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T16:02:41.601Z",
+    "address": "190 Cách mạng tháng tám, tnaa hoa, HCM",
+    "customer": "kkk",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "1d8e",
+    "userId": "3c99",
+    "items": [
+      {
+        "productId": "sushi",
+        "quantity": 1,
+        "price": 129000
+      }
+    ],
+    "total": 174000,
+    "deliveryFee": 45000,
+    "status": "pending",
+    "placedAt": "2025-11-26T16:25:12.308Z",
+    "address": "190 Cách mạng tháng tám, tna hoa, HCM",
+    "customer": "vv",
+    "paymentMethod": "online"
+  },
+  {
+    "id": "ff-1026",
+    "code": "FF-1026",
+    "userId": "3c99",
+    "customer": "Trần Tuấn Khanh",
+    "customerEmail": "vu191@gmail.com",
+    "customerPhone": "0825358779",
+    "address": "101 Nguyễn Công Trứ, Quận 1, TP.HCM",
+    "items": [
+      {
+        "productId": "pizza",
+        "name": "Pizza phô mai",
+        "quantity": 1,
+        "price": 89000
+      },
+      {
+        "productId": "chicken",
+        "name": "Gà rán",
+        "quantity": 1,
+        "price": 50000
+      }
+    ],
+    "subtotal": 139000,
+    "deliveryFee": 20000,
+    "total": 159000,
+    "status": "cancelled",
+    "trackingStatus": "cancelled",
+    "deliveryMethod": "drone",
+    "estimatedArrival": "10 - 15 phút",
+    "estimatedMinutes": 14,
+    "paid": true,
+    "paymentMethod": "online",
+    "route": [
+      {
+        "id": "pickup",
+        "title": "Nhận món tại nhà hàng",
+        "eta": "15:35",
+        "position": {
+          "x": 10,
+          "y": 70
+        },
+        "description": "Drone đã nhận đơn tại KFC Nguyễn Trãi và đang kiểm tra cảm biến.",
+        "coords": {
+          "lat": 10.762622,
+          "lng": 106.660172
+        }
+      },
+      {
+        "id": "takeoff",
+        "title": "Drone cất cánh",
+        "eta": "15:37",
+        "position": {
+          "x": 25,
+          "y": 55
+        },
+        "description": "Thiết bị bay rời bãi đáp và tăng độ cao lên 60m.",
+        "coords": {
+          "lat": 10.764752,
+          "lng": 106.670419
+        }
+      },
+      {
+        "id": "enroute",
+        "title": "Đang trên đường giao",
+        "eta": "15:42",
+        "position": {
+          "x": 50,
+          "y": 45
+        },
+        "description": "Drone đang di chuyển qua Quận 1 với vận tốc ổn định 40 km/h.",
+        "coords": {
+          "lat": 10.770421,
+          "lng": 106.68394
+        }
+      },
+      {
+        "id": "arriving",
+        "title": "Chuẩn bị hạ cánh",
+        "eta": "15:45",
+        "position": {
+          "x": 75,
+          "y": 40
+        },
+        "description": "Drone đang tiếp cận điểm giao và giảm tốc độ.",
+        "coords": {
+          "lat": 10.776866,
+          "lng": 106.688123
+        }
+      },
+      {
+        "id": "delivered",
+        "title": "Hoàn tất giao hàng",
+        "eta": "15:48",
+        "position": {
+          "x": 88,
+          "y": 65
+        },
+        "description": "Đơn hàng được giao thành công cho khách Trần Tuấn Khanh.",
+        "coords": {
+          "lat": 10.780497,
+          "lng": 106.700195
+        }
+      }
+    ],
+    "placedAt": "2025-11-26T15:30:00.000Z",
+    "createdAt": "2025-11-26T15:30:00.000Z"
+  },
+  {
+    "id": "ff-2042",
+    "code": "FF-2042",
+    "userId": "user-1",
+    "customer": "User One",
+    "customerEmail": "user1@gmail.com",
+    "customerPhone": "0909000900",
+    "address": "212 Lý Chính Thắng, Quận 3, TP.HCM",
+    "items": [
+      {
+        "productId": "burger",
+        "name": "Hamburger",
+        "quantity": 1,
+        "price": 45000
+      },
+      {
+        "productId": "sushi",
+        "name": "Sushi",
+        "quantity": 1,
+        "price": 129000
+      }
+    ],
+    "subtotal": 174000,
+    "deliveryFee": 15000,
+    "total": 189000,
+    "status": "preparing",
+    "trackingStatus": "awaitingPickup",
+    "deliveryMethod": "motorbike",
+    "estimatedArrival": "25 - 35 phút",
+    "estimatedMinutes": 28,
+    "paid": false,
+    "paymentMethod": "cod",
+    "route": [
+      {
+        "id": "restaurant",
+        "title": "Tài xế nhận đơn",
+        "eta": "09:10",
+        "position": {
+          "x": 12,
+          "y": 65
+        },
+        "description": "Shipper đang chờ lấy món tại bếp.",
+        "coords": {
+          "lat": 10.777708,
+          "lng": 106.69992
+        }
+      },
+      {
+        "id": "pickup",
+        "title": "Rời nhà hàng",
+        "eta": "09:15",
+        "position": {
+          "x": 32,
+          "y": 52
+        },
+        "description": "Đơn được cất vào túi giữ nhiệt, chuẩn bị di chuyển.",
+        "coords": {
+          "lat": 10.78421,
+          "lng": 106.70325
+        }
+      },
+      {
+        "id": "bridge",
+        "title": "Đang trên đường giao",
+        "eta": "09:25",
+        "position": {
+          "x": 58,
+          "y": 45
+        },
+        "description": "Shipper chạy qua cầu Ông Lãnh, tránh khu vực đông xe.",
+        "coords": {
+          "lat": 10.77025,
+          "lng": 106.70172
+        }
+      },
+      {
+        "id": "arriving",
+        "title": "Sắp tới nơi",
+        "eta": "09:32",
+        "position": {
+          "x": 78,
+          "y": 48
+        },
+        "description": "Tài xế đang gọi cho khách để xác nhận toà nhà.",
+        "coords": {
+          "lat": 10.76781,
+          "lng": 106.70395
+        }
+      },
+      {
+        "id": "delivered",
+        "title": "Hoàn tất giao",
+        "eta": "09:35",
+        "position": {
+          "x": 90,
+          "y": 62
+        },
+        "description": "Đơn giao thành công, chờ khách xác nhận thanh toán COD.",
+        "coords": {
+          "lat": 10.76522,
+          "lng": 106.70488
+        }
+      }
+    ],
+    "placedAt": "2025-11-26T09:00:00.000Z",
+    "createdAt": "2025-11-26T09:00:00.000Z"
+  }
+]
