@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { seedUsers, userSegments } from '../../data/userData'
-import { deleteUser as deleteUserApi, fetchUsers as fetchUsersApi, updateUser as updateUserApi } from '../../services/api'
+import {
+  changeUserPassword as changeUserPasswordApi,
+  deleteUser as deleteUserApi,
+  fetchUsers as fetchUsersApi,
+  updateUser as updateUserApi,
+} from '../../services/api'
 import './Users.css'
 
 const normalizeUser = (user) => ({
@@ -29,6 +34,8 @@ function Users() {
   const [selectedUserId, setSelectedUserId] = useState(seedUsers[0]?.id ?? '')
   const [syncing, setSyncing] = useState(false)
   const [message, setMessage] = useState('')
+  const [passwordForm, setPasswordForm] = useState({ password: '', confirm: '' })
+  const [actionLoading, setActionLoading] = useState('')
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -75,12 +82,21 @@ function Users() {
   }, [filters.platform, filters.role, filters.search, users])
 
   const segmentStats = useMemo(() => {
-    const base = { Khách hàng: 0, Shipper: 0, Merchant: 0 }
+    const base = { 'Khách hàng': 0, Shipper: 0, Merchant: 0 }
     users.forEach((user) => {
       const role = user.role in base ? user.role : 'Khách hàng'
       base[role] += 1
     })
     return base
+  }, [users])
+
+  const accessStats = useMemo(() => {
+    const total = users.length
+    const locked = users.filter((user) => user.status === 'locked').length
+    const active = total - locked
+    const frontend = users.filter((user) => user.platform === 'Frontend').length
+    const mobile = users.filter((user) => user.platform === 'Mobile').length
+    return { total, active, locked, frontend, mobile }
   }, [users])
 
   const handleSelect = (id) => {
@@ -95,12 +111,15 @@ function Users() {
   const handleSave = async () => {
     if (!selectedUser) return
     setMessage('')
+    setActionLoading('save')
     try {
       await updateUserApi(selectedUser.id, selectedUser)
       setMessage('Đã đồng bộ thông tin tài khoản thành công.')
     } catch (error) {
       console.error('Không thể cập nhật user', error)
       setMessage('Không thể đồng bộ lên máy chủ, đã lưu tại giao diện.')
+    } finally {
+      setActionLoading('')
     }
   }
 
@@ -108,29 +127,62 @@ function Users() {
     const nextStatus = user.status === 'locked' ? 'active' : 'locked'
     setUsers((prev) => prev.map((item) => (item.id === user.id ? { ...item, status: nextStatus } : item)))
     setMessage('Đang đồng bộ trạng thái khoá tài khoản…')
+    setActionLoading(`lock-${user.id}`)
     try {
       await updateUserApi(user.id, { status: nextStatus })
       setMessage('Đã cập nhật trạng thái khoá/mở tài khoản.')
     } catch (error) {
       console.error('Không thể cập nhật trạng thái user', error)
       setMessage('Không thể đồng bộ trạng thái, vui lòng thử lại.')
+    } finally {
+      setActionLoading('')
     }
   }
 
   const handleDelete = async (user) => {
     if (!user) return
+    if (!window.confirm('Xoá tài khoản này? Người dùng sẽ không thể đăng nhập frontend hoặc mobile.')) return
     setUsers((prev) => prev.filter((item) => item.id !== user.id))
     setMessage('Đang xoá tài khoản…')
+    setActionLoading(`delete-${user.id}`)
     try {
       await deleteUserApi(user.id)
       setMessage('Tài khoản đã bị xoá khỏi hệ thống.')
     } catch (error) {
       console.error('Không thể xoá user', error)
       setMessage('Không thể xoá khỏi máy chủ, đã xoá tạm tại giao diện.')
+    } finally {
+      setActionLoading('')
+    }
+  }
+
+  const handlePasswordSubmit = async () => {
+    if (!editingUser) return
+    if (!passwordForm.password || passwordForm.password !== passwordForm.confirm) {
+      setMessage('Mật khẩu không hợp lệ: cần nhập và trùng khớp xác nhận.')
+      return
+    }
+
+    setMessage('Đang đổi mật khẩu đăng nhập…')
+    setActionLoading(`password-${editingUser.id}`)
+
+    try {
+      await changeUserPasswordApi(editingUser.id, passwordForm.password)
+      setMessage('Đã cập nhật mật khẩu, tài khoản có thể đăng nhập với mật khẩu mới.')
+      setPasswordForm({ password: '', confirm: '' })
+    } catch (error) {
+      console.error('Không thể đổi mật khẩu user', error)
+      setMessage('Không thể đổi mật khẩu trên máy chủ, vui lòng thử lại.')
+    } finally {
+      setActionLoading('')
     }
   }
 
   const editingUser = selectedUser ?? filteredUsers[0]
+
+  useEffect(() => {
+    setPasswordForm({ password: '', confirm: '' })
+  }, [selectedUserId])
 
   return (
     <div className="sa-page users-page">
@@ -138,7 +190,7 @@ function Users() {
         <header>
           <div>
             <h2>Quản lý người dùng</h2>
-            <p>Kiểm soát quyền truy cập, trạng thái xác minh và hành động xử lý nhanh cho frontend & mobile.</p>
+            <p>Kiểm soát tài khoản đăng nhập trên frontend & mobile, khoá/xoá sẽ ngăn đăng nhập lập tức.</p>
             {message && <small className="hint">{message}</small>}
           </div>
           <div className="sync-badge">
@@ -146,6 +198,37 @@ function Users() {
             <small>{syncing ? 'Đang kết nối' : 'Dữ liệu cập nhật'}</small>
           </div>
         </header>
+
+        <div className="access-grid">
+          <article className="access-card">
+            <header>
+              <div>
+                <p className="eyebrow">Trạng thái đăng nhập</p>
+                <h3>{accessStats.active} đang hoạt động</h3>
+              </div>
+              <span className="pill success">{accessStats.locked} đã khoá</span>
+            </header>
+            <p>Các tài khoản khoá hoặc bị xoá sẽ không thể đăng nhập trên cả web frontend và app mobile.</p>
+            <div className="platform-stats">
+              <span className="pill neutral">{accessStats.frontend} Frontend</span>
+              <span className="pill neutral">{accessStats.mobile} Mobile</span>
+            </div>
+          </article>
+          <article className="access-card policies">
+            <header>
+              <div>
+                <p className="eyebrow">Chính sách bảo mật</p>
+                <h3>Bảo vệ đăng nhập</h3>
+              </div>
+              <span className="pill warning">Đổi mật khẩu tại đây</span>
+            </header>
+            <ul>
+              <li>Khoá login: chặn đăng nhập ngay lập tức trên web + app.</li>
+              <li>Xoá tài khoản: vô hiệu hoá hoàn toàn, không thể phục hồi đăng nhập.</li>
+              <li>Đổi mật khẩu: áp dụng cho cả frontend và mobile, yêu cầu nhập lại khi đăng nhập.</li>
+            </ul>
+          </article>
+        </div>
 
         <div className="segment-grid">
           {userSegments.map((segment) => (
@@ -195,15 +278,15 @@ function Users() {
             <header>
               <div>
                 <h3>Danh sách tài khoản</h3>
-                <small>Được đồng bộ hai chiều cho giao diện web và ứng dụng.</small>
+                <small>Khoá/Xoá sẽ ngăn đăng nhập ngay trên frontend & mobile.</small>
               </div>
               <span className="total-count">{filteredUsers.length} user</span>
             </header>
             <div className="table-head">
-              <span>User</span>
+              <span>Tài khoản</span>
               <span>Liên hệ</span>
               <span>Nền tảng</span>
-              <span>Trạng thái</span>
+              <span>Đăng nhập</span>
               <span>Hành động</span>
             </div>
             <div className="table-body">
@@ -233,12 +316,26 @@ function Users() {
                       </span>
                       <small>{user.verified ? 'Đã xác minh' : 'Chưa xác minh'}</small>
                     </div>
-                    <div className="row-actions" onClick={(event) => event.stopPropagation()}>
-                      <button type="button" className="ghost" onClick={() => handleSelect(user.id)}>Sửa</button>
-                      <button type="button" className="ghost" onClick={() => handleToggleLock(user)}>
-                        {isLocked ? 'Mở khoá' : 'Khoá'}
+                  <div className="row-actions" onClick={(event) => event.stopPropagation()}>
+                      <button type="button" className="ghost" onClick={() => handleSelect(user.id)}>
+                        Sửa
                       </button>
-                      <button type="button" className="danger" onClick={() => handleDelete(user)}>Xoá</button>
+                      <button
+                        type="button"
+                        className="ghost"
+                        disabled={actionLoading === `lock-${user.id}`}
+                        onClick={() => handleToggleLock(user)}
+                      >
+                        {isLocked ? 'Mở khoá' : 'Khoá login'}
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        disabled={actionLoading === `delete-${user.id}`}
+                        onClick={() => handleDelete(user)}
+                      >
+                        Xoá vĩnh viễn
+                      </button>
                     </div>
                   </div>
                 )
@@ -311,10 +408,63 @@ function Users() {
                 Đã xác minh email/CMND
               </label>
               <div className="editor-actions">
-                <button type="button" className="ghost" onClick={() => handleToggleLock(editingUser)}>
+                <button
+                  type="button"
+                  className="ghost"
+                  disabled={actionLoading === `lock-${editingUser.id}`}
+                  onClick={() => handleToggleLock(editingUser)}
+                >
                   {editingUser.status === 'locked' ? 'Mở khoá đăng nhập' : 'Khoá đăng nhập'}
                 </button>
-                <button type="button" className="primary" onClick={handleSave}>Lưu & đồng bộ</button>
+                <button
+                  type="button"
+                  className="primary"
+                  disabled={actionLoading === 'save'}
+                  onClick={handleSave}
+                >
+                  Lưu & đồng bộ
+                </button>
+              </div>
+
+              <div className="password-card">
+                <header>
+                  <div>
+                    <p className="eyebrow">Đổi mật khẩu</p>
+                    <strong>Mật khẩu mới áp dụng cho frontend & mobile</strong>
+                  </div>
+                  <span className="pill warning">Bảo vệ đăng nhập</span>
+                </header>
+                <div className="input-grid">
+                  <label>
+                    Mật khẩu mới
+                    <input
+                      type="password"
+                      value={passwordForm.password}
+                      placeholder="Tối thiểu 8 ký tự"
+                      onChange={(event) => setPasswordForm((prev) => ({ ...prev, password: event.target.value }))}
+                    />
+                  </label>
+                  <label>
+                    Nhập lại
+                    <input
+                      type="password"
+                      value={passwordForm.confirm}
+                      placeholder="Nhập lại để xác nhận"
+                      onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirm: event.target.value }))}
+                    />
+                  </label>
+                </div>
+                <div className="editor-actions">
+                  <small>Khuyến nghị thay đổi định kỳ, mật khẩu cũ sẽ hết hiệu lực ngay.</small>
+                  <button
+                    type="button"
+                    className="primary"
+                    disabled={actionLoading === `password-${editingUser.id}`}
+                    onClick={handlePasswordSubmit}
+                  >
+                    Cập nhật mật khẩu
+                  </button>
+                </div>
               </div>
             </aside>
           ) : null}
