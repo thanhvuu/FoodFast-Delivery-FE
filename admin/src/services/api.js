@@ -31,6 +31,17 @@ export const createProduct = async (payload) => {
   return handleResponse(response)
 }
 
+export const updateProduct = async (id, payload) => {
+  const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  return handleResponse(response)
+}
+
 export const fetchOrders = async () => {
   const response = await fetch(`${API_BASE_URL}/orders?_sort=placedAt&_order=desc`)
   return handleResponse(response)

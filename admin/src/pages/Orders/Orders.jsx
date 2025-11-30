@@ -1,34 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { order_list } from '../../assets/assest'
+import React, { useEffect, useState } from 'react'
 import { fetchOrders, updateOrder } from '../../services/api'
 import './Orders.css'
 import { useAdminLanguage } from '../../context/LanguageContext'
 
-const ORDERS_STORAGE_KEY = 'foodfast-orders'
-const ORDER_STATUS_FLOW = ['new', 'preparing', 'completed']
-
-const readStoredOrders = () => {
-    if (typeof window === 'undefined') return []
-    try {
-        const data = window.localStorage.getItem(ORDERS_STORAGE_KEY)
-        if (!data) return []
-        const parsed = JSON.parse(data)
-        return Array.isArray(parsed) ? parsed : []
-    } catch (error) {
-        console.error(error)
-        return []
-    }
-}
-
-const fetchApiOrders = async () => {
-    try {
-        const apiOrders = await fetchOrders()
-        return Array.isArray(apiOrders) ? apiOrders : []
-    } catch (error) {
-        console.error('Không thể tải danh sách đơn từ API', error)
-        return []
-    }
-}
+const ORDER_STATUS_FLOW = ['pending', 'preparing', 'completed']
 
 const digitsOnly = (value) => {
     if (typeof value === 'number' && Number.isFinite(value)) {
@@ -55,12 +30,9 @@ const nextFallbackId = () => {
 
 const normaliseStatus = (status) => {
     if (!status) return ORDER_STATUS_FLOW[0]
-    if (ORDER_STATUS_FLOW.includes(status)) {
-        return status
-    }
-    if (status === 'complete' || status === 'conplete') return 'completed'
-    if (status === 'delivered') return 'completed'
-    if (status === 'pending' || status === 'new_order') return 'new'
+    if (ORDER_STATUS_FLOW.includes(status)) return status
+    if (status === 'new' || status === 'new_order') return 'pending'
+    if (status === 'complete' || status === 'delivered') return 'completed'
     if (status === 'in_progress') return 'preparing'
     return ORDER_STATUS_FLOW[0]
 }
@@ -70,23 +42,16 @@ const transformOrder = (order) => {
     const status = normaliseStatus(order?.adminStatus ?? order?.status)
     return {
         id: order?.id ?? nextFallbackId(),
-        customer: order?.customer ?? 'Khách hàng',
-        address: order?.address ?? '',
+        customer: order?.customer ?? order?.customerName ?? 'Khách hàng',
+        address: order?.address ?? order?.customerAddress ?? '',
         status,
-        trackingStatus: order?.trackingStatus,
+        trackingStatus: order?.trackingStatus ?? status,
         paid: Boolean(order?.paid),
         deliveryFee: digitsOnly(order?.deliveryFee),
         total: digitsOnly(order?.total),
         items,
-        createdAt: order?.createdAt ?? null,
+        createdAt: order?.createdAt ?? order?.placedAt ?? null,
     }
-}
-
-const mergeOrders = (baseOrders, dynamicOrders) => {
-    const unique = new Map()
-    baseOrders.forEach(order => unique.set(order.id, order))
-    dynamicOrders.forEach(order => unique.set(order.id, order))
-    return Array.from(unique.values())
 }
 
 const calculateOrderTotal = (order) => {
@@ -108,90 +73,66 @@ const Orders = () => {
     const { dictionary, formatCurrency } = useAdminLanguage()
     const t = dictionary.ordersPage
 
-    const staticOrders = useMemo(() => order_list.map(transformOrder), [])
-    const loadOrders = async () => {
-        const [storedOrders, apiOrders] = await Promise.all([
-            Promise.resolve(readStoredOrders()),
-            fetchApiOrders(),
-        ])
-        const normalisedApiOrders = apiOrders.map(transformOrder)
-        const normalisedStored = storedOrders.map(transformOrder)
-        return mergeOrders(staticOrders, mergeOrders(normalisedStored, normalisedApiOrders))
-    }
+    const [orders, setOrders] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
 
-    const [orders, setOrders] = useState(staticOrders)
+    const loadOrders = async () => {
+        setIsLoading(true)
+        try {
+            const apiOrders = await fetchOrders({ _sort: 'placedAt', _order: 'desc' })
+            const normalised = Array.isArray(apiOrders) ? apiOrders.map(transformOrder) : []
+            setOrders(normalised)
+        } catch (error) {
+            console.error('Không thể tải danh sách đơn từ API', error)
+            setOrders([])
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     useEffect(() => {
-        const syncOrders = async () => {
-            const merged = await loadOrders()
-            setOrders(merged)
-        }
-        syncOrders()
-        window.addEventListener('storage', syncOrders)
-        window.addEventListener('foodfast-orders-update', syncOrders)
-        return () => {
-            window.removeEventListener('storage', syncOrders)
-            window.removeEventListener('foodfast-orders-update', syncOrders)
-        }
-    }, [staticOrders])
+        loadOrders()
+    }, [])
 
-    const updateStoredOrder = (id, updater) => {
-        const existing = readStoredOrders()
-        const index = existing.findIndex(order => order.id === id)
-        if (index === -1) return
-        const current = existing[index]
-        const changes = typeof updater === 'function' ? updater(current) : updater
-        existing[index] = { ...current, ...changes }
-        window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(existing))
-        window.dispatchEvent(new CustomEvent('foodfast-orders-update'))
+    const handleAdvanceStatus = async (id) => {
+        const currentOrder = orders.find(order => order.id === id)
+        if (!currentOrder) return
+        const nextStatus = getNextStatus(currentOrder.status)
+        if (!nextStatus) return
+
+        const optimisticOrder = { ...currentOrder, status: nextStatus, trackingStatus: nextStatus }
+        setOrders(prev => prev.map(order => order.id === id ? optimisticOrder : order))
+
+        try {
+            const response = await updateOrder(id, {
+                status: nextStatus,
+                trackingStatus: nextStatus,
+            })
+            const merged = transformOrder({ ...currentOrder, ...response, status: response?.status ?? nextStatus, trackingStatus: response?.trackingStatus ?? nextStatus })
+            setOrders(prev => prev.map(order => order.id === id ? merged : order))
+        } catch (error) {
+            console.error('Không thể cập nhật đơn hàng', error)
+            alert('Không thể cập nhật đơn hàng. Vui lòng thử lại.')
+            setOrders(prev => prev.map(order => order.id === id ? currentOrder : order))
+        }
     }
 
-    const handleAdvanceStatus = (id) => {
-        setOrders(prev => {
-            const updated = prev.map(order => {
-                if (order.id !== id) return order
-                const nextStatus = getNextStatus(order.status)
-                if (!nextStatus) {
-                    return order
-                }
-                const isCompletedStep = nextStatus === 'completed'
-                const persistedStatus = isCompletedStep ? 'complete' : nextStatus
-                const nextTrackingStatus = isCompletedStep ? 'delivered' : 'inTransit'
-                updateStoredOrder(id, current => ({
-                    adminStatus: persistedStatus,
-                    status: persistedStatus,
-                    trackingStatus: nextTrackingStatus ?? current.trackingStatus,
-                }))
-                updateOrder(id, {
-                    status: persistedStatus,
-                    trackingStatus: nextTrackingStatus,
-                }).catch(error => console.error('Không thể cập nhật đơn hàng', error))
-                return {
-                    ...order,
-                    status: nextStatus,
-                    trackingStatus: nextTrackingStatus,
-                }
-            })
+    const handleTogglePaid = async (id) => {
+        const currentOrder = orders.find(order => order.id === id)
+        if (!currentOrder) return
+        const nextPaid = !currentOrder.paid
 
-            return updated
-        })
-    }
+        setOrders(prev => prev.map(order => order.id === id ? { ...order, paid: nextPaid } : order))
 
-    const handleTogglePaid = (id) => {
-        setOrders(prev => {
-            let nextPaid = null
-            const updated = prev.map(order => {
-                if (order.id !== id) return order
-                nextPaid = !order.paid
-                return { ...order, paid: nextPaid }
-            })
-
-            if (nextPaid !== null) {
-                updateStoredOrder(id, { paid: nextPaid })
-            }
-
-            return updated
-        })
+        try {
+            const response = await updateOrder(id, { paid: nextPaid })
+            const merged = transformOrder({ ...currentOrder, ...response, paid: response?.paid ?? nextPaid })
+            setOrders(prev => prev.map(order => order.id === id ? merged : order))
+        } catch (error) {
+            console.error('Không thể cập nhật thanh toán', error)
+            alert('Không thể cập nhật thanh toán. Vui lòng thử lại.')
+            setOrders(prev => prev.map(order => order.id === id ? currentOrder : order))
+        }
     }
 
     return (
@@ -210,45 +151,55 @@ const Orders = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.map(order => (
-                        <tr key={order.id}>
-                            <td>{order.customer}</td>
-                            <td style={{ minWidth: '160px' }}>
-                                {order.items.map((it, idx) => (
-                                    <div key={idx} style={{ marginBottom: 5 }}>
-                                        <span style={{ fontWeight: 500 }}>{it.name}</span>
-                                        {" "}x{it.quantity}
-                                        <span style={{ color: '#888', marginLeft: 2, fontSize: 15 }}>
-                                            ({formatCurrency(it.price * it.quantity)})
-                                        </span>
-                                    </div>
-                                ))}
-                            </td>
-                            <td>{order.address}</td>
-                            <td>
-                                <span className={`badge ${order.status === 'completed' ? 'badge-completed' : order.status === 'preparing' ? 'badge-preparing' : 'badge-new'}`}>
-                                    {t.statuses[order.status] ?? order.status}
-                                </span>
-                            </td>
-                            <td>
-                                <span className={order.paid ? 'badge badge-paid' : 'badge badge-unpaid'}>
-                                    {order.paid ? t.payment.paid : t.payment.unpaid}
-                                </span>
-                            </td>
-                            <td>
-                                {formatCurrency(calculateOrderTotal(order))}
-                            </td>
-                            <td>
-                                <button
-                                    onClick={() => handleAdvanceStatus(order.id)}
-                                    disabled={!getNextStatus(order.status)}
-                                >
-                                    {t.buttons.advanceStatus?.[order.status] ?? t.buttons.advanceFallback}
-                                </button>
-                                <button onClick={() => handleTogglePaid(order.id)}>{t.buttons.togglePayment}</button>
-                            </td>
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan="7" className="loading-row">{t.loading}</td>
                         </tr>
-                    ))}
+                    ) : orders.length === 0 ? (
+                        <tr>
+                            <td colSpan="7" className="loading-row">{t.empty}</td>
+                        </tr>
+                    ) : (
+                        orders.map(order => (
+                            <tr key={order.id}>
+                                <td>{order.customer}</td>
+                                <td style={{ minWidth: '160px' }}>
+                                    {order.items.map((it, idx) => (
+                                        <div key={idx} style={{ marginBottom: 5 }}>
+                                            <span style={{ fontWeight: 500 }}>{it.name}</span>
+                                            {" "}x{it.quantity}
+                                            <span style={{ color: '#888', marginLeft: 2, fontSize: 15 }}>
+                                                ({formatCurrency(it.price * it.quantity)})
+                                            </span>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td>{order.address}</td>
+                                <td>
+                                    <span className={`badge ${order.status === 'completed' ? 'badge-completed' : order.status === 'preparing' ? 'badge-preparing' : 'badge-new'}`}>
+                                        {t.statuses[order.status] ?? order.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className={order.paid ? 'badge badge-paid' : 'badge badge-unpaid'}>
+                                        {order.paid ? t.payment.paid : t.payment.unpaid}
+                                    </span>
+                                </td>
+                                <td>
+                                    {formatCurrency(calculateOrderTotal(order))}
+                                </td>
+                                <td>
+                                    <button
+                                        onClick={() => handleAdvanceStatus(order.id)}
+                                        disabled={!getNextStatus(order.status)}
+                                    >
+                                        {t.buttons.advanceStatus?.[order.status] ?? t.buttons.advanceFallback}
+                                    </button>
+                                    <button onClick={() => handleTogglePaid(order.id)}>{t.buttons.togglePayment}</button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </div>

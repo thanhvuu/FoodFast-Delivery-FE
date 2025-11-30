@@ -183,7 +183,7 @@ const translations = {
         actions: 'Điều chỉnh',
       },
       statuses: {
-        new: 'Đơn mới',
+        pending: 'Đơn mới',
         preparing: 'Đang chế biến',
         completed: 'Hoàn thành',
       },
@@ -193,13 +193,15 @@ const translations = {
       },
       buttons: {
         advanceStatus: {
-          new: 'Xác nhận đơn',
+          pending: 'Xác nhận đơn',
           preparing: 'Hoàn thành đơn',
           completed: 'Đã hoàn thành',
         },
         advanceFallback: 'Cập nhật trạng thái',
         togglePayment: 'Đổi thanh toán',
       },
+      empty: 'Chưa có đơn hàng',
+      loading: 'Đang tải đơn hàng...'
     },
     restaurantPage: {
       title: 'Quản lý thông tin quán',
@@ -487,7 +489,7 @@ const translations = {
         actions: 'Actions',
       },
       statuses: {
-        new: 'New order',
+        pending: 'New order',
         preparing: 'In kitchen',
         completed: 'Completed',
       },
@@ -497,13 +499,15 @@ const translations = {
       },
       buttons: {
         advanceStatus: {
-          new: 'Confirm order',
+          pending: 'Confirm order',
           preparing: 'Complete order',
           completed: 'Completed',
         },
         advanceFallback: 'Update status',
         togglePayment: 'Toggle payment',
       },
+      empty: 'No orders yet',
+      loading: 'Loading orders...'
     },
     restaurantPage: {
       title: 'Restaurant profile',

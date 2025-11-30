@@ -74,3 +74,50 @@
   background: transparent;
   border-style: dashed;
 }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: capitalize;
+  background: rgba(255, 120, 60, 0.12);
+  color: #ff5a1f;
+}
+
+.status-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-preparing {
+  color: #f08a00;
+}
+
+.status-completed {
+  color: #1a8f4c;
+  background: rgba(26, 143, 76, 0.12);
+}
+
+.order-empty {
+  color: #7a3417;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255, 120, 60, 0.2);
+}
+
+.sa-alert {
+  margin: 12px 0;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 90, 31, 0.08);
+  color: #a83200;
+  border: 1px solid rgba(255, 90, 31, 0.25);
+}
