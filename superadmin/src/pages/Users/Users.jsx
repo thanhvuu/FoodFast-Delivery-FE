@@ -75,7 +75,7 @@ function Users() {
   }, [filters.platform, filters.role, filters.search, users])
 
   const segmentStats = useMemo(() => {
-    const base = { Khách hàng: 0, Shipper: 0, Merchant: 0 }
+    const base = { 'Khách hàng': 0, Shipper: 0, Merchant: 0 }
     users.forEach((user) => {
       const role = user.role in base ? user.role : 'Khách hàng'
       base[role] += 1
