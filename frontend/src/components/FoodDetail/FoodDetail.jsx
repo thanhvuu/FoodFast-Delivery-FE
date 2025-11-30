@@ -19,17 +19,17 @@ const FoodDetail = () => {
     };
 
     const priceFormatter = useMemo(() =>
-        new Intl.NumberFormat(dictionary.common.currencyLocale, {
+        new Intl.NumberFormat(dictionary.common?.currencyLocale, {
             style: 'currency',
             currency: 'VND',
             maximumFractionDigits: 0,
         }),
-        [dictionary.common.currencyLocale]
+        [dictionary.common?.currencyLocale]
     )
 
     const food = food_list.find(item => item._id === id)
 
-    const translations = dictionary.foodItems[id] || {}
+    const translations = dictionary.foodItems?.[id] || {}
     const displayName = translations.name || food?.name
     const displayDescription = translations.description || food?.description
     const restaurant = food?.restaurant || { name: 'Tên quán mẫu', address: 'Địa chỉ mẫu 123' }

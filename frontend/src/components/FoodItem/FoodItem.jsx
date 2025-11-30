@@ -11,10 +11,10 @@ const FoodItem = ({ id, name, price, description, image }) => {
   const { dictionary } = useLanguage()
   const [imgSrc, setImgSrc] = useState(image || assets.header_img)
 
-  const itemTranslations = dictionary.foodItems[id] || {}
+  const itemTranslations = dictionary.foodItems?.[id] || {}
   const displayName = itemTranslations.name || name
   const displayDescription = itemTranslations.description || description
-  const { common } = dictionary
+  const { common = {} } = dictionary
 
   const priceFormatter = useMemo(
     () =>
