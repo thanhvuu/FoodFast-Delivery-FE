@@ -5,19 +5,29 @@ const DEFAULT_BASE_URL = 'http://localhost:4000';
 
 const sanitizeUrl = (url: string) => url.replace(/\/+$/, '');
 
-const extractHost = (raw?: string | null): string | undefined => {
+const normalizeUrl = (raw?: string | null): string | undefined => {
   if (!raw) return undefined;
+
+  const cleaned = raw.startsWith('blob:') ? raw.replace(/^blob:/, '') : raw;
+
   try {
-    const url = raw.startsWith('http') ? raw : `http://${raw}`;
-    return new URL(url).hostname;
+    const parsed = new URL(cleaned.startsWith('http') ? cleaned : `http://${cleaned}`);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return undefined;
+    return sanitizeUrl(parsed.toString());
   } catch {
     return undefined;
   }
 };
 
+const extractHost = (raw?: string | null): string | undefined => {
+  const normalized = normalizeUrl(raw);
+  if (!normalized) return undefined;
+  return new URL(normalized).hostname;
+};
+
 export const getApiBaseUrl = () => {
-  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
-  if (envUrl) return sanitizeUrl(envUrl);
+  const envUrl = normalizeUrl(process.env.EXPO_PUBLIC_API_BASE_URL);
+  if (envUrl) return envUrl;
 
   const hostFromConstants = extractHost(Constants.expoConfig?.hostUri);
   const hostFromBundle = extractHost(NativeModules?.SourceCode?.scriptURL);
