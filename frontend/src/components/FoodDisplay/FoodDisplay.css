@@ -40,3 +40,44 @@
     gap: 30px;
     row-gap: 50px;
 }
+
+.food-display__empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #777;
+  font-weight: 600;
+}
+
+.food-display__pagination {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.food-display__page-button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.food-display__page-button:hover:not(:disabled) {
+  border-color: #ff6347;
+  color: #ff6347;
+}
+
+.food-display__page-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.food-display__page-status {
+  font-weight: 700;
+  color: #333;
+}

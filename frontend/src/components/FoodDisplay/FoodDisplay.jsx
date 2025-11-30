@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import './FoodDisplay.css'
 import { StoreContext } from '../../Context/StoreContext'
 import FoodItem from '../FoodItem/FoodItem'
@@ -10,6 +10,8 @@ const FoodDisplay = ({ category = 'all' }) => {
     const { food_list = [] } = useContext(StoreContext)
     const { dictionary } = useLanguage()
     const [sortOrder, setSortOrder] = useState('default')
+    const [currentPage, setCurrentPage] = useState(1)
+    const ITEMS_PER_PAGE = 10
 
     const sortOptions = [
         { value: 'default', label: dictionary.foodDisplay.sort.default },
@@ -41,6 +43,27 @@ const FoodDisplay = ({ category = 'all' }) => {
         return itemsToShow
     }, [itemsToShow, sortOrder])
 
+    const totalPages = useMemo(() => {
+        if (!sortedItems.length) return 1
+        return Math.ceil(sortedItems.length / ITEMS_PER_PAGE)
+    }, [sortedItems.length])
+
+    const paginatedItems = useMemo(() => {
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+        const endIndex = startIndex + ITEMS_PER_PAGE
+        return sortedItems.slice(startIndex, endIndex)
+    }, [currentPage, sortedItems])
+
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [category, sortOrder])
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages)
+        }
+    }, [currentPage, totalPages])
+
     return (
         <div className='food-display' id='food-display'>
             <div className="food-display__header">
@@ -61,17 +84,42 @@ const FoodDisplay = ({ category = 'all' }) => {
                 </label>
             </div>
             <div className="food-display-list">
-                {sortedItems.map((item) => (
-                    <Link to={`/food/${item._id}`} key={item._id} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <FoodItem
-                            id={item._id}
-                            name={item.name}
-                            description={item.description}
-                            price={item.price}
-                            image={item.image}
-                        />
-                    </Link>
-                ))}
+                {paginatedItems.length === 0 ? (
+                    <p className="food-display__empty">{dictionary.foodDisplay.empty}</p>
+                ) : (
+                    paginatedItems.map((item) => (
+                        <Link to={`/food/${item._id}`} key={item._id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <FoodItem
+                                id={item._id}
+                                name={item.name}
+                                description={item.description}
+                                price={item.price}
+                                image={item.image}
+                            />
+                        </Link>
+                    ))
+                )}
+            </div>
+            <div className="food-display__pagination" role="navigation" aria-label={dictionary.foodDisplay.pagination.label}>
+                <button
+                    type="button"
+                    className="food-display__page-button"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    {dictionary.foodDisplay.pagination.previous}
+                </button>
+                <span className="food-display__page-status">
+                    {dictionary.foodDisplay.pagination.page} {currentPage}/{totalPages}
+                </span>
+                <button
+                    type="button"
+                    className="food-display__page-button"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    {dictionary.foodDisplay.pagination.next}
+                </button>
             </div>
         </div>
     )

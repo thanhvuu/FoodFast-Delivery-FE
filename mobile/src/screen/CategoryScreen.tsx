@@ -18,8 +18,10 @@ const CategoryScreen: React.FC<
   const initialCategory = route.params?.category ?? discoveryFilters[0];
   const [activeCategory, setActiveCategory] = React.useState(initialCategory);
   const [priceSort, setPriceSort] = React.useState<'none' | 'asc' | 'desc'>('none');
+  const [currentPage, setCurrentPage] = React.useState(1);
   const { products } = useProducts();
   const menu = React.useMemo(() => (products?.length ? products : allFoods), [products]);
+  const itemsPerPage = 10;
 
   React.useEffect(() => {
     if (route.params?.category) {
@@ -45,6 +47,26 @@ const CategoryScreen: React.FC<
 
     return items;
   }, [filteredFoods, priceSort]);
+
+  const totalPages = React.useMemo(
+    () => Math.max(1, Math.ceil(sortedFoods.length / itemsPerPage)),
+    [sortedFoods.length],
+  );
+
+  const paginatedFoods = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedFoods.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, sortedFoods]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, priceSort]);
+
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleSelectSort = (value: 'asc' | 'desc') => {
     setPriceSort((current) => (current === value ? 'none' : value));
@@ -85,7 +107,7 @@ const CategoryScreen: React.FC<
           {sortedFoods.length === 0 ? (
             <Text style={styles.emptyText}>Chưa có món nào trong danh mục này.</Text>
           ) : (
-            sortedFoods.map((item) => (
+            paginatedFoods.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>
                 <FoodCard
                   item={item}
@@ -96,6 +118,30 @@ const CategoryScreen: React.FC<
             ))
           )}
         </View>
+
+        {sortedFoods.length > 0 && (
+          <View style={styles.paginationRow}>
+            <TouchableOpacity
+              style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
+              disabled={currentPage === 1}
+              onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            >
+              <Text style={styles.pageButtonText}>Trước</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.pageStatus}>
+              Trang {currentPage}/{totalPages}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.pageButton, currentPage === totalPages && styles.pageButtonDisabled]}
+              disabled={currentPage === totalPages}
+              onPress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            >
+              <Text style={styles.pageButtonText}>Sau</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </ScreenContainer>
   );
@@ -138,6 +184,32 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: spacing.lg,
     fontWeight: '600',
+  },
+  paginationRow: {
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  pageButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pageButtonDisabled: {
+    opacity: 0.5,
+  },
+  pageButtonText: {
+    fontWeight: '700',
+    color: colors.text,
+  },
+  pageStatus: {
+    fontWeight: '700',
+    color: colors.text,
   },
 });
 

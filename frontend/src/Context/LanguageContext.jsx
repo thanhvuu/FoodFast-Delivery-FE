@@ -53,6 +53,13 @@ const translationData = {
         lowToHigh: 'Giá thấp đến cao',
         highToLow: 'Giá cao đến thấp',
       },
+      pagination: {
+        label: 'Phân trang món ăn',
+        previous: 'Trang trước',
+        next: 'Trang sau',
+        page: 'Trang',
+      },
+      empty: 'Chưa có món nào trong danh mục này.',
     },
     footer: {
       description:
@@ -342,6 +349,13 @@ const translationData = {
         lowToHigh: 'Price: Low to High',
         highToLow: 'Price: High to Low',
       },
+      pagination: {
+        label: 'Food pagination',
+        previous: 'Previous',
+        next: 'Next',
+        page: 'Page',
+      },
+      empty: 'No dishes found in this category.',
     },
     footer: {
       description:
