@@ -2,11 +2,12 @@ import React, { useState } from 'react'
 import './Menu.css'
 import ExploreMenu from '../../components/ExploreMenu/ExploreMenu'
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay'
-import Footer from '../../components/Footer/Footer'
+import RestaurantSection from '../../components/RestaurantSection/RestaurantSection'
 import { useLanguage } from '../../Context/LanguageContext'
 
 const Menu = () => {
   const [category, setCategory] = useState('all')
+  const [restaurant, setRestaurant] = useState('all')
   const { dictionary } = useLanguage()
   const menuText = dictionary.menuPage
 
@@ -20,7 +21,8 @@ const Menu = () => {
         </div>
       </section>
       <ExploreMenu category={category} setCategory={setCategory} />
-      <FoodDisplay category={category} />
+      <RestaurantSection selectedRestaurant={restaurant} onSelect={setRestaurant} />
+      <FoodDisplay category={category} restaurant={restaurant} />
     </div>
   )
 }

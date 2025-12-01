@@ -42,13 +42,31 @@ export const updateProduct = async (id, payload) => {
   return handleResponse(response)
 }
 
-export const fetchOrders = async () => {
-  const response = await fetch(`${API_BASE_URL}/orders?_sort=placedAt&_order=desc`)
+export const fetchOrders = async (params = {}) => {
+  const searchParams = new URLSearchParams(params)
+  const query = searchParams.toString()
+  const response = await fetch(`${API_BASE_URL}/orders${query ? `?${query}` : ''}`)
   return handleResponse(response)
 }
 
 export const updateOrder = async (id, payload) => {
   const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+  return handleResponse(response)
+}
+
+export const fetchRestaurant = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/restaurants/${id}`)
+  return handleResponse(response)
+}
+
+export const updateRestaurant = async (id, payload) => {
+  const response = await fetch(`${API_BASE_URL}/restaurants/${id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

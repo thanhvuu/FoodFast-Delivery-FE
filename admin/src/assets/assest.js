@@ -26,6 +26,8 @@ export const assests = {
     upload_area,
 }
 
+export const restaurants = dataset.restaurants || []
+
 export const food_list = [
     {
         _id: '1',

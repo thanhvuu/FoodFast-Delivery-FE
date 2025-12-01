@@ -21,7 +21,7 @@ const CategoryScreen: React.FC<
   const [currentPage, setCurrentPage] = React.useState(1);
   const { products } = useProducts();
   const menu = React.useMemo(() => (products?.length ? products : allFoods), [products]);
-  const itemsPerPage = 10;
+  const itemsPerPage = 6;
 
   React.useEffect(() => {
     if (route.params?.category) {

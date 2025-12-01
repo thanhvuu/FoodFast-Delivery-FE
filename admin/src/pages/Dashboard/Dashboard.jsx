@@ -33,6 +33,7 @@ const normaliseItem = item => ({
   name: item?.name ?? 'Product',
   quantity: Math.max(1, digitsOnly(item?.quantity)),
   price: digitsOnly(item?.price),
+  productId: item?.productId || item?.product_id || item?.id,
 })
 
 const transformOrder = order => {
@@ -95,20 +96,43 @@ const toValidDate = value => {
   return new Date(timestamp)
 }
 
-const Dashboard = ({ products = [] }) => {
+const getProductId = product => product?.id ?? product?.productId ?? product?._id
+const normalizeName = (value = '') => value.toString().trim().toLowerCase()
+
+const Dashboard = ({ products = [], restaurant }) => {
   const { dictionary, formatCurrency } = useAdminLanguage()
   const t = dictionary.dashboardPage
   const ordersTranslations = dictionary.ordersPage
   const locale = dictionary.common?.currencyLocale ?? 'vi-VN'
 
   const staticOrders = useMemo(() => order_list.map(transformOrder), [])
+  const [orders, setOrders] = useState([])
+
+  const allowedProductIds = useMemo(() => {
+    if (!restaurant) return null
+    const set = new Set()
+    const targetName = normalizeName(restaurant.name)
+    products.forEach((p) => {
+      const pid = getProductId(p)
+      const restName = normalizeName(p?.restaurant?.name || '')
+      const restId = p?.restaurant?.id
+      if (restId === restaurant.id || (restName && restName === targetName)) {
+        if (pid) set.add(pid)
+      }
+    })
+    return set
+  }, [products, restaurant])
+
+  const filterOrdersByRestaurant = (list) => {
+    if (!allowedProductIds) return list
+    return list.filter((order) => order.items.some((it) => allowedProductIds.has(it.productId)))
+  }
 
   const loadOrders = () => {
     const stored = readStoredOrders().map(transformOrder)
-    return mergeOrders(staticOrders, stored)
+    const merged = mergeOrders(staticOrders, stored)
+    return filterOrdersByRestaurant(merged)
   }
-
-  const [orders, setOrders] = useState(loadOrders)
 
   const dailyFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short' }),
@@ -132,7 +156,8 @@ const Dashboard = ({ products = [] }) => {
       }
     }
     return undefined
-  }, [staticOrders])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staticOrders, allowedProductIds])
 
   const metrics = useMemo(() => {
     const totalOrders = orders.length

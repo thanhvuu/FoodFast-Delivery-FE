@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import './Restaurant.css'
 import { useAdminLanguage } from '../../context/LanguageContext'
+import { fetchRestaurant, updateRestaurant } from '../../services/api'
 
 const STORAGE_KEY = 'foodfast-restaurant-profile'
 
@@ -34,23 +35,57 @@ const saveProfile = (profile) => {
   window.dispatchEvent(new CustomEvent('foodfast-restaurant-profile-updated'))
 }
 
-const Restaurant = () => {
+const Restaurant = ({ restaurant }) => {
   const { dictionary, formatCurrency } = useAdminLanguage()
   const t = dictionary.restaurantPage
 
   const [profile, setProfile] = useState(defaultProfile)
   const [lastSaved, setLastSaved] = useState(null)
   const [status, setStatus] = useState('idle')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const stored = readProfile()
-    if (stored) {
-      setProfile(prev => ({ ...prev, ...stored }))
-      if (stored.updatedAt) {
-        setLastSaved(new Date(stored.updatedAt))
+    const load = async () => {
+      const stored = readProfile()
+      let base = { ...defaultProfile }
+
+      if (restaurant) {
+        base = {
+          ...base,
+          name: restaurant.name || base.name,
+          address: restaurant.address || base.address,
+          openingTime: restaurant.openingHours?.open || base.openingTime,
+          closingTime: restaurant.openingHours?.close || base.closingTime,
+        }
+        try {
+          setLoading(true)
+          const apiRes = await fetchRestaurant(restaurant.id)
+          if (apiRes && typeof apiRes === 'object') {
+            base = {
+              ...base,
+              ...apiRes,
+              openingTime: apiRes.openingHours?.open || base.openingTime,
+              closingTime: apiRes.openingHours?.close || base.closingTime,
+            }
+          }
+        } catch (err) {
+          console.error('Không thể tải thông tin nhà hàng', err)
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      if (stored) {
+        base = { ...base, ...stored }
+      }
+
+      setProfile(base)
+      if (base.updatedAt) {
+        setLastSaved(new Date(base.updatedAt))
       }
     }
-  }, [])
+    load()
+  }, [restaurant])
 
   useEffect(() => {
     const listener = () => {
@@ -87,16 +122,39 @@ const Restaurant = () => {
       .replace('{{close}}', profile.closingTime)
   }, [profile.openingTime, profile.closingTime, t.summary.scheduleFallback, t.summary.scheduleText])
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const payload = {
       ...profile,
+      openingHours: {
+        open: profile.openingTime,
+        close: profile.closingTime,
+      },
       updatedAt: new Date().toISOString(),
     }
-    saveProfile(payload)
-    setLastSaved(new Date(payload.updatedAt))
-    setStatus('saved')
-    setTimeout(() => setStatus('idle'), 3200)
+    try {
+      setLoading(true)
+      if (restaurant?.id) {
+        await updateRestaurant(restaurant.id, {
+          name: payload.name,
+          address: payload.address,
+          phone: payload.phone,
+          openingHours: payload.openingHours,
+          shippingFee: payload.shippingFee,
+          notes: payload.notes,
+        })
+      }
+      saveProfile(payload)
+      setLastSaved(new Date(payload.updatedAt))
+      setStatus('saved')
+      setTimeout(() => setStatus('idle'), 3200)
+    } catch (error) {
+      console.error('Không thể lưu thông tin quán', error)
+      setStatus('idle')
+      alert('Không thể lưu thông tin. Vui lòng thử lại.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -200,7 +258,7 @@ const Restaurant = () => {
           </label>
 
           <div className='form-actions'>
-            <button type='submit'>{t.actions.save}</button>
+            <button type='submit' disabled={loading}>{loading ? t.actions.saving : t.actions.save}</button>
             {lastSaved && (
               <span className='last-saved'>
                 {t.lastUpdated.replace('{{time}}', lastSaved.toLocaleString())}

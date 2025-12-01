@@ -3,7 +3,7 @@ import './Add.css'
 import { assests } from '../../assets/assest'
 import { useAdminLanguage } from '../../context/LanguageContext'
 
-const Add = ({ onAddProduct }) => {
+const Add = ({ onAddProduct, restaurant }) => {
     const { dictionary } = useAdminLanguage()
     const t = dictionary.addPage
 
@@ -18,8 +18,8 @@ const Add = ({ onAddProduct }) => {
         category: defaultCategory,
         price: '',
         status: 'available',
-        restaurantName: '',
-        restaurantAddress: '',
+        restaurantName: restaurant?.name || '',
+        restaurantAddress: restaurant?.address || '',
     })
     const [imagePreview, setImagePreview] = useState('')
     const [imageFile, setImageFile] = useState(null)
@@ -96,10 +96,12 @@ const Add = ({ onAddProduct }) => {
             price: Number(formData.price) || 0,
             status: formData.status,
             image: imageToSave,
-            restaurant: {
-                name: formData.restaurantName.trim(),
-                address: formData.restaurantAddress.trim(),
-            },
+            restaurant: restaurant
+                ? { id: restaurant.id, name: restaurant.name, address: restaurant.address }
+                : {
+                    name: formData.restaurantName.trim(),
+                    address: formData.restaurantAddress.trim(),
+                },
         }
 
         try {
@@ -115,8 +117,8 @@ const Add = ({ onAddProduct }) => {
             category: defaultCategory,
             price: '',
             status: 'available',
-            restaurantName: '',
-            restaurantAddress: '',
+            restaurantName: restaurant?.name || '',
+            restaurantAddress: restaurant?.address || '',
         })
         if (imagePreview) {
             URL.revokeObjectURL(imagePreview)
@@ -162,26 +164,38 @@ const Add = ({ onAddProduct }) => {
                         onChange={handleChange}
                     ></textarea>
                 </div>
-                <div className="add-restaurant flex-col">
-                    <p>{t.restaurantNameLabel}</p>
-                    <input
-                        type="text"
-                        name="restaurantName"
-                        value={formData.restaurantName}
-                        onChange={handleChange}
-                        placeholder={t.restaurantNamePlaceholder}
-                    />
-                </div>
-                <div className="add-restaurant flex-col">
-                    <p>{t.restaurantAddressLabel}</p>
-                    <input
-                        type="text"
-                        name="restaurantAddress"
-                        value={formData.restaurantAddress}
-                        onChange={handleChange}
-                        placeholder={t.restaurantAddressPlaceholder}
-                    />
-                </div>
+                {restaurant ? (
+                    <div className="add-restaurant flex-col">
+                        <p>{t.restaurantNameLabel}</p>
+                        <div className="readonly-field">
+                            <strong>{restaurant.name}</strong>
+                            <div style={{ color: '#6b7280', marginTop: 4 }}>{restaurant.address}</div>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="add-restaurant flex-col">
+                            <p>{t.restaurantNameLabel}</p>
+                            <input
+                                type="text"
+                                name="restaurantName"
+                                value={formData.restaurantName}
+                                onChange={handleChange}
+                                placeholder={t.restaurantNamePlaceholder}
+                            />
+                        </div>
+                        <div className="add-restaurant flex-col">
+                            <p>{t.restaurantAddressLabel}</p>
+                            <input
+                                type="text"
+                                name="restaurantAddress"
+                                value={formData.restaurantAddress}
+                                onChange={handleChange}
+                                placeholder={t.restaurantAddressPlaceholder}
+                            />
+                        </div>
+                    </>
+                )}
                 <div className="add-category-price">
                     <div className="add-category flex-col">
                         <p>{t.categoryLabel}</p>

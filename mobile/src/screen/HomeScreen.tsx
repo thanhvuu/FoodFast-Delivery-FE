@@ -17,6 +17,8 @@ import { CustomerHomeStackParamList } from '../navigation/types';
 import RestaurantCard from '../components/RestaurantCard';
 import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
+import useProducts from '../hooks/useProducts';
+import useRestaurants from '../hooks/useRestaurants';
 
 const heroImage =
   'https://images.unsplash.com/photo-1601924579534-811e171ad6a5?auto=format&fit=crop&w=1200&q=80';
@@ -31,6 +33,18 @@ type Props = NativeStackScreenProps<CustomerHomeStackParamList, 'Home'>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = React.useState<string | undefined>(undefined);
+  const { products } = useProducts();
+  const { restaurants } = useRestaurants();
+
+  const dishCountByRestaurant = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    products.forEach((item) => {
+      const name = item?.restaurant?.name?.toString().trim().toLowerCase();
+      if (!name) return;
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return counts;
+  }, [products]);
 
   const handleSeeAll = () => {
     navigation.navigate('CategoryListing');
@@ -96,6 +110,39 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </View>
+
+        <SectionHeader
+          title="Nhà hàng đang hoạt động"
+          subtitle="Chỉ hiển thị nhà hàng đã duyệt, kèm số món đang bán."
+        />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.restaurantList}>
+          {restaurants.map((res) => {
+            const count = dishCountByRestaurant.get(res.name.toLowerCase()) || 0;
+            const isOpen = res.isOpen !== false;
+            const hours =
+              res.openingHours?.open && res.openingHours?.close
+                ? `${res.openingHours.open} - ${res.openingHours.close}`
+                : undefined;
+            return (
+              <TouchableOpacity key={res.id} style={styles.restaurantCard} activeOpacity={0.88}>
+                <View style={styles.restaurantTopRow}>
+                  <Text style={styles.restaurantName} numberOfLines={1}>
+                    {res.name}
+                  </Text>
+                  <View style={isOpen ? styles.statusPill : styles.statusPillClosed}>
+                    <Text style={isOpen ? styles.statusText : styles.statusTextClosed}>
+                      {res.displayStatus || (isOpen ? 'Đang hoạt động' : 'Đã đóng cửa')}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.restaurantMeta} numberOfLines={1}>
+                  {res.owner || 'Ẩn danh'} • {res.city || '—'} {hours ? `• ${hours}` : ''}
+                </Text>
+                <Text style={styles.restaurantCount}>{count} món hiện có</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
 
         <SectionHeader
           title="Top Quán Rating 5* tuần này"
@@ -227,9 +274,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },
-  horizontalList: {
+  restaurantList: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
+  },
+  restaurantCard: {
+    width: 260,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: spacing.md,
+    marginRight: spacing.md,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  restaurantTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  restaurantName: {
+    fontWeight: '800',
+    color: colors.text,
+    fontSize: 16,
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  statusPill: {
+    backgroundColor: '#E6F6EB',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 12,
+  },
+  statusPillClosed: {
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 12,
+  },
+  statusText: {
+    color: '#14804A',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  statusTextClosed: {
+    color: '#991B1B',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  restaurantMeta: {
+    color: colors.muted,
+    fontSize: 12,
+    marginBottom: spacing.sm,
+  },
+  restaurantCount: {
+    color: colors.text,
+    fontWeight: '700',
   },
 });
 
