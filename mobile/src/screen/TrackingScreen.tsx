@@ -69,10 +69,11 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [droneProgress, setDroneProgress] = useState(0);
   const [nearArrival, setNearArrival] = useState(false);
   const [deliveredNotice, setDeliveredNotice] = useState(false);
-  const [waitRemaining, setWaitRemaining] = useState(120); // giây chờ ở trạng thái pending
   const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startDelayRef = useRef<NodeJS.Timeout | null>(null);
+  const startedRef = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -147,21 +148,19 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const alertedRef = useRef(false);
-  const waitIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
       setDroneProgress(0);
       setNearArrival(false);
       setDeliveredNotice(false);
-      setWaitRemaining(120);
       setOtp('');
       setOtpStatus('idle');
       alertedRef.current = false;
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (waitIntervalRef.current) clearInterval(waitIntervalRef.current);
       startedRef.current = false;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (startDelayRef.current) clearTimeout(startDelayRef.current);
 
+      // Giữ pending khoảng 1 phút rồi mới bay, không hiển thị countdown
       const startFlying = () => {
         if (startedRef.current) return;
         startedRef.current = true;
@@ -171,7 +170,7 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
               if (intervalRef.current) clearInterval(intervalRef.current);
               return 100;
             }
-            const next = prev + 3; // chậm hơn để giữ pending/preparing lâu hơn
+            const next = prev + 3;
             if (next >= 80 && !alertedRef.current) {
               alertedRef.current = true;
               setNearArrival(true);
@@ -186,34 +185,16 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
         }, 2500);
       };
 
-      waitIntervalRef.current = setInterval(() => {
-        setWaitRemaining((prev) => {
-          const next = Math.max(prev - 1, 0);
-          if (next === 0) {
-            if (waitIntervalRef.current) {
-              clearInterval(waitIntervalRef.current);
-              waitIntervalRef.current = null;
-            }
-            startFlying();
-          }
-          return next;
-        });
-      }, 1000);
+      startDelayRef.current = setTimeout(() => {
+        startFlying();
+      }, 60000);
 
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
-        if (waitIntervalRef.current) clearInterval(waitIntervalRef.current);
+        if (startDelayRef.current) clearTimeout(startDelayRef.current);
       };
     }, [deliveredNotice]),
   );
-
-  const handleStartNow = useCallback(() => {
-    if (waitIntervalRef.current) {
-      clearInterval(waitIntervalRef.current);
-      waitIntervalRef.current = null;
-    }
-    setWaitRemaining(0); // trigger startFlying via effect
-  }, []);
 
   const handleOtpSubmit = async () => {
     const sanitized = otp.trim();
@@ -304,14 +285,6 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
 
         <View style={styles.progressCard}>
           <Text style={styles.progressTitle}>Tiến trình drone</Text>
-          {waitRemaining > 0 ? (
-            <View style={styles.waitRow}>
-              <Text style={styles.waitText}>Đang chuẩn bị, drone cất cánh sau {waitRemaining}s</Text>
-              <TouchableOpacity style={styles.waitButton} activeOpacity={0.85} onPress={handleStartNow}>
-                <Text style={styles.waitButtonLabel}>Bay ngay</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${Math.min(droneProgress, 100)}%` }]} />
           </View>
@@ -485,31 +458,6 @@ const styles = StyleSheet.create({
   progressLabel: {
     marginTop: spacing.xs,
     color: colors.muted,
-  },
-  waitRow: {
-    backgroundColor: '#f5f7fb',
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  waitText: {
-    flex: 1,
-    color: colors.text,
-    fontWeight: '600',
-  },
-  waitButton: {
-    marginLeft: spacing.md,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-  },
-  waitButtonLabel: {
-    color: '#fff',
-    fontWeight: '700',
   },
   nearArrival: {
     marginTop: spacing.sm,

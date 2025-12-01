@@ -6,7 +6,7 @@ import { useLanguage } from '../../Context/LanguageContext'
 import { Link } from 'react-router-dom'
 
 
-const FoodDisplay = ({ category = 'all' }) => {
+const FoodDisplay = ({ category = 'all', restaurant = 'all' }) => {
     const { food_list = [] } = useContext(StoreContext)
     const { dictionary } = useLanguage()
     const [sortOrder, setSortOrder] = useState('default')
@@ -21,15 +21,19 @@ const FoodDisplay = ({ category = 'all' }) => {
 
     const itemsToShow = useMemo(() => {
         const normalizedCategory = (category || '').toString().trim().toLowerCase()
-        if (!normalizedCategory || normalizedCategory === 'all') {
-            return food_list
-        }
+        const normalizedRestaurant = (restaurant || '').toString().trim().toLowerCase()
 
         return food_list.filter((item) => {
             const itemCat = (item.category || '').toString().trim().toLowerCase()
-            return itemCat === normalizedCategory
+            const matchCategory = !normalizedCategory || normalizedCategory === 'all' ? true : itemCat === normalizedCategory
+
+            const itemRestaurant = (item.restaurant?.name || '').toString().trim().toLowerCase()
+            const matchRestaurant =
+                !normalizedRestaurant || normalizedRestaurant === 'all' ? true : itemRestaurant === normalizedRestaurant
+
+            return matchCategory && matchRestaurant
         })
-    }, [category, food_list])
+    }, [category, restaurant, food_list])
 
     const sortedItems = useMemo(() => {
         if (sortOrder === 'asc') {
@@ -56,7 +60,7 @@ const FoodDisplay = ({ category = 'all' }) => {
 
     useEffect(() => {
         setCurrentPage(1)
-    }, [category, sortOrder])
+    }, [category, restaurant, sortOrder])
 
     useEffect(() => {
         if (currentPage > totalPages) {

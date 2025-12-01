@@ -41,3 +41,8 @@ export const updateOrderStatus = async (id, status) => {
   })
   return handleResponse(response)
 }
+
+export const fetchRestaurants = async () => {
+  const response = await fetch(`${API_BASE_URL}/restaurants`)
+  return handleResponse(response)
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { fetchOrders, updateOrder } from '../../services/api'
 import './Orders.css'
 import { useAdminLanguage } from '../../context/LanguageContext'
@@ -17,9 +17,10 @@ const digitsOnly = (value) => {
 }
 
 const normaliseItem = (item) => ({
-    name: item?.name ?? 'Sản phẩm',
-    quantity: Math.max(1, digitsOnly(item?.quantity)),
-    price: digitsOnly(item?.price),
+  name: item?.name ?? 'Sản phẩm',
+  quantity: Math.max(1, digitsOnly(item?.quantity)),
+  price: digitsOnly(item?.price),
+  productId: item?.productId || item?.product_id || item?.id,
 })
 
 let fallbackIdCounter = 0
@@ -69,30 +70,52 @@ const getNextStatus = (status) => {
     return ORDER_STATUS_FLOW[index + 1] ?? null
 }
 
-const Orders = () => {
-    const { dictionary, formatCurrency } = useAdminLanguage()
-    const t = dictionary.ordersPage
+const getProductId = (product) => product?.id ?? product?.productId ?? product?._id
+const normalizeName = (value = '') => value.toString().trim().toLowerCase()
 
-    const [orders, setOrders] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
+const Orders = ({ restaurant, products = [] }) => {
+  const { dictionary, formatCurrency } = useAdminLanguage()
+  const t = dictionary.ordersPage
 
-    const loadOrders = async () => {
-        setIsLoading(true)
-        try {
-            const apiOrders = await fetchOrders({ _sort: 'placedAt', _order: 'desc' })
-            const normalised = Array.isArray(apiOrders) ? apiOrders.map(transformOrder) : []
-            setOrders(normalised)
-        } catch (error) {
-            console.error('Không thể tải danh sách đơn từ API', error)
-            setOrders([])
-        } finally {
-            setIsLoading(false)
-        }
+  const [orders, setOrders] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const allowedProductIds = useMemo(() => {
+    if (!restaurant) return null
+    const set = new Set()
+    const targetName = normalizeName(restaurant.name)
+    products.forEach((p) => {
+      const pid = getProductId(p)
+      const restName = normalizeName(p?.restaurant?.name || '')
+      const restId = p?.restaurant?.id
+      if (restId === restaurant.id || (restName && restName === targetName)) {
+        if (pid) set.add(pid)
+      }
+    })
+    return set
+  }, [products, restaurant])
+
+  const loadOrders = async () => {
+    setIsLoading(true)
+    try {
+      const apiOrders = await fetchOrders({ _sort: 'placedAt', _order: 'desc' })
+      const normalised = Array.isArray(apiOrders) ? apiOrders.map(transformOrder) : []
+      const filtered = allowedProductIds
+        ? normalised.filter((order) => order.items.some((it) => allowedProductIds.has(it.productId)))
+        : normalised
+      setOrders(filtered)
+    } catch (error) {
+      console.error('Không thể tải danh sách đơn từ API', error)
+      setOrders([])
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    useEffect(() => {
-        loadOrders()
-    }, [])
+  useEffect(() => {
+    loadOrders()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedProductIds])
 
     const handleAdvanceStatus = async (id) => {
         const currentOrder = orders.find(order => order.id === id)

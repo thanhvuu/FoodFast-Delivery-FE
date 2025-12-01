@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useEffect, useMemo, useState } from 'react'
 import { food_list as fallbackFoodList, resolveFoodImage } from '../assets/assets'
-import { fetchProducts } from '../services/api'
+import { fetchProducts, fetchRestaurants } from '../services/api'
 
 export const StoreContext = createContext(null)
 
@@ -27,25 +27,42 @@ const normalizeCategory = (value) => {
 
 const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({})
-  const [food_list, setFoodList] = useState(() =>
-    fallbackFoodList.map((item) => ({
-      ...item,
-      category: normalizeCategory(item.category),
-    }))
+  const normalizedFallback = useMemo(
+    () =>
+      fallbackFoodList.map((item) => ({
+        ...item,
+        category: normalizeCategory(item.category),
+      })),
+    []
   )
+
+  const [food_list, setFoodList] = useState(normalizedFallback)
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchProducts()
-        if (!Array.isArray(data) || !data.length) return
+        const [products, restaurants] = await Promise.all([
+          fetchProducts().catch(() => []),
+          fetchRestaurants().catch(() => []),
+        ])
 
-        const normalizedProducts = data.map((item, index) => {
-          const fallbackItem = fallbackFoodList[index % fallbackFoodList.length] || {}
+        const activeRestaurantNames = new Set(
+          (restaurants || [])
+            .filter((r) => (r.statusKey || '').toString().toLowerCase() === 'active')
+            .map((r) => r.name?.toString().trim().toLowerCase())
+            .filter(Boolean)
+        )
+
+        const shouldFilterByRestaurant = activeRestaurantNames.size > 0
+        const sourceList = Array.isArray(products) && products.length ? products : fallbackFoodList
+
+        const normalizedProducts = sourceList.map((item, index) => {
+          const fallbackItem = normalizedFallback[index % normalizedFallback.length] || {}
 
           return {
+            ...fallbackItem,
             ...item,
-            _id: item._id || item.id?.toString() || `product-${index}`,
+            _id: item._id || item.id?.toString() || fallbackItem._id || `product-${index}`,
             name: item.name || fallbackItem.name || 'Món ăn',
             description: item.description || fallbackItem.description || 'Món ăn thơm ngon từ FoodFast',
             price: Number.isFinite(Number(item.price))
@@ -53,14 +70,24 @@ const StoreContextProvider = (props) => {
               : fallbackItem.price || 0,
             image: resolveFoodImage(item.image) || fallbackItem.image,
             category: normalizeCategory(item.category || fallbackItem.category || 'other'),
-            restaurant: item.restaurant || fallbackItem.restaurant || {
-              name: 'FoodFast Kitchen',
-              address: '273 An Dương Vương, Quận 5, TP.HCM',
-            },
+            restaurant:
+              item.restaurant ||
+              fallbackItem.restaurant || {
+                name: 'FoodFast Kitchen',
+                address: '273 An Dương Vương, Quận 5, TP.HCM',
+              },
           }
         })
 
-        setFoodList(normalizedProducts)
+        const filteredProducts = shouldFilterByRestaurant
+          ? normalizedProducts.filter((item) => {
+              const restaurantName = item?.restaurant?.name?.toString().trim().toLowerCase()
+              if (!restaurantName) return true
+              return activeRestaurantNames.has(restaurantName)
+            })
+          : normalizedProducts
+
+        setFoodList(filteredProducts)
       } catch (error) {
         console.error('Không thể tải dữ liệu sản phẩm', error)
       }

@@ -5,6 +5,7 @@ import './ModalLogin.css'
 // Mặc định dùng json-server backend tại port 4000 nếu không cấu hình proxy
 const API_BASE_URL = (import.meta.env?.VITE_AUTH_API_BASE_URL || 'http://localhost:4000').replace(/\/$/, '')
 const USERS_API_URL = `${API_BASE_URL}/users`
+const ADMIN_BASE_URL = (import.meta.env?.VITE_ADMIN_BASE_URL || 'http://localhost:5174').replace(/\/$/, '')
 
 export default function ModalLogin({ open, onClose, onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true)
@@ -59,6 +60,12 @@ export default function ModalLogin({ open, onClose, onLoginSuccess }) {
               navigate('/super-admin')
             } else if (matched.role === 'admin') {
               navigate('/admin')
+            } else if (matched.role === 'restaurant') {
+              // Điều hướng sang trang quản trị nhà hàng (5174) kèm restaurantId nếu có
+              const target = matched.restaurantId
+                ? `${ADMIN_BASE_URL}/?restaurantId=${encodeURIComponent(matched.restaurantId)}`
+                : ADMIN_BASE_URL
+              window.location.href = target
             } else {
               navigate('/')
             }

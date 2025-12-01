@@ -7,6 +7,10 @@ export type FoodItem = {
   image: string;
   category: string;
   description: string;
+  restaurant?: {
+    name: string;
+    address?: string;
+  };
 };
 
 export const normalizeCategory = (value?: string) => {

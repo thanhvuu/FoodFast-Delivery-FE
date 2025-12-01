@@ -102,3 +102,10 @@
     font-weight: 600;
     max-width: 260px;
 }
+
+.readonly-field {
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fafafa;
+}

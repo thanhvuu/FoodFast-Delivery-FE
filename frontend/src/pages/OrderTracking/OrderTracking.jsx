@@ -196,11 +196,13 @@ const OrderTracking = () => {
   const [progress, setProgress] = useState(0)
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [hideArrivedCard, setHideArrivedCard] = useState(false)
+  const completionSyncedRef = React.useRef(false)
 
   useEffect(() => {
     setProgress(0)
     setLastUpdated(new Date())
     setHideArrivedCard(false)
+    completionSyncedRef.current = false
   }, [selectedOrderId])
 
   useEffect(() => {
@@ -208,21 +210,27 @@ const OrderTracking = () => {
 
     const step = deliveryMethod === 'motorbike' ? 0.01 : 0.015
     const interval = deliveryMethod === 'motorbike' ? 2500 : 2000
-
-    const timer = setInterval(() => {
-      setProgress(prev => {
-        const next = prev + step
-        if (next >= route.length - 1) {
-          clearInterval(timer)
+    const startDelay = 60000 // giữ trạng thái pending ~1 phút trước khi tiến trình chạy
+    let timer
+    const delayTimer = setTimeout(() => {
+      timer = setInterval(() => {
+        setProgress(prev => {
+          const next = prev + step
+          if (next >= route.length - 1) {
+            if (timer) clearInterval(timer)
+            setLastUpdated(new Date())
+            return route.length - 1
+          }
           setLastUpdated(new Date())
-          return route.length - 1
-        }
-        setLastUpdated(new Date())
-        return next
-      })
-    }, interval)
+          return next
+        })
+      }, interval)
+    }, startDelay)
 
-    return () => clearInterval(timer)
+    return () => {
+      if (timer) clearInterval(timer)
+      clearTimeout(delayTimer)
+    }
   }, [deliveryMethod, route])
 
   const currentIndex = Math.floor(progress)
@@ -308,14 +316,60 @@ const OrderTracking = () => {
       normalizedTracking || normalizedStatus,
     )
   const canCancel = normalizedStatus === 'pending' && !hasLaunched
-  const canComplete = normalizedStatus !== 'completed' && normalizedStatus !== 'cancelled' && completion >= 100 && !hideArrivedCard
+  const canComplete =
+    !hideArrivedCard && deliveredNotified.current && normalizedStatus !== 'cancelled'
   const arrivedNotice = completion >= 100
 
+  // Đồng bộ trạng thái hoàn tất về backend / admin khi tiến độ đạt 100% và chưa đánh dấu
   useEffect(() => {
-    if (normalizedStatus === 'completed' || normalizedStatus === 'cancelled') {
-      setHideArrivedCard(true)
+    const syncCompletion = async () => {
+      if (!selectedOrder?.id) return
+      const baseStatus = (selectedOrder?.status ?? '').toLowerCase()
+      if (completion < 100) {
+        completionSyncedRef.current = false
+        return
+      }
+      if (completionSyncedRef.current) return
+      if (baseStatus === 'completed' || baseStatus === 'cancelled') {
+        completionSyncedRef.current = true
+        return
+      }
+
+      const applyLocalUpdate = () => {
+        const updated = { ...selectedOrder, status: 'completed', trackingStatus: 'completed' }
+        const mergedOrders = toUniqueOrders([
+          updated,
+          ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+        ])
+        writeStoredOrders(mergedOrders)
+        setSelectedOrderId(updated.id)
+      }
+
+      completionSyncedRef.current = true
+      try {
+        if (selectedOrder.id.startsWith('local-')) {
+          applyLocalUpdate()
+          return
+        }
+        const updated = await updateOrderStatus(selectedOrder.id, 'completed')
+        if (!updated) {
+          applyLocalUpdate()
+          return
+        }
+        const mergedOrders = toUniqueOrders([
+          { ...updated, trackingStatus: updated.trackingStatus ?? 'completed' },
+          ...readStoredOrders().filter(order => order.id !== selectedOrder.id),
+        ])
+        writeStoredOrders(mergedOrders)
+        setSelectedOrderId(updated.id)
+      } catch (err) {
+        console.error('Không thể đồng bộ hoàn tất đơn', err)
+        applyLocalUpdate()
+      }
     }
-  }, [normalizedStatus])
+
+    syncCompletion()
+  }, [completion, selectedOrder])
 
   const handleCancel = async () => {
     if (!selectedOrder?.id) return

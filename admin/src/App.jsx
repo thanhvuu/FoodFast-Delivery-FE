@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import Sidebar from './component/Sidebar/Sidebar'
 import Navbar from './component/navbar/Navbar'
@@ -8,7 +8,7 @@ import Orders from './pages/Orders/Orders'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
-import { food_list } from './assets/assest'
+import { food_list, restaurants as restaurantSeed } from './assets/assest'
 import { createProduct, deleteProduct as deleteProductApi, fetchProducts, updateProduct as updateProductApi } from './services/api'
 
 const getProductId = product => product?.id ?? product?.productId ?? product?._id
@@ -16,6 +16,36 @@ const getProductId = product => product?.id ?? product?.productId ?? product?._i
 const App = () => {
   // State quản lý toàn bộ sản phẩm
   const [products, setProducts] = useState(food_list)
+  const [restaurantContext, setRestaurantContext] = useState(null)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paramRestaurantId = params.get('restaurantId')
+    const stored = (() => {
+      try {
+        const raw = localStorage.getItem('restaurantContext')
+        return raw ? JSON.parse(raw) : null
+      } catch {
+        return null
+      }
+    })()
+
+    const findRestaurant = (id) => restaurantSeed.find((r) => r.id === id)
+    let next = null
+    if (paramRestaurantId) {
+      const found = findRestaurant(paramRestaurantId)
+      if (found) next = found
+    } else if (stored?.id && findRestaurant(stored.id)) {
+      next = findRestaurant(stored.id)
+    } else if (restaurantSeed.length) {
+      next = restaurantSeed[0]
+    }
+
+    if (next) {
+      setRestaurantContext(next)
+      localStorage.setItem('restaurantContext', JSON.stringify(next))
+    }
+  }, [])
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -76,6 +106,17 @@ const App = () => {
       })
   }
 
+  const normalizeName = (value = '') => value.toString().trim().toLowerCase()
+  const filteredProducts = useMemo(() => {
+    if (!restaurantContext) return products
+    const targetName = normalizeName(restaurantContext.name)
+    return products.filter((item) => {
+      const itemRestName = normalizeName(item?.restaurant?.name || '')
+      const itemRestId = item?.restaurant?.id
+      return itemRestId === restaurantContext.id || (itemRestName && itemRestName === targetName)
+    })
+  }, [products, restaurantContext])
+
   return (
     <div className="admin-app">
       <Navbar />
@@ -83,15 +124,15 @@ const App = () => {
         <Sidebar />
         <main className="admin-content">
           <Routes>
-            <Route path="/" element={<Dashboard products={products} />} />
-            <Route path="/dashboard" element={<Dashboard products={products} />} />
-            <Route path="/add" element={<Add onAddProduct={addProduct} />} />
+            <Route path="/" element={<Dashboard products={filteredProducts} />} />
+            <Route path="/dashboard" element={<Dashboard products={filteredProducts} />} />
+            <Route path="/add" element={<Add onAddProduct={addProduct} restaurant={restaurantContext} />} />
             <Route
               path="/list"
-              element={<List products={products} onDelete={deleteProduct} onUpdate={updateProduct} />}
+              element={<List products={filteredProducts} onDelete={deleteProduct} onUpdate={updateProduct} />}
             />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/restaurant" element={<Restaurant />} />
+            <Route path="/orders" element={<Orders restaurant={restaurantContext} products={products} />} />
+            <Route path="/restaurant" element={<Restaurant restaurant={restaurantContext} />} />
           </Routes>
         </main>
       </div>
