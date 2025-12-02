@@ -10,6 +10,7 @@ import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
 import { food_list, restaurants as restaurantSeed } from './assets/assest'
 import { createProduct, deleteProduct as deleteProductApi, fetchProducts, fetchRestaurants, updateProduct as updateProductApi } from './services/api'
+import Login from './pages/Login/Login'
 
 const getProductId = product => product?.id ?? product?.productId ?? product?._id
 
@@ -18,6 +19,15 @@ const App = () => {
   const [products, setProducts] = useState(food_list)
   const [restaurants, setRestaurants] = useState(restaurantSeed)
   const [restaurantContext, setRestaurantContext] = useState(null)
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem('user')
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed?.role === 'restaurant' ? parsed : null
+    } catch {
+      return null
+    }
+  })
 
   useEffect(() => {
     const loadRestaurants = async () => {
@@ -62,15 +72,6 @@ const App = () => {
       }
     })()
 
-    const storedUser = (() => {
-      try {
-        const raw = localStorage.getItem('user')
-        return raw ? JSON.parse(raw) : null
-      } catch {
-        return null
-      }
-    })()
-
     const findRestaurant = (id) => {
       if (!id) return null
       return restaurants.find((r) => r.id === id) || restaurantSeed.find((r) => r.id === id) || null
@@ -86,8 +87,8 @@ const App = () => {
     if (paramRestaurantId) {
       next = findRestaurant(paramRestaurantId)
     }
-    if (!next && storedUser?.role === 'restaurant' && storedUser.restaurantId) {
-      next = findRestaurant(storedUser.restaurantId)
+    if (!next && user?.role === 'restaurant' && user.restaurantId) {
+      next = findRestaurant(user.restaurantId)
     }
     if (!next && storedContext?.id) {
       next = findRestaurant(storedContext.id)
@@ -103,7 +104,26 @@ const App = () => {
       setRestaurantContext(next)
       localStorage.setItem('restaurantContext', JSON.stringify(next))
     }
-  }, [restaurants, restaurantContext])
+  }, [restaurants, restaurantContext, user])
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user))
+      return
+    }
+
+    localStorage.removeItem('user')
+  }, [user])
+
+  const handleLoginSuccess = (authUser) => {
+    setUser(authUser)
+  }
+
+  const handleLogout = () => {
+    setUser(null)
+    setRestaurantContext(null)
+    localStorage.removeItem('restaurantContext')
+  }
 
   // Hàm thêm sản phẩm, truyền xuống Add
   const addProduct = async (product) => {
@@ -160,9 +180,13 @@ const App = () => {
     })
   }, [products, restaurantContext])
 
+  if (!user) {
+    return <Login onSuccess={handleLoginSuccess} />
+  }
+
   return (
     <div className="admin-app">
-      <Navbar />
+      <Navbar user={user} onLogout={handleLogout} />
       <div className="admin-body">
         <Sidebar />
         <main className="admin-content">
