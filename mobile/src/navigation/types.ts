@@ -1,9 +1,12 @@
+import type { RestaurantItem } from '../hooks/useRestaurants';
+
 export type CustomerHomeStackParamList = {
   Home: undefined;
   CategoryListing: { category: string } | undefined;
   FoodDetail: { id?: string; category?: string } | undefined;
   Contact: undefined;
   Tracking: { orderId?: string } | undefined;
+  RestaurantMenu: { restaurant: RestaurantItem };
   Account: undefined;
   OrderHistory: undefined;
 };

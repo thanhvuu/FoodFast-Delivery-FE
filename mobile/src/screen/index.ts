@@ -15,3 +15,4 @@ export { default as AdminAccountScreen } from './AdminAccountScreen';
 export { default as RestaurantOverviewScreen } from './RestaurantOverviewScreen';
 export { default as RestaurantOrdersScreen } from './RestaurantOrdersScreen';
 export { default as RestaurantAccountScreen } from './RestaurantAccountScreen';
+export { default as RestaurantMenuScreen } from './RestaurantMenuScreen';

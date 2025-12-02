@@ -25,7 +25,9 @@ export const normalizeCategory = (value?: string) => {
   return value
 }
 
-export const allFoods: FoodItem[] = [
+const restaurantPool = ['The Pizza Hub', 'Bếp Nhà Xanh', 'Sushi Corner', 'Hi Five Coffee'];
+
+const rawFoods: FoodItem[] = [
   {
     id: 'banh-thuy',
     name: 'Bánh Thủy',
@@ -246,7 +248,13 @@ export const allFoods: FoodItem[] = [
     description: 'Trà sữa Okinawa ngọt dịu, kem cheese và trân châu hoàng kim.',
     image: 'https://images.unsplash.com/photo-1510626176961-4b37d0b4e904?auto=format&fit=crop&w=800&q=80',
   },
-].map((item) => ({ ...item, category: normalizeCategory(item.category) }))
+];
+
+export const allFoods: FoodItem[] = rawFoods.map((item, index) => ({
+  ...item,
+  category: normalizeCategory(item.category),
+  restaurant: item.restaurant ?? { name: restaurantPool[index % restaurantPool.length] },
+}));
 
 export const featured: FoodItem[] = allFoods.slice(0, 6)
 export const popular: FoodItem[] = allFoods.slice(6)

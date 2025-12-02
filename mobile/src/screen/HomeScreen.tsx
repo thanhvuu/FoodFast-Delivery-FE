@@ -19,6 +19,7 @@ import type { RestaurantShowcase } from '../data/home';
 import { discoveryFilters, shortcuts, topRatedRestaurants, newRestaurants } from '../data/home';
 import useProducts from '../hooks/useProducts';
 import useRestaurants from '../hooks/useRestaurants';
+import type { RestaurantItem } from '../hooks/useRestaurants';
 
 const heroImage =
   'https://images.unsplash.com/photo-1601924579534-811e171ad6a5?auto=format&fit=crop&w=1200&q=80';
@@ -48,6 +49,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleSeeAll = () => {
     navigation.navigate('CategoryListing');
+  };
+
+  const handleOpenRestaurant = (item: RestaurantItem) => {
+    navigation.navigate('RestaurantMenu', { restaurant: item });
   };
 
   const handlePressRestaurant = (item: RestaurantShowcase) => {
@@ -124,7 +129,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 ? `${res.openingHours.open} - ${res.openingHours.close}`
                 : undefined;
             return (
-              <TouchableOpacity key={res.id} style={styles.restaurantCard} activeOpacity={0.88}>
+              <TouchableOpacity
+                key={res.id}
+                style={styles.restaurantCard}
+                activeOpacity={0.88}
+                onPress={() => handleOpenRestaurant(res)}
+              >
                 <View style={styles.restaurantTopRow}>
                   <Text style={styles.restaurantName} numberOfLines={1}>
                     {res.name}
