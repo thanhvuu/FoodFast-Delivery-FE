@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { seedUsers, userSegments } from '../../data/userData'
 import {
   changeUserPassword as changeUserPasswordApi,
-  deleteUser as deleteUserApi,
   fetchUsers as fetchUsersApi,
   updateUser as updateUserApi,
 } from '../../services/api'
@@ -19,6 +18,9 @@ const normalizeUser = (user) => ({
   verified: Boolean(user?.verified ?? user?.isVerified),
   lastActive: user?.lastActive ?? 'Chưa có',
   city: user?.city ?? '—',
+  account: user?.account ?? user?.username ?? user?.login ?? user?.email?.split('@')[0] ?? 'khach-hang',
+  password: user?.password ?? user?.credentials?.password ?? 'Chưa cập nhật',
+  createdAt: user?.createdAt ?? user?.created_at ?? 'Đang cập nhật',
 })
 
 const mergeUsers = (base, incoming) => {
@@ -30,7 +32,7 @@ const mergeUsers = (base, incoming) => {
 
 function Users() {
   const [users, setUsers] = useState(() => seedUsers.map(normalizeUser))
-  const [filters, setFilters] = useState({ role: 'all', platform: 'all', search: '' })
+  const [filters, setFilters] = useState({ role: 'all', platform: 'all', status: 'all', search: '' })
   const [selectedUserId, setSelectedUserId] = useState(seedUsers[0]?.id ?? '')
   const [syncing, setSyncing] = useState(false)
   const [message, setMessage] = useState('')
@@ -74,13 +76,15 @@ function Users() {
     return users.filter((user) => {
       const matchRole = filters.role === 'all' || user.role === filters.role
       const matchPlatform = filters.platform === 'all' || user.platform === filters.platform
+      const matchStatus = filters.status === 'all' || user.status === filters.status
       const matchText = !query
         || user.name.toLowerCase().includes(query)
         || user.email.toLowerCase().includes(query)
         || user.phone.toLowerCase().includes(query)
-      return matchRole && matchPlatform && matchText
+        || user.account.toLowerCase().includes(query)
+      return matchRole && matchPlatform && matchStatus && matchText
     })
-  }, [filters.platform, filters.role, filters.search, users])
+  }, [filters.platform, filters.role, filters.search, filters.status, users])
 
   const segmentStats = useMemo(() => {
     const base = { 'Khách hàng': 0, Shipper: 0, Merchant: 0 }
@@ -141,23 +145,6 @@ function Users() {
     }
   }
 
-  const handleDelete = async (user) => {
-    if (!user) return
-    if (!window.confirm('Xoá tài khoản này? Người dùng sẽ không thể đăng nhập frontend hoặc mobile.')) return
-    setUsers((prev) => prev.filter((item) => item.id !== user.id))
-    setMessage('Đang xoá tài khoản…')
-    setActionLoading(`delete-${user.id}`)
-    try {
-      await deleteUserApi(user.id)
-      setMessage('Tài khoản đã bị xoá khỏi hệ thống.')
-    } catch (error) {
-      console.error('Không thể xoá user', error)
-      setMessage('Không thể xoá khỏi máy chủ, đã xoá tạm tại giao diện.')
-    } finally {
-      setActionLoading('')
-    }
-  }
-
   const handlePasswordSubmit = async () => {
     if (!editingUser) return
     if (!passwordForm.password || passwordForm.password !== passwordForm.confirm) {
@@ -170,6 +157,11 @@ function Users() {
 
     try {
       await changeUserPasswordApi(editingUser.id, passwordForm.password)
+      setUsers((prev) => prev.map((user) => (
+        user.id === editingUser.id
+          ? { ...user, password: passwordForm.password }
+          : user
+      )))
       setMessage('Đã cập nhật mật khẩu, tài khoản có thể đăng nhập với mật khẩu mới.')
       setPasswordForm({ password: '', confirm: '' })
     } catch (error) {
@@ -194,176 +186,147 @@ function Users() {
 
   return (
     <div className="sa-page users-page">
-      <section className="sa-section">
-        <header>
+      <section className="sa-section users-shell">
+        <header className="users-header">
           <div>
-            <h2>Quản lý người dùng</h2>
-            <p>Kiểm soát tài khoản đăng nhập trên frontend & mobile, khoá/xoá sẽ ngăn đăng nhập lập tức.</p>
+            <p className="eyebrow">Customer management</p>
+            <h2>Quản lý khách hàng</h2>
+            <p>Đồng bộ toàn bộ tài khoản đăng nhập web & mobile. Khoá hoặc đổi mật khẩu áp dụng ngay cho cả hai kênh.</p>
             {message && <small className="hint">{message}</small>}
           </div>
-          <div className="sync-badge">
-            <span className={syncing ? 'live' : ''}>Đồng bộ realtime</span>
-            <small>{syncing ? 'Đang kết nối' : 'Dữ liệu cập nhật'}</small>
-            <button type="button" onClick={loadUsers}>Đồng bộ ngay</button>
+          <div className="header-actions">
+            <div className="live-sync">
+              <span className={syncing ? 'live' : ''}>{syncing ? 'Đang đồng bộ' : 'Realtime đã kết nối'}</span>
+              <small>{accessStats.total} tài khoản đang hiển thị</small>
+            </div>
+            <div className="header-buttons">
+              <button type="button" className="ghost" onClick={loadUsers}>
+                Đồng bộ
+              </button>
+              <button type="button" className="primary">Tạo mới</button>
+            </div>
           </div>
         </header>
 
-        <div className="access-grid">
-          <article className="access-card">
-            <header>
-              <div>
-                <p className="eyebrow">Trạng thái đăng nhập</p>
-                <h3>{accessStats.active} đang hoạt động</h3>
-              </div>
-              <span className="pill success">{accessStats.locked} đã khoá</span>
-            </header>
-            <p>Các tài khoản khoá hoặc bị xoá sẽ không thể đăng nhập trên cả web frontend và app mobile.</p>
-            <div className="platform-stats">
-              <span className="pill neutral">{accessStats.frontend} Frontend</span>
-              <span className="pill neutral">{accessStats.mobile} Mobile</span>
-            </div>
-          </article>
-          <article className="access-card">
-            <header>
-              <div>
-                <p className="eyebrow">Đồng bộ 2 kênh</p>
-                <h3>Một lần thao tác = áp dụng cả hai</h3>
-              </div>
-              <span className="pill warning">Frontend & Mobile</span>
-            </header>
-            <p>Mọi cập nhật hồ sơ, khoá/mở khoá đều đẩy sang cả web khách hàng và ứng dụng mobile để tránh sai lệch.</p>
-            <ul className="sync-rules">
-              <li>Sửa thông tin: hiển thị thống nhất trên tất cả thiết bị.</li>
-              <li>Khoá đăng nhập: chặn ngay lập tức trên web + app.</li>
-              <li>Mở khoá: cấp quyền lại cho cả hai kênh cùng lúc.</li>
-            </ul>
-          </article>
-          <article className="access-card policies">
-            <header>
-              <div>
-                <p className="eyebrow">Chính sách bảo mật</p>
-                <h3>Bảo vệ đăng nhập</h3>
-              </div>
-              <span className="pill warning">Đổi mật khẩu tại đây</span>
-            </header>
-            <ul>
-              <li>Khoá login: chặn đăng nhập ngay lập tức trên web + app.</li>
-              <li>Xoá tài khoản: vô hiệu hoá hoàn toàn, không thể phục hồi đăng nhập.</li>
-              <li>Đổi mật khẩu: áp dụng cho cả frontend và mobile, yêu cầu nhập lại khi đăng nhập.</li>
-            </ul>
-          </article>
-        </div>
-
-        <div className="segment-grid">
-          {userSegments.map((segment) => (
-            <article key={segment.role} className="segment-card">
-              <header>
-                <h3>{segment.role}</h3>
-                <span>{segmentStats[segment.role] ?? 0} user</span>
-              </header>
-              <p>{segment.description}</p>
-              <div className="segment-actions">
-                {segment.actions.map((action) => (
-                  <button key={action} type="button">{action}</button>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="user-management">
-          <div className="user-filters">
-            <input
-              type="search"
-              placeholder="Tìm theo tên, email, SĐT"
-              value={filters.search}
-              onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-            />
-            <select
-              value={filters.role}
-              onChange={(event) => setFilters((prev) => ({ ...prev, role: event.target.value }))}
-            >
-              <option value="all">Tất cả vai trò</option>
-              <option value="Khách hàng">Khách hàng</option>
-              <option value="Shipper">Shipper</option>
-              <option value="Merchant">Merchant</option>
-            </select>
-            <select
-              value={filters.platform}
-              onChange={(event) => setFilters((prev) => ({ ...prev, platform: event.target.value }))}
-            >
-              <option value="all">Tất cả kênh</option>
-              <option value="Frontend">Frontend (Web)</option>
-              <option value="Mobile">Mobile (App)</option>
-            </select>
+        <div className="users-meta">
+          <div>
+            <p className="eyebrow">Hoạt động</p>
+            <strong>{accessStats.active} đang hoạt động</strong>
+            <small>{accessStats.locked} tài khoản đang bị khoá</small>
           </div>
+          <div>
+            <p className="eyebrow">Kênh đăng nhập</p>
+            <strong>{accessStats.frontend} Web frontend</strong>
+            <small>{accessStats.mobile} App mobile</small>
+          </div>
+          <div>
+            <p className="eyebrow">Phân loại</p>
+            <strong>{segmentStats['Khách hàng']} khách hàng</strong>
+            <small>{segmentStats.Shipper} shipper • {segmentStats.Merchant} merchant</small>
+          </div>
+        </div>
 
-          <div className="user-table">
-            <header>
-              <div>
-                <h3>Danh sách tài khoản</h3>
-                <small>Khoá/Xoá sẽ ngăn đăng nhập ngay trên frontend & mobile.</small>
-              </div>
-              <span className="total-count">{filteredUsers.length} user</span>
-            </header>
-            <div className="table-head">
-              <span>Tài khoản</span>
-              <span>Liên hệ</span>
-              <span>Nền tảng</span>
-              <span>Đăng nhập</span>
-              <span>Hành động</span>
+        <div className="user-panels">
+          <div className="user-table-panel">
+            <div className="user-filters">
+              <input
+                type="search"
+                placeholder="Tìm tên, email, tài khoản"
+                value={filters.search}
+                onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
+              />
+              <select
+                value={filters.role}
+                onChange={(event) => setFilters((prev) => ({ ...prev, role: event.target.value }))}
+              >
+                <option value="all">Tất cả vai trò</option>
+                <option value="Khách hàng">Khách hàng</option>
+                <option value="Shipper">Shipper</option>
+                <option value="Merchant">Merchant</option>
+              </select>
+              <select
+                value={filters.platform}
+                onChange={(event) => setFilters((prev) => ({ ...prev, platform: event.target.value }))}
+              >
+                <option value="all">Tất cả kênh</option>
+                <option value="Frontend">Frontend (Web)</option>
+                <option value="Mobile">Mobile (App)</option>
+              </select>
+              <select
+                value={filters.status}
+                onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Hoạt động</option>
+                <option value="locked">Khoá</option>
+              </select>
             </div>
-            <div className="table-body">
-              {filteredUsers.map((user) => {
-                const isLocked = user.status === 'locked'
-                return (
-                  <div
-                    key={user.id}
-                    className={`table-row ${user.id === selectedUserId ? 'active' : ''}`}
-                    onClick={() => handleSelect(user.id)}
-                  >
-                    <div>
-                      <strong>{user.name}</strong>
-                      <small>{user.role}</small>
+
+            <div className="user-table">
+              <div className="table-head">
+                <span>Khách hàng</span>
+                <span>Email</span>
+                <span>Ngày tạo</span>
+                <span>Trạng thái</span>
+                <span>Hành động</span>
+              </div>
+              <div className="table-body">
+                {filteredUsers.map((user) => {
+                  const isLocked = user.status === 'locked'
+                  return (
+                    <div
+                      key={user.id}
+                      className={`table-row ${user.id === selectedUserId ? 'active' : ''}`}
+                      onClick={() => handleSelect(user.id)}
+                    >
+                      <div className="cell">
+                        <strong>{user.name}</strong>
+                        <small>{user.role}</small>
+                      </div>
+                      <div className="cell">
+                        <div className="contact-line">{user.email}</div>
+                        <small className="credential-hint">Tài khoản: {user.account} • Mật khẩu: {user.password}</small>
+                        <small>{user.phone}</small>
+                      </div>
+                      <div className="cell">
+                        <span className="pill neutral">{user.platform}</span>
+                        <small>{user.createdAt}</small>
+                      </div>
+                      <div className="cell status-cell">
+                        <span className={`status ${isLocked ? 'locked' : 'active'}`}>
+                          {isLocked ? 'Khoá' : 'Hoạt động'}
+                        </span>
+                        <small>{user.verified ? 'Đã xác minh' : 'Chưa xác minh'}</small>
+                      </div>
+                      <div className="cell row-actions" onClick={(event) => event.stopPropagation()}>
+                        <button type="button" className="ghost" onClick={() => handleSelect(user.id)}>
+                          Xem
+                        </button>
+                        <button
+                          type="button"
+                          className={isLocked ? 'primary' : 'danger'}
+                          disabled={actionLoading === `lock-${user.id}`}
+                          onClick={() => handleToggleLock(user)}
+                        >
+                          {isLocked ? 'Mở khoá' : 'Khoá'}
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <span>{user.email}</span>
-                      <small>{user.phone}</small>
-                    </div>
-                    <div>
-                      <span className="pill">{user.platform}</span>
-                      <small>{user.city}</small>
-                    </div>
-                    <div>
-                      <span className={`status ${isLocked ? 'locked' : 'active'}`}>
-                        {isLocked ? 'Đã khoá' : 'Hoạt động'}
-                      </span>
-                      <small>{user.verified ? 'Đã xác minh' : 'Chưa xác minh'}</small>
-                    </div>
-                  <div className="row-actions" onClick={(event) => event.stopPropagation()}>
-                      <button type="button" className="ghost" onClick={() => handleSelect(user.id)}>
-                        Sửa
-                      </button>
-                      <button
-                        type="button"
-                        className="ghost"
-                        disabled={actionLoading === `lock-${user.id}`}
-                        onClick={() => handleToggleLock(user)}
-                      >
-                        {isLocked ? 'Mở khoá' : 'Khoá login'}
-                      </button>
-                      <button
-                        type="button"
-                        className="danger"
-                        disabled={actionLoading === `delete-${user.id}`}
-                        onClick={() => handleDelete(user)}
-                      >
-                        Xoá vĩnh viễn
-                      </button>
-                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="segment-strip">
+              {userSegments.map((segment) => (
+                <div key={segment.role} className="segment-pill">
+                  <div>
+                    <p className="eyebrow">{segment.role}</p>
+                    <strong>{segment.description}</strong>
                   </div>
-                )
-              })}
+                  <span>{segment.actions.join(' • ')}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -371,42 +334,60 @@ function Users() {
             <aside className="user-editor">
               <header>
                 <div>
-                  <p className="eyebrow">Chỉnh sửa thông tin</p>
+                  <p className="eyebrow">Thông tin khách hàng</p>
                   <h3>{editingUser.name}</h3>
-                  <small>Mọi thay đổi được đồng bộ cả frontend và mobile login.</small>
+                  <small>Thông tin đăng nhập hiển thị ở mọi kênh.</small>
                 </div>
                 <span className={`status ${editingUser.status === 'locked' ? 'locked' : 'active'}`}>
                   {editingUser.status === 'locked' ? 'Đã khoá' : 'Đang hoạt động'}
                 </span>
               </header>
-              <label>
-                Họ tên
-                <input
-                  value={editingUser.name}
-                  onChange={(event) => handleFieldChange('name', event.target.value)}
-                />
-              </label>
-              <label>
-                Email đăng nhập
-                <input
-                  value={editingUser.email}
-                  onChange={(event) => handleFieldChange('email', event.target.value)}
-                />
-              </label>
-              <label>
-                Số điện thoại
-                <input
-                  value={editingUser.phone}
-                  onChange={(event) => handleFieldChange('phone', event.target.value)}
-                />
-              </label>
-              <label>
-                Thành phố
-                <input
-                  value={editingUser.city}
-                  onChange={(event) => handleFieldChange('city', event.target.value)}
-                />
-              </label>
+
+              <div className="inspector-grid">
+                <label>
+                  Họ tên
+                  <input
+                    value={editingUser.name}
+                    onChange={(event) => handleFieldChange('name', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Tài khoản đăng nhập
+                  <input
+                    value={editingUser.account}
+                    onChange={(event) => handleFieldChange('account', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Email đăng nhập
+                  <input
+                    value={editingUser.email}
+                    onChange={(event) => handleFieldChange('email', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Số điện thoại
+                  <input
+                    value={editingUser.phone}
+                    onChange={(event) => handleFieldChange('phone', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Thành phố
+                  <input
+                    value={editingUser.city}
+                    onChange={(event) => handleFieldChange('city', event.target.value)}
+                  />
+                </label>
+                <label>
+                  Ngày tạo
+                  <input
+                    value={editingUser.createdAt}
+                    onChange={(event) => handleFieldChange('createdAt', event.target.value)}
+                  />
+                </label>
+              </div>
+
               <div className="input-grid">
                 <label>
                   Vai trò
@@ -430,6 +411,7 @@ function Users() {
                   </select>
                 </label>
               </div>
+
               <div className="sync-preview">
                 <div>
                   <p className="eyebrow">Frontend</p>
@@ -447,6 +429,7 @@ function Users() {
                   <small>Dữ liệu hồ sơ chính lấy từ kênh này.</small>
                 </div>
               </div>
+
               <label className="checkbox">
                 <input
                   type="checkbox"
@@ -455,6 +438,25 @@ function Users() {
                 />
                 Đã xác minh email/CMND
               </label>
+
+              <div className="credential-card">
+                <header>
+                  <p className="eyebrow">Thông tin đăng nhập</p>
+                  <span className="pill warning">Hiển thị đồng bộ</span>
+                </header>
+                <div className="credential-grid">
+                  <div>
+                    <small>Tài khoản</small>
+                    <strong>{editingUser.account}</strong>
+                  </div>
+                  <div>
+                    <small>Mật khẩu hiện tại</small>
+                    <strong className="password-value">{editingUser.password}</strong>
+                  </div>
+                </div>
+                <small>Những tài khoản đăng ký trước đây cũng hiển thị tài khoản/mật khẩu ngay tại đây.</small>
+              </div>
+
               <div className="editor-actions">
                 <button
                   type="button"
