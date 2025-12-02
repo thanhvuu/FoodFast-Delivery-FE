@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { seedUsers, userSegments } from '../../data/userData'
 import {
   changeUserPassword as changeUserPasswordApi,
@@ -37,31 +37,32 @@ function Users() {
   const [passwordForm, setPasswordForm] = useState({ password: '', confirm: '' })
   const [actionLoading, setActionLoading] = useState('')
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      setSyncing(true)
-      try {
-        const apiUsers = await fetchUsersApi({ includeLocked: true })
-        if (Array.isArray(apiUsers) && apiUsers.length) {
-          setUsers((prev) => {
-            const merged = mergeUsers(prev, apiUsers)
-            const hasSelection = merged.some((user) => user.id === selectedUserId)
-            if (!hasSelection) {
-              setSelectedUserId(merged[0]?.id ?? '')
-            }
-            return merged
-          })
-        }
-      } catch (error) {
-        console.warn('Không thể đồng bộ danh sách user', error)
-        setMessage('Không thể đồng bộ realtime, đang hiển thị dữ liệu lưu sẵn.')
-      } finally {
-        setSyncing(false)
+  const loadUsers = useCallback(async () => {
+    setSyncing(true)
+    try {
+      const apiUsers = await fetchUsersApi({ includeLocked: true })
+      if (Array.isArray(apiUsers) && apiUsers.length) {
+        setUsers((prev) => {
+          const merged = mergeUsers(prev, apiUsers)
+          const hasSelection = merged.some((user) => user.id === selectedUserId)
+          if (!hasSelection) {
+            setSelectedUserId(merged[0]?.id ?? '')
+          }
+          return merged
+        })
+        setMessage('Đã đồng bộ danh sách tài khoản giữa frontend và mobile.')
       }
+    } catch (error) {
+      console.warn('Không thể đồng bộ danh sách user', error)
+      setMessage('Không thể đồng bộ realtime, đang hiển thị dữ liệu lưu sẵn.')
+    } finally {
+      setSyncing(false)
     }
+  }, [selectedUserId])
 
+  useEffect(() => {
     loadUsers()
-  }, [])
+  }, [loadUsers])
 
   const selectedUser = useMemo(
     () => users.find((user) => user.id === selectedUserId) ?? users[0],
@@ -126,11 +127,12 @@ function Users() {
   const handleToggleLock = async (user) => {
     const nextStatus = user.status === 'locked' ? 'active' : 'locked'
     setUsers((prev) => prev.map((item) => (item.id === user.id ? { ...item, status: nextStatus } : item)))
-    setMessage('Đang đồng bộ trạng thái khoá tài khoản…')
+    setMessage(nextStatus === 'locked'
+      ? 'Đã khoá đăng nhập: tài khoản bị chặn ngay trên web và app.'
+      : 'Đã mở khoá: người dùng đăng nhập lại được trên cả frontend & mobile.')
     setActionLoading(`lock-${user.id}`)
     try {
       await updateUserApi(user.id, { status: nextStatus })
-      setMessage('Đã cập nhật trạng thái khoá/mở tài khoản.')
     } catch (error) {
       console.error('Không thể cập nhật trạng thái user', error)
       setMessage('Không thể đồng bộ trạng thái, vui lòng thử lại.')
@@ -180,6 +182,12 @@ function Users() {
 
   const editingUser = selectedUser ?? filteredUsers[0]
 
+  const syncPreview = useMemo(() => ({
+    frontend: editingUser?.status !== 'locked',
+    mobile: editingUser?.status !== 'locked',
+    channel: editingUser?.platform ?? 'Frontend',
+  }), [editingUser])
+
   useEffect(() => {
     setPasswordForm({ password: '', confirm: '' })
   }, [selectedUserId])
@@ -196,6 +204,7 @@ function Users() {
           <div className="sync-badge">
             <span className={syncing ? 'live' : ''}>Đồng bộ realtime</span>
             <small>{syncing ? 'Đang kết nối' : 'Dữ liệu cập nhật'}</small>
+            <button type="button" onClick={loadUsers}>Đồng bộ ngay</button>
           </div>
         </header>
 
@@ -213,6 +222,21 @@ function Users() {
               <span className="pill neutral">{accessStats.frontend} Frontend</span>
               <span className="pill neutral">{accessStats.mobile} Mobile</span>
             </div>
+          </article>
+          <article className="access-card">
+            <header>
+              <div>
+                <p className="eyebrow">Đồng bộ 2 kênh</p>
+                <h3>Một lần thao tác = áp dụng cả hai</h3>
+              </div>
+              <span className="pill warning">Frontend & Mobile</span>
+            </header>
+            <p>Mọi cập nhật hồ sơ, khoá/mở khoá đều đẩy sang cả web khách hàng và ứng dụng mobile để tránh sai lệch.</p>
+            <ul className="sync-rules">
+              <li>Sửa thông tin: hiển thị thống nhất trên tất cả thiết bị.</li>
+              <li>Khoá đăng nhập: chặn ngay lập tức trên web + app.</li>
+              <li>Mở khoá: cấp quyền lại cho cả hai kênh cùng lúc.</li>
+            </ul>
           </article>
           <article className="access-card policies">
             <header>
@@ -376,6 +400,13 @@ function Users() {
                   onChange={(event) => handleFieldChange('phone', event.target.value)}
                 />
               </label>
+              <label>
+                Thành phố
+                <input
+                  value={editingUser.city}
+                  onChange={(event) => handleFieldChange('city', event.target.value)}
+                />
+              </label>
               <div className="input-grid">
                 <label>
                   Vai trò
@@ -398,6 +429,23 @@ function Users() {
                     <option value="Mobile">Mobile (App)</option>
                   </select>
                 </label>
+              </div>
+              <div className="sync-preview">
+                <div>
+                  <p className="eyebrow">Frontend</p>
+                  <strong>{syncPreview.frontend ? 'Có thể đăng nhập' : 'Đang bị khoá'}</strong>
+                  <small>Áp dụng ngay khi lưu hoặc khoá/mở khoá.</small>
+                </div>
+                <div>
+                  <p className="eyebrow">Mobile</p>
+                  <strong>{syncPreview.mobile ? 'Có thể đăng nhập' : 'Đang bị khoá'}</strong>
+                  <small>Đồng bộ cùng trạng thái với frontend.</small>
+                </div>
+                <div>
+                  <p className="eyebrow">Kênh ưu tiên</p>
+                  <strong>{syncPreview.channel}</strong>
+                  <small>Dữ liệu hồ sơ chính lấy từ kênh này.</small>
+                </div>
               </div>
               <label className="checkbox">
                 <input
