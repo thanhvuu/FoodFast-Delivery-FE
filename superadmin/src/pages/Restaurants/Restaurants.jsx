@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './Restaurants.css'
 
 function Restaurants() {
@@ -11,6 +11,64 @@ function Restaurants() {
   const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || 'http://localhost:4000').replace(/\/$/, '')
   const RESOURCE_URL = `${API_BASE_URL}/restaurants`
   const USERS_URL = `${API_BASE_URL}/users`
+  const autoSyncRef = useRef(false)
+
+  const buildAccountPayload = (restaurant) => {
+    const slug = (restaurant?.name || 'merchant')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
+    const idPart = restaurant?.id || slug || 'store'
+
+    return {
+      username: `Admin ${restaurant?.name || 'Cửa hàng'}`.trim(),
+      email: `${slug || 'store'}-${idPart}@foodfast.io`,
+      password: `ff-${idPart}-123`,
+      role: 'restaurant',
+      restaurantId: restaurant?.id,
+      redirect: '/admin',
+    }
+  }
+
+  const ensureAccountsForRestaurants = async (restaurantList, existingAccountsMap) => {
+    const missingRestaurants = restaurantList.filter((item) => item.id && !existingAccountsMap[item.id])
+    if (!missingRestaurants.length) return
+
+    try {
+      const creations = await Promise.all(
+        missingRestaurants.map(async (restaurant) => {
+          const payload = buildAccountPayload(restaurant)
+          const res = await fetch(USERS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+
+          if (!res.ok) throw new Error('Không thể tự tạo tài khoản cho nhà hàng')
+
+          return res.json()
+        }),
+      )
+
+      const validCreations = creations.filter(Boolean)
+      if (validCreations.length) {
+        setAccounts((prev) => {
+          const next = { ...prev }
+          validCreations.forEach((acc) => {
+            if (acc.restaurantId) next[acc.restaurantId] = acc
+          })
+          return next
+        })
+      }
+      setError('')
+    } catch (err) {
+      console.error(err)
+      setError(err?.message || 'Không thể đồng bộ tài khoản nhà hàng')
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +92,10 @@ function Restaurants() {
             })
         }
         setAccounts(map)
+        if (!autoSyncRef.current) {
+          autoSyncRef.current = true
+          await ensureAccountsForRestaurants(Array.isArray(restaurantsData) ? restaurantsData : [], map)
+        }
         setError('')
       } catch (err) {
         console.error(err)
@@ -229,6 +291,7 @@ function Restaurants() {
                 <th>Chủ sở hữu</th>
                 <th>Thành phố</th>
                 <th>Tài khoản</th>
+                <th>Mật khẩu</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
                 <th>Đánh giá</th>
@@ -253,6 +316,13 @@ function Restaurants() {
                         </div>
                       ) : (
                         <span className="muted">Chưa có</span>
+                      )}
+                    </td>
+                    <td>
+                      {accountRow?.password ? (
+                        <span className="account-pass">{accountRow.password}</span>
+                      ) : (
+                        <span className="muted">—</span>
                       )}
                     </td>
                     <td>
