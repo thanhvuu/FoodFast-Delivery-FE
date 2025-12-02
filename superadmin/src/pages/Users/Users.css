@@ -35,6 +35,18 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+.sync-badge button {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 120, 60, 0.25);
+  background: #fff;
+  color: #b93815;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .segment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -78,6 +90,14 @@
 }
 
 .access-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  display: grid;
+  gap: 4px;
+}
+
+.sync-rules {
   margin: 0;
   padding-left: 18px;
   color: #475569;
@@ -254,6 +274,24 @@
 .row-actions button.danger {
   border-color: rgba(185, 28, 28, 0.2);
   color: #b91c1c;
+}
+
+.sync-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 247, 237, 0.7);
+  border: 1px dashed rgba(249, 115, 22, 0.4);
+}
+
+.sync-preview strong {
+  color: #0f172a;
+}
+
+.sync-preview small {
+  color: #475569;
 }
 
 .user-editor {
