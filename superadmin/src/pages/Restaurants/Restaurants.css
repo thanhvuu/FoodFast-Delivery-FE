@@ -124,6 +124,17 @@
   color: rgba(122, 52, 23, 0.7);
 }
 
+.account-pass {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 120, 60, 0.1);
+  color: #7a3417;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
 .error-banner {
   background: rgba(248, 113, 113, 0.1);
   color: #991b1b;
