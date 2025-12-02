@@ -3,9 +3,11 @@ import './Navbar.css'
 import { assests } from '../../assets/assest'
 import { useAdminLanguage } from '../../context/LanguageContext'
 
-const Navbar = () => {
+const Navbar = ({ user, onLogout }) => {
     const { dictionary, language, setLanguage, languageOptions } = useAdminLanguage()
     const { navbar = {} } = dictionary
+    const userName = user?.username || user?.name || user?.email || 'Tài khoản cửa hàng'
+    const userEmail = user?.email ?? 'Chưa cập nhật email'
 
     return (
         <header className='admin-topbar'>
@@ -34,6 +36,17 @@ const Navbar = () => {
                     ))}
                 </select>
                 <p className='language-hint'>{navbar.languageHint ?? 'Chọn ngôn ngữ để đồng bộ với đội vận hành.'}</p>
+            </div>
+            <div className='user-card'>
+                <div className='user-meta'>
+                    <span className='language-title'>Tài khoản đang đăng nhập</span>
+                    <strong>{userName}</strong>
+                    <p>{userEmail}</p>
+                    <small>Đồng bộ trực tiếp với danh sách cửa hàng từ Super Admin.</small>
+                </div>
+                <button type='button' onClick={onLogout}>
+                    Đăng xuất
+                </button>
             </div>
         </header>
     )
