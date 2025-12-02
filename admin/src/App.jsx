@@ -9,42 +9,29 @@ import Dashboard from './pages/Dashboard/Dashboard'
 import Restaurant from './pages/Restaurant/Restaurant'
 import { Routes, Route } from 'react-router-dom'
 import { food_list, restaurants as restaurantSeed } from './assets/assest'
-import { createProduct, deleteProduct as deleteProductApi, fetchProducts, updateProduct as updateProductApi } from './services/api'
+import { createProduct, deleteProduct as deleteProductApi, fetchProducts, fetchRestaurants, updateProduct as updateProductApi } from './services/api'
 
 const getProductId = product => product?.id ?? product?.productId ?? product?._id
 
 const App = () => {
   // State quản lý toàn bộ sản phẩm
   const [products, setProducts] = useState(food_list)
+  const [restaurants, setRestaurants] = useState(restaurantSeed)
   const [restaurantContext, setRestaurantContext] = useState(null)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const paramRestaurantId = params.get('restaurantId')
-    const stored = (() => {
+    const loadRestaurants = async () => {
       try {
-        const raw = localStorage.getItem('restaurantContext')
-        return raw ? JSON.parse(raw) : null
-      } catch {
-        return null
+        const data = await fetchRestaurants()
+        if (Array.isArray(data) && data.length) {
+          setRestaurants(data)
+        }
+      } catch (error) {
+        console.error('Không thể tải danh sách nhà hàng từ API', error)
       }
-    })()
-
-    const findRestaurant = (id) => restaurantSeed.find((r) => r.id === id)
-    let next = null
-    if (paramRestaurantId) {
-      const found = findRestaurant(paramRestaurantId)
-      if (found) next = found
-    } else if (stored?.id && findRestaurant(stored.id)) {
-      next = findRestaurant(stored.id)
-    } else if (restaurantSeed.length) {
-      next = restaurantSeed[0]
     }
 
-    if (next) {
-      setRestaurantContext(next)
-      localStorage.setItem('restaurantContext', JSON.stringify(next))
-    }
+    loadRestaurants()
   }, [])
 
   useEffect(() => {
@@ -61,6 +48,62 @@ const App = () => {
 
     loadProducts()
   }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paramRestaurantId = params.get('restaurantId')
+
+    const storedContext = (() => {
+      try {
+        const raw = localStorage.getItem('restaurantContext')
+        return raw ? JSON.parse(raw) : null
+      } catch {
+        return null
+      }
+    })()
+
+    const storedUser = (() => {
+      try {
+        const raw = localStorage.getItem('user')
+        return raw ? JSON.parse(raw) : null
+      } catch {
+        return null
+      }
+    })()
+
+    const findRestaurant = (id) => {
+      if (!id) return null
+      return restaurants.find((r) => r.id === id) || restaurantSeed.find((r) => r.id === id) || null
+    }
+
+    const isSameRestaurant = (a, b) => {
+      if (!a || !b) return false
+      if (a.id && b.id) return a.id === b.id
+      return a.name === b.name
+    }
+
+    let next = null
+    if (paramRestaurantId) {
+      next = findRestaurant(paramRestaurantId)
+    }
+    if (!next && storedUser?.role === 'restaurant' && storedUser.restaurantId) {
+      next = findRestaurant(storedUser.restaurantId)
+    }
+    if (!next && storedContext?.id) {
+      next = findRestaurant(storedContext.id)
+    }
+    if (!next && restaurants.length) {
+      next = restaurants[0]
+    }
+    if (!next && restaurantSeed.length) {
+      next = restaurantSeed[0]
+    }
+
+    if (next && !isSameRestaurant(next, restaurantContext)) {
+      setRestaurantContext(next)
+      localStorage.setItem('restaurantContext', JSON.stringify(next))
+    }
+  }, [restaurants, restaurantContext])
 
   // Hàm thêm sản phẩm, truyền xuống Add
   const addProduct = async (product) => {
