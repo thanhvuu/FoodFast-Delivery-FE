@@ -22,6 +22,7 @@ import {
   RestaurantOverviewScreen,
   RestaurantOrdersScreen,
   RestaurantAccountScreen,
+  RestaurantMenuScreen,
 } from '../screen';
 import { useAuth } from '../context';
 import colors from '../theme/colors';
@@ -107,6 +108,7 @@ const CustomerHomeStackNavigator: React.FC = () => (
     <HomeStack.Screen name="Home" component={HomeScreen} />
     <HomeStack.Screen name="CategoryListing" component={CategoryScreen} />
     <HomeStack.Screen name="FoodDetail" component={FoodDetailScreen} />
+    <HomeStack.Screen name="RestaurantMenu" component={RestaurantMenuScreen} />
     <HomeStack.Screen name="Contact" component={ContactScreen} />
     <HomeStack.Screen name="Tracking" component={TrackingScreen} />
   </HomeStack.Navigator>
