@@ -8,18 +8,28 @@ import {
 } from '../../services/api'
 import './Users.css'
 
-const normalizeUser = (user) => ({
-  id: user?.id ?? user?._id ?? crypto.randomUUID(),
-  name: user?.name ?? 'Không rõ tên',
-  email: user?.email ?? 'chua-cap-nhat@foodfast.vn',
-  phone: user?.phone ?? '—',
-  role: user?.role ?? 'Khách hàng',
-  platform: user?.platform ?? (user?.channel ?? 'Frontend'),
-  status: user?.status ?? 'active',
-  verified: Boolean(user?.verified ?? user?.isVerified),
-  lastActive: user?.lastActive ?? 'Chưa có',
-  city: user?.city ?? '—',
-})
+const normalizeUser = (user) => {
+  const roleMap = {
+    restaurant: 'Merchant',
+    merchant: 'Merchant',
+    shipper: 'Shipper',
+    'Khách hàng': 'Khách hàng',
+  }
+  const role = roleMap[user?.role] ?? 'Khách hàng'
+
+  return {
+    id: user?.id ?? user?._id ?? crypto.randomUUID(),
+    name: user?.name ?? user?.username ?? 'Không rõ tên',
+    email: user?.email ?? 'chua-cap-nhat@foodfast.vn',
+    phone: user?.phone ?? '—',
+    role,
+    platform: user?.platform ?? user?.channel ?? 'Frontend',
+    status: user?.status ?? 'active',
+    verified: Boolean(user?.verified ?? user?.isVerified ?? false),
+    lastActive: user?.lastActive ?? 'Chưa có',
+    city: user?.city ?? user?.address ?? '—',
+  }
+}
 
 const mergeUsers = (base, incoming) => {
   const unique = new Map()
@@ -29,9 +39,9 @@ const mergeUsers = (base, incoming) => {
 }
 
 function Users() {
-  const [users, setUsers] = useState(() => seedUsers.map(normalizeUser))
+  const [users, setUsers] = useState([])
   const [filters, setFilters] = useState({ role: 'all', platform: 'all', search: '' })
-  const [selectedUserId, setSelectedUserId] = useState(seedUsers[0]?.id ?? '')
+  const [selectedUserId, setSelectedUserId] = useState('')
   const [syncing, setSyncing] = useState(false)
   const [message, setMessage] = useState('')
   const [passwordForm, setPasswordForm] = useState({ password: '', confirm: '' })
@@ -50,11 +60,17 @@ function Users() {
           }
           return merged
         })
-        setMessage('Đã đồng bộ danh sách tài khoản giữa frontend và mobile.')
+        setMessage('Đã lấy danh sách người dùng từ backend (dtb.json).')
+      } else {
+        setUsers(seedUsers.map(normalizeUser))
+        setSelectedUserId(seedUsers[0]?.id ?? '')
+        setMessage('Backend chưa có dữ liệu, đang dùng dữ liệu mẫu.')
       }
     } catch (error) {
       console.warn('Không thể đồng bộ danh sách user', error)
-      setMessage('Không thể đồng bộ realtime, đang hiển thị dữ liệu lưu sẵn.')
+      setUsers(seedUsers.map(normalizeUser))
+      setSelectedUserId(seedUsers[0]?.id ?? '')
+      setMessage('Không thể lấy từ backend, đang hiển thị dữ liệu mẫu.')
     } finally {
       setSyncing(false)
     }

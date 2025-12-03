@@ -46,7 +46,7 @@ export const updateUser = async (id, payload) => {
 }
 
 export const changeUserPassword = async (id, password) => {
-  const response = await fetch(`${API_BASE_URL}/users/${id}/password`, {
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password }),
