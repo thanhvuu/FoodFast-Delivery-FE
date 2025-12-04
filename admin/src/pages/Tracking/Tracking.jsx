@@ -75,10 +75,14 @@ const Tracking = () => {
     const estimatedMinutes = selectedOrder?.estimatedMinutes
     const [progress, setProgress] = useState(0)
     const [lastUpdated, setLastUpdated] = useState(new Date())
+    const milestoneRef = React.useRef({ first: false, second: false })
+    const [milestoneMessage, setMilestoneMessage] = useState('')
 
     useEffect(() => {
         setProgress(0)
         setLastUpdated(new Date())
+        milestoneRef.current = { first: false, second: false }
+        setMilestoneMessage('')
     }, [selectedOrderId])
 
     useEffect(() => {
@@ -129,6 +133,25 @@ const Tracking = () => {
     }, [currentPoint, nextPoint, segmentProgress])
 
     const completion = route.length > 1 ? (progress / (route.length - 1)) * 100 : 0
+
+    // Mốc 1/3 và 2/3 quãng đường: thông báo cho nhà hàng
+    useEffect(() => {
+        if (route.length < 2) return
+        const oneThird = completion >= 33 && completion < 66
+        const twoThird = completion >= 66 && completion < 100
+
+        if (oneThird && !milestoneRef.current.first) {
+            milestoneRef.current.first = true
+            setMilestoneMessage('Đang giao: đã đi được 1/3 quãng đường.')
+            window.alert('Đang giao: đơn đã đi được 1/3 quãng đường.')
+        }
+
+        if (twoThird && !milestoneRef.current.second) {
+            milestoneRef.current.second = true
+            setMilestoneMessage('Sắp giao tới: đã đi được 2/3 quãng đường.')
+            window.alert('Sắp giao tới: đơn đã đi được 2/3 quãng đường.')
+        }
+    }, [completion, route.length])
 
     const statusKey = selectedOrder?.trackingStatus ?? selectedOrder?.status ?? 'new'
     const statusDictionary = t.summaryLabels.statusValues ?? {}
@@ -255,6 +278,7 @@ const Tracking = () => {
                                 <div className='progress-bar' style={{ width: `${completion}%` }} />
                             </div>
                             <small>{Math.round(completion)} {t.summaryLabels.progressSuffix}</small>
+                            {milestoneMessage ? <small className='summary-muted'>{milestoneMessage}</small> : null}
                         </div>
                         <div className='summary-card'>
                             <span className='summary-label'>{t.summaryLabels.lastUpdate}</span>
