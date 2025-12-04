@@ -211,10 +211,11 @@ const OrderTracking = () => {
 
   useEffect(() => {
     if (route.length < 2) return undefined
-
-    const step = deliveryMethod === 'motorbike' ? 0.01 : 0.015
-    const interval = deliveryMethod === 'motorbike' ? 2500 : 2000
-    const startDelay = 60000 // giữ trạng thái pending ~1 phút trước khi tiến trình chạy
+    // Rút ngắn thời gian giao còn ~5 phút
+    const desiredDurationMs = 5 * 60 * 1000
+    const interval = 1200
+    const step = (route.length - 1) / Math.max(1, desiredDurationMs / interval)
+    const startDelay = 5000
     let timer
     const delayTimer = setTimeout(() => {
       timer = setInterval(() => {

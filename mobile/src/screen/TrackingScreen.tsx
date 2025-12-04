@@ -69,6 +69,8 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [droneProgress, setDroneProgress] = useState(0);
   const [nearArrival, setNearArrival] = useState(false);
   const [deliveredNotice, setDeliveredNotice] = useState(false);
+  const milestoneRef = useRef({ first: false, second: false });
+  const [milestoneMessage, setMilestoneMessage] = useState('');
   const [otp, setOtp] = useState('');
   const [otpStatus, setOtpStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -153,6 +155,8 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
       setDroneProgress(0);
       setNearArrival(false);
       setDeliveredNotice(false);
+      milestoneRef.current = { first: false, second: false };
+      setMilestoneMessage('');
       setOtp('');
       setOtpStatus('idle');
       alertedRef.current = false;
@@ -160,17 +164,30 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (startDelayRef.current) clearTimeout(startDelayRef.current);
 
-      // Giữ pending khoảng 1 phút rồi mới bay, không hiển thị countdown
+      // Mô phỏng giao trong ~5 phút, chờ 5s rồi chạy tiến trình
       const startFlying = () => {
         if (startedRef.current) return;
         startedRef.current = true;
+        const desiredDurationMs = 5 * 60 * 1000;
+        const interval = 1200;
+        const step = 100 / Math.max(1, desiredDurationMs / interval);
         intervalRef.current = setInterval(() => {
           setDroneProgress((prev) => {
             if (prev >= 100) {
               if (intervalRef.current) clearInterval(intervalRef.current);
               return 100;
             }
-            const next = prev + 3;
+            const next = prev + step;
+            if (!milestoneRef.current.first && next >= 33 && next < 66) {
+              milestoneRef.current.first = true;
+              setMilestoneMessage('Drone đang đi (đã 1/3 quãng đường).');
+              Alert.alert('Drone đang đi', 'Drone đã hoàn thành 1/3 quãng đường.');
+            }
+            if (!milestoneRef.current.second && next >= 66 && next < 100) {
+              milestoneRef.current.second = true;
+              setMilestoneMessage('Sắp giao tới (đã 2/3 quãng đường).');
+              Alert.alert('Sắp giao tới', 'Drone đã đi 2/3 quãng đường, chuẩn bị nhận hàng.');
+            }
             if (next >= 80 && !alertedRef.current) {
               alertedRef.current = true;
               setNearArrival(true);
@@ -182,12 +199,12 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
             }
             return next;
           });
-        }, 2500);
+        }, interval);
       };
 
       startDelayRef.current = setTimeout(() => {
         startFlying();
-      }, 60000);
+      }, 5000);
 
       return () => {
         if (intervalRef.current) clearInterval(intervalRef.current);
@@ -289,6 +306,7 @@ const TrackingScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={[styles.progressFill, { width: `${Math.min(droneProgress, 100)}%` }]} />
           </View>
           <Text style={styles.progressLabel}>{Math.round(droneProgress)}% hành trình</Text>
+          {milestoneMessage ? <Text style={styles.progressLabel}>{milestoneMessage}</Text> : null}
           {nearArrival ? <Text style={styles.nearArrival}>Drone sắp đến điểm giao • chuẩn bị OTP</Text> : null}
         </View>
 
