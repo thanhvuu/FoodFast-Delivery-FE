@@ -197,12 +197,16 @@ const OrderTracking = () => {
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [hideArrivedCard, setHideArrivedCard] = useState(false)
   const completionSyncedRef = React.useRef(false)
+  const milestoneRef = React.useRef({ first: false, second: false })
+  const [milestoneMessage, setMilestoneMessage] = useState('')
 
   useEffect(() => {
     setProgress(0)
     setLastUpdated(new Date())
     setHideArrivedCard(false)
     completionSyncedRef.current = false
+    milestoneRef.current = { first: false, second: false }
+    setMilestoneMessage('')
   }, [selectedOrderId])
 
   useEffect(() => {
@@ -267,6 +271,25 @@ const OrderTracking = () => {
       deliveredNotified.current = false
     }
   }, [completion, selectedOrder?.status, trackingPage.arrivedSuccess])
+
+  // Mốc 1/3 và 2/3 quãng đường: thông báo cho người dùng
+  useEffect(() => {
+    if (route.length < 2) return
+    const oneThird = completion >= 33 && completion < 66
+    const twoThird = completion >= 66 && completion < 100
+
+    if (oneThird && !milestoneRef.current.first) {
+      milestoneRef.current.first = true
+      setMilestoneMessage('Drone đang di chuyển (đã đi được 1/3 quãng đường).')
+      window.alert('Drone đang đi: đã hoàn thành 1/3 quãng đường.')
+    }
+
+    if (twoThird && !milestoneRef.current.second) {
+      milestoneRef.current.second = true
+      setMilestoneMessage('Sắp giao tới (đã đi được 2/3 quãng đường).')
+      window.alert('Sắp giao tới: drone đã đi 2/3 quãng đường.')
+    }
+  }, [completion, route.length])
 
   const summaryLabels = trackingPage.summaryLabels
 
@@ -572,6 +595,9 @@ const OrderTracking = () => {
                 <small>
                   {Math.round(completion)} {summaryLabels.progressSuffix}
                 </small>
+                {milestoneMessage ? (
+                  <small className='summary-muted'>{milestoneMessage}</small>
+                ) : null}
               </div>
             </article>
             <article className='summary-card'>
